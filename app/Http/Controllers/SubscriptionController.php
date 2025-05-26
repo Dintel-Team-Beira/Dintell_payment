@@ -25,7 +25,15 @@ class SubscriptionController extends Controller
             $query->latest()->limit(50);
         }]);
 
-        return view('subscriptions.show', compact('subscription'));
+        // Calcular estatísticas
+        $stats = [
+            'total_requests' => $subscription->total_requests,
+            'days_active' => $subscription->starts_at ? now()->diffInDays($subscription->starts_at) : 0,
+            'payment_failures' => $subscription->payment_failures,
+            // Adicione outras estatísticas conforme necessário
+        ];
+
+        return view('subscriptions.show', compact('subscription', 'stats'));
     }
 
     public function create()
