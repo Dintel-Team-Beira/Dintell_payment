@@ -248,4 +248,16 @@ class Subscription extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    // No modelo Subscription.php
+public function getStatsAttribute()
+{
+    return [
+        'total_requests' => $this->total_requests,
+        'days_active' => $this->starts_at ? now()->diffInDays($this->starts_at) : 0,
+        'payment_failures' => $this->payment_failures,
+        'monthly_requests' => $this->monthly_requests,
+        // Outras estatísticas...
+    ];
+}
 }
