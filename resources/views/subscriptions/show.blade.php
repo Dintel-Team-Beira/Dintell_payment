@@ -9,7 +9,7 @@
         <form method="POST" action="{{ route('subscriptions.suspend', $subscription) }}" class="inline">
             @csrf
             <button type="button" onclick="openSuspendModal()"
-                    class="rounded-md bg-yellow-600 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-500">
+                    class="px-3 py-2 text-sm font-semibold text-white bg-yellow-600 rounded-md hover:bg-yellow-500">
                 Suspender
             </button>
         </form>
@@ -17,7 +17,7 @@
         <form method="POST" action="{{ route('subscriptions.activate', $subscription) }}" class="inline">
             @csrf
             <button type="submit"
-                    class="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-500">
+                    class="px-3 py-2 text-sm font-semibold text-white bg-green-600 rounded-md hover:bg-green-500">
                 Ativar
             </button>
         </form>
@@ -33,7 +33,7 @@
     </form>
 
     <a href="{{ route('subscriptions.edit', $subscription) }}"
-       class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+       class="px-3 py-2 text-sm font-semibold text-gray-900 bg-white rounded-md shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
         Editar
     </a>
 </div>
@@ -42,7 +42,7 @@
 @section('content')
 <div class="space-y-6">
     <!-- Main Info Card -->
-    <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg">
+    <div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-900/5">
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -70,11 +70,11 @@
             <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-3">
                 <div>
                     <dt class="text-sm font-medium text-gray-500">Chave API</dt>
-                    <dd class="mt-1 flex items-center">
-                        <code class="text-sm text-gray-900 bg-gray-100 px-2 py-1 rounded">{{ substr($subscription->api_key, 0, 20) }}...</code>
+                    <dd class="flex items-center mt-1">
+                        <code class="px-2 py-1 text-sm text-gray-900 bg-gray-100 rounded">{{ substr($subscription->api_key, 0, 20) }}...</code>
                         <form method="POST" action="{{ route('subscriptions.regenerate-key', $subscription) }}" class="inline ml-2">
                             @csrf
-                            <button type="submit" class="text-blue-600 hover:text-blue-800 text-sm">Regenerar</button>
+                            <button type="submit" class="text-sm text-blue-600 hover:text-blue-800">Regenerar</button>
                         </form>
                     </dd>
                 </div>
@@ -104,96 +104,177 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l-1-3m1 3l-1-3m-16.5-3h9.75"/>
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Total Requests</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ number_format($stats['total_requests']) }}</dd>
-                        </dl>
+  {{-- View com estatísticas formatadas --}}
+
+<div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
+    {{-- Dias Ativo --}}
+    <div class="overflow-hidden bg-white rounded-lg shadow">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center w-8 h-8 bg-blue-500 rounded-full">
+                        <i class="text-white fas fa-calendar-alt"></i>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5a2.25 2.25 0 012.25 2.25v7.5"/>
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Dias Ativo</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ $stats['days_active'] }}</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 010 0L21.75 9M21.75 9H15M21.75 9v6.75"/>
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Uso (%)</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ number_format($subscription->usage_percentage, 1) }}%</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Falhas Pagamento</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ $stats['payment_failures'] }}</dd>
-                        </dl>
-                    </div>
+                <div class="flex-1 w-0 ml-5">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">
+                            Dias Ativo
+                        </dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {{ $stats['days_active'] }}
+                            <span class="text-sm text-gray-500">
+                                {{ $stats['days_active'] == 1 ? 'dia' : 'dias' }}
+                            </span>
+                        </dd>
+                    </dl>
                 </div>
             </div>
         </div>
     </div>
 
+    {{-- Total Requests --}}
+    <div class="overflow-hidden bg-white rounded-lg shadow">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center w-8 h-8 bg-green-500 rounded-full">
+                        <i class="text-white fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <div class="flex-1 w-0 ml-5">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">
+                            Total Requests
+                        </dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {{ $stats['total_requests'] }}
+                        </dd>
+                        <dd class="text-sm text-gray-500">
+                            Média: {{ $stats['avg_daily_requests'] }}/dia
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Receita Total --}}
+    <div class="overflow-hidden bg-white rounded-lg shadow">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center w-8 h-8 bg-yellow-500 rounded-full">
+                        <i class="text-white fas fa-dollar-sign"></i>
+                    </div>
+                </div>
+                <div class="flex-1 w-0 ml-5">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">
+                            Receita Total
+                        </dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {{ $stats['total_revenue'] }}
+                        </dd>
+                        <dd class="text-sm text-gray-500">
+                            Último: {{ $stats['last_payment'] }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Usage Percentage --}}
+    <div class="overflow-hidden bg-white rounded-lg shadow">
+        <div class="p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center w-8 h-8 bg-purple-500 rounded-full">
+                        <i class="text-white fas fa-database"></i>
+                    </div>
+                </div>
+                <div class="flex-1 w-0 ml-5">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">
+                            Uso de Recursos
+                        </dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {{ $stats['usage_percentage'] }}%
+                        </dd>
+                        <dd class="text-sm text-gray-500">
+                            Storage: {{ $stats['storage_used'] }}GB
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Detalhes adicionais --}}
+<div class="p-6 bg-white rounded-lg shadow">
+    <h3 class="mb-4 text-lg font-semibold">Informações Detalhadas</h3>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div>
+            <h4 class="mb-3 font-medium text-gray-700">Atividade</h4>
+            <dl class="space-y-2">
+                <div class="flex justify-between">
+                    <dt class="text-sm text-gray-500">Requests Mensais:</dt>
+                    <dd class="text-sm font-medium">{{ $stats['monthly_requests'] }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-sm text-gray-500">Média Diária:</dt>
+                    <dd class="text-sm font-medium">{{ $stats['avg_daily_requests'] }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-sm text-gray-500">Bandwidth Usado:</dt>
+                    <dd class="text-sm font-medium">{{ $stats['bandwidth_used'] }} GB</dd>
+                </div>
+            </dl>
+        </div>
+
+        <div>
+            <h4 class="mb-3 font-medium text-gray-700">Pagamentos</h4>
+            <dl class="space-y-2">
+                <div class="flex justify-between">
+                    <dt class="text-sm text-gray-500">Próximo Pagamento:</dt>
+                    <dd class="text-sm font-medium">{{ $stats['next_payment'] }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-sm text-gray-500">Falhas de Pagamento:</dt>
+                    <dd class="text-sm font-medium {{ $stats['payment_failures'] > 0 ? 'text-red-600' : '' }}">
+                        {{ $stats['payment_failures'] }}
+                    </dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-sm text-gray-500">Dias até Expirar:</dt>
+                    <dd class="text-sm font-medium {{ is_numeric($stats['days_until_expiry']) && $stats['days_until_expiry'] < 7 ? 'text-red-600' : '' }}">
+                        {{ $stats['days_until_expiry'] }}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+</div>
+
     <!-- Actions -->
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <!-- Renew Subscription -->
-        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg p-6">
+        <div class="p-6 bg-white rounded-lg shadow-sm ring-1 ring-gray-900/5">
             {{-- <h3 class="text-lg font-semibold mb-4 --}}
-<h3 class="text-lg font-semibold mb-4">Renovar Subscrição</h3>
+<h3 class="mb-4 text-lg font-semibold">Renovar Subscrição</h3>
         <form method="POST" action="{{ route('subscriptions.renew', $subscription) }}" class="space-y-4">
             @csrf
             <div>
                 <label class="block text-sm font-medium text-gray-700">Valor</label>
-                <input type="number" step="0.01" name="amount" value="{{ $subscription->plan->price }}" required
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <input type="number" step="0.01" name="amount_paid" value="{{ $subscription->plan->price }}" required
+                       class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Método de Pagamento</label>
-                <select name="payment_method" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="payment_method" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="mpesa">MPesa</option>
                     <option value="visa">Visa</option>
                     <option value="bank_transfer">Transferência</option>
@@ -203,20 +284,20 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700">Referência</label>
                 <input type="text" name="payment_reference"
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                       class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
-            <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+            <button type="submit" class="w-full px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700">
                 Processar Renovação
             </button>
         </form>
     </div>
 
     <!-- Quick Actions -->
-    <div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg p-6">
-        <h3 class="text-lg font-semibold mb-4">Ações Rápidas</h3>
+    <div class="p-6 bg-white rounded-lg shadow-sm ring-1 ring-gray-900/5">
+        <h3 class="mb-4 text-lg font-semibold">Ações Rápidas</h3>
         <div class="space-y-3">
             <a href="https://{{ $subscription->domain }}" target="_blank"
-               class="flex items-center justify-between p-3 text-sm bg-blue-50 rounded-lg hover:bg-blue-100">
+               class="flex items-center justify-between p-3 text-sm rounded-lg bg-blue-50 hover:bg-blue-100">
                 <span>Visitar Website</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -224,7 +305,7 @@
             </a>
 
             <a href="{{ route('suspension.page', ['domain' => $subscription->domain]) }}" target="_blank"
-               class="flex items-center justify-between p-3 text-sm bg-yellow-50 rounded-lg hover:bg-yellow-100">
+               class="flex items-center justify-between p-3 text-sm rounded-lg bg-yellow-50 hover:bg-yellow-100">
                 <span>Ver Página Suspensão</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
@@ -232,7 +313,7 @@
             </a>
 
             <button onclick="testApiConnection()"
-                    class="w-full flex items-center justify-between p-3 text-sm bg-green-50 rounded-lg hover:bg-green-100">
+                    class="flex items-center justify-between w-full p-3 text-sm rounded-lg bg-green-50 hover:bg-green-100">
                 <span>Testar API</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
@@ -244,7 +325,7 @@
 
 <!-- Recent API Logs -->
 @if($subscription->apiLogs->count() > 0)
-<div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg">
+<div class="bg-white rounded-lg shadow-sm ring-1 ring-gray-900/5">
     <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="text-base font-semibold leading-6 text-gray-900">Logs da API Recentes</h3>
     </div>
@@ -252,20 +333,20 @@
         <table class="min-w-full divide-y divide-gray-300">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data/Hora</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Endpoint</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Data/Hora</th>
+                    <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">IP</th>
+                    <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Endpoint</th>
+                    <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 uppercase">Status</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($subscription->apiLogs->take(10) as $log)
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                         {{ $log->created_at->format('d/m H:i') }}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $log->ip_address }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $log->endpoint }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{{ $log->ip_address }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{{ $log->endpoint }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
                             {{ $log->response_code < 300 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -281,13 +362,13 @@
 @endif
 </div>
 <!-- Suspend Modal -->
-<div id="suspendModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Suspender Subscrição</h3>
+<div id="suspendModal" class="fixed inset-0 z-50 hidden w-full h-full overflow-y-auto bg-gray-600 bg-opacity-50">
+    <div class="relative p-5 mx-auto bg-white border rounded-md shadow-lg top-20 w-96">
+        <h3 class="mb-4 text-lg font-medium text-gray-900">Suspender Subscrição</h3>
         <form method="POST" action="{{ route('subscriptions.suspend', $subscription) }}">
             @csrf
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Motivo da Suspensão</label>
+                <label class="block mb-2 text-sm font-medium text-gray-700">Motivo da Suspensão</label>
                 <textarea name="reason" rows="3" required
                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Descreva o motivo da suspensão..."></textarea>
