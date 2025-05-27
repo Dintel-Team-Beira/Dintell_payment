@@ -69,7 +69,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Logs da API
     Route::get('/api-logs', [ApiLogController::class, 'index'])->name('api-logs.index');
     Route::get('/api-logs/{apiLog}', [ApiLogController::class, 'show'])->name('api-logs.show');
-    Route::delete('/api-logs/cleanup', [ApiLogController::class, 'cleanup'])->name('api-logs.cleanup');
+    // Route::delete('/api-logs/cleanup', [ApiLogController::class, 'cleanup'])->name('api-logs.cleanup');
+        // Excluir logs
+        Route::delete('/api-logs/{apiLog}', [ApiLogController::class, 'destroy'])->name('api-logs.destroy');
+        Route::post('/api-logs/bulk-delete', [ApiLogController::class, 'bulkDelete'])->name('api-logs.bulk-delete');
+        Route::post('/api-logs/cleanup', [ApiLogController::class, 'cleanup'])->name('api-logs.cleanup');
+
+        // Exportar e estatísticas
+        Route::get('/api-logs-export', [ApiLogController::class, 'export'])->name('api-logs.export');
+        Route::get('/api-logs-statistics', [ApiLogController::class, 'statistics'])->name('api-logs.statistics');
 
     // Logs de Email
     Route::get('/email-logs', [EmailController::class, 'logs'])->name('email-logs.index');
