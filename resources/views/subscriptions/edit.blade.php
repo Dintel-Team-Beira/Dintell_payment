@@ -3,7 +3,7 @@
 @section('title', 'Editar Subscrição')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="mx-auto max-w-8xl">
     <div class="mb-6">
         <div class="flex items-center justify-between">
             <div>
@@ -27,58 +27,58 @@
         @method('PUT')
 
         <!-- Basic Information -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-6">Informações Básicas</h2>
+        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+            <h2 class="mb-6 text-lg font-semibold text-gray-900">Informações Básicas</h2>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Cliente *</label>
-                    <select name="client_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="client_id" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         @foreach($clients as $client)
                             <option value="{{ $client->id }}" {{ old('client_id', $subscription->client_id) == $client->id ? 'selected' : '' }}>
                                 {{ $client->name }} ({{ $client->email }})
                             </option>
                         @endforeach
                     </select>
-                    @error('client_id')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                    @error('client_id')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Plano *</label>
-                    <select name="subscription_plan_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="subscription_plan_id" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         @foreach($plans as $plan)
                             <option value="{{ $plan->id }}" {{ old('subscription_plan_id', $subscription->subscription_plan_id) == $plan->id ? 'selected' : '' }}>
                                 {{ $plan->name }} - MT {{ number_format($plan->price, 2) }}
                             </option>
                         @endforeach
                     </select>
-                    @error('subscription_plan_id')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                    @error('subscription_plan_id')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Domínio *</label>
                     <input type="text" name="domain" value="{{ old('domain', $subscription->domain) }}" required
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('domain')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    @error('domain')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Subdomínio</label>
                     <input type="text" name="subdomain" value="{{ old('subdomain', $subscription->subdomain) }}"
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('subdomain')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    @error('subdomain')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
             </div>
         </div>
 
         <!-- Status and Control -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-6">Status e Controle</h2>
+        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+            <h2 class="mb-6 text-lg font-semibold text-gray-900">Status e Controle</h2>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Status *</label>
-                    <select name="status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="status" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="active" {{ old('status', $subscription->status) === 'active' ? 'selected' : '' }}>Ativo</option>
                         <option value="inactive" {{ old('status', $subscription->status) === 'inactive' ? 'selected' : '' }}>Inativo</option>
                         <option value="suspended" {{ old('status', $subscription->status) === 'suspended' ? 'selected' : '' }}>Suspenso</option>
@@ -86,16 +86,16 @@
                         <option value="expired" {{ old('status', $subscription->status) === 'expired' ? 'selected' : '' }}>Expirado</option>
                         <option value="trial" {{ old('status', $subscription->status) === 'trial' ? 'selected' : '' }}>Trial</option>
                     </select>
-                    @error('status')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                    @error('status')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Controle Manual *</label>
-                    <select name="manual_status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="manual_status" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="enabled" {{ old('manual_status', $subscription->manual_status) === 'enabled' ? 'selected' : '' }}>Habilitado</option>
                         <option value="disabled" {{ old('manual_status', $subscription->manual_status) === 'disabled' ? 'selected' : '' }}>Desabilitado</option>
                     </select>
-                    @error('manual_status')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                    @error('manual_status')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
             </div>
 
@@ -103,16 +103,16 @@
             <div class="mt-4">
                 <label class="block text-sm font-medium text-gray-700">Motivo da Suspensão</label>
                 <textarea name="suspension_reason" rows="3"
-                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                           placeholder="Descreva o motivo da suspensão...">{{ old('suspension_reason', $subscription->suspension_reason) }}</textarea>
-                @error('suspension_reason')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                @error('suspension_reason')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
             </div>
             @endif
         </div>
 
         <!-- Dates -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-6">Datas</h2>
+        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+            <h2 class="mb-6 text-lg font-semibold text-gray-900">Datas</h2>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <div>
@@ -120,124 +120,124 @@
                     <input type="datetime-local" name="starts_at"
                            value="{{ old('starts_at', $subscription->starts_at ? $subscription->starts_at->format('Y-m-d\TH:i') : '') }}"
                            required
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('starts_at')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    @error('starts_at')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Data de Expiração</label>
                     <input type="datetime-local" name="ends_at"
                            value="{{ old('ends_at', $subscription->ends_at ? $subscription->ends_at->format('Y-m-d\TH:i') : '') }}"
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('ends_at')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    @error('ends_at')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Trial até</label>
                     <input type="datetime-local" name="trial_ends_at"
                            value="{{ old('trial_ends_at', $subscription->trial_ends_at ? $subscription->trial_ends_at->format('Y-m-d\TH:i') : '') }}"
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('trial_ends_at')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    @error('trial_ends_at')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
             </div>
         </div>
 
         <!-- Payment Information -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-6">Informações de Pagamento</h2>
+        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+            <h2 class="mb-6 text-lg font-semibold text-gray-900">Informações de Pagamento</h2>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Valor Pago *</label>
                     <input type="number" step="0.01" name="amount_paid"
                            value="{{ old('amount_paid', $subscription->amount_paid) }}" required
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('amount_paid')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    @error('amount_paid')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Método de Pagamento</label>
-                    <select name="payment_method" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="payment_method" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="">Selecionar método</option>
                         <option value="mpesa" {{ old('payment_method', $subscription->payment_method) === 'mpesa' ? 'selected' : '' }}>MPesa</option>
                         <option value="visa" {{ old('payment_method', $subscription->payment_method) === 'visa' ? 'selected' : '' }}>Visa</option>
                         <option value="bank_transfer" {{ old('payment_method', $subscription->payment_method) === 'bank_transfer' ? 'selected' : '' }}>Transferência</option>
                         <option value="cash" {{ old('payment_method', $subscription->payment_method) === 'cash' ? 'selected' : '' }}>Dinheiro</option>
                     </select>
-                    @error('payment_method')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                    @error('payment_method')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Referência do Pagamento</label>
                     <input type="text" name="payment_reference"
                            value="{{ old('payment_reference', $subscription->payment_reference) }}"
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('payment_reference')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    @error('payment_reference')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Falhas de Pagamento</label>
                     <input type="number" name="payment_failures" min="0"
                            value="{{ old('payment_failures', $subscription->payment_failures) }}"
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('payment_failures')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    @error('payment_failures')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
             </div>
         </div>
 
         <!-- Settings -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-6">Configurações</h2>
+        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+            <h2 class="mb-6 text-lg font-semibold text-gray-900">Configurações</h2>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Dias de Aviso de Expiração</label>
                     <input type="number" name="expiry_warning_days" min="1" max="30"
                            value="{{ old('expiry_warning_days', $subscription->expiry_warning_days) }}"
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('expiry_warning_days')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    @error('expiry_warning_days')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div class="space-y-4">
                     <div class="flex items-center">
                         <input type="checkbox" name="auto_renew" value="1"
                                {{ old('auto_renew', $subscription->auto_renew) ? 'checked' : '' }}
-                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label class="ml-2 block text-sm text-gray-900">Renovação automática</label>
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <label class="block ml-2 text-sm text-gray-900">Renovação automática</label>
                     </div>
 
                     <div class="flex items-center">
                         <input type="checkbox" name="email_notifications" value="1"
                                {{ old('email_notifications', $subscription->email_notifications) ? 'checked' : '' }}
-                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label class="ml-2 block text-sm text-gray-900">Notificações por email</label>
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <label class="block ml-2 text-sm text-gray-900">Notificações por email</label>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Usage Statistics (Read-only) -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-6">Estatísticas de Uso</h2>
+        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+            <h2 class="mb-6 text-lg font-semibold text-gray-900">Estatísticas de Uso</h2>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-                <div class="bg-gray-50 rounded-lg p-4">
+                <div class="p-4 rounded-lg bg-gray-50">
                     <div class="text-sm font-medium text-gray-500">Total de Requests</div>
                     <div class="text-2xl font-bold text-gray-900">{{ number_format($subscription->total_requests) }}</div>
                 </div>
 
-                <div class="bg-gray-50 rounded-lg p-4">
+                <div class="p-4 rounded-lg bg-gray-50">
                     <div class="text-sm font-medium text-gray-500">Requests Mensais</div>
                     <div class="text-2xl font-bold text-gray-900">{{ number_format($subscription->monthly_requests) }}</div>
                 </div>
 
-                <div class="bg-gray-50 rounded-lg p-4">
+                <div class="p-4 rounded-lg bg-gray-50">
                     <div class="text-sm font-medium text-gray-500">Storage Usado</div>
                     <div class="text-2xl font-bold text-gray-900">{{ $subscription->storage_used_gb }}GB</div>
                     <div class="text-xs text-gray-500">de {{ $subscription->plan->max_storage_gb }}GB</div>
                 </div>
 
-                <div class="bg-gray-50 rounded-lg p-4">
+                <div class="p-4 rounded-lg bg-gray-50">
                     <div class="text-sm font-medium text-gray-500">Bandwidth Usado</div>
                     <div class="text-2xl font-bold text-gray-900">{{ $subscription->bandwidth_used_gb }}GB</div>
                     <div class="text-xs text-gray-500">de {{ $subscription->plan->max_bandwidth_gb }}GB</div>
@@ -249,19 +249,19 @@
                     <span class="text-gray-500">Uso Geral</span>
                     <span class="font-medium">{{ number_format($subscription->usage_percentage, 1) }}%</span>
                 </div>
-                <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ min($subscription->usage_percentage, 100) }}%"></div>
+                <div class="w-full h-2 mt-1 bg-gray-200 rounded-full">
+                    <div class="h-2 bg-blue-600 rounded-full" style="width: {{ min($subscription->usage_percentage, 100) }}%"></div>
                 </div>
             </div>
         </div>
 
         <!-- API Key (Read-only) -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-6">Chave da API</h2>
+        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+            <h2 class="mb-6 text-lg font-semibold text-gray-900">Chave da API</h2>
 
             <div class="flex items-center space-x-4">
                 <div class="flex-1">
-                    <code class="block w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-sm font-mono">
+                    <code class="block w-full p-3 font-mono text-sm border border-gray-200 rounded-md bg-gray-50">
                         {{ $subscription->api_key }}
                     </code>
                 </div>
@@ -290,8 +290,8 @@
         </div>
 
         <!-- Submit Buttons -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex justify-between items-center">
+        <div class="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">
+            <div class="flex items-center justify-between">
                 <div class="text-sm text-gray-500">
                     Criado em: {{ $subscription->created_at->format('d/m/Y H:i') }}
                     @if($subscription->updated_at != $subscription->created_at)
