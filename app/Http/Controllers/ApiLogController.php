@@ -47,7 +47,7 @@ class ApiLogController extends Controller
             $query->where('created_at', '<=', $request->date_to . ' 23:59:59');
         }
 
-        $logs = $query->paginate(50)->withQueryString();
+        $logs = $query->paginate(5)->withQueryString();
 
         // Get filter options
         $domains = ApiLog::select('domain')
