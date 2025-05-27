@@ -389,22 +389,35 @@ class SubscriptionVerificationController extends Controller
 
     private function logApiCall($request, $domain, $endpoint, $result)
     {
-        // dispatch(function () use ($request, $domain, $endpoint, $result) {
-            ApiLog::create([
-                'subscription_id' => $result['subscription_id'] ?? null,
+        // Corrigir serialização - não incluir objetos PDO nos headers
+        $sanitizedHeaders = [];
+        foreach ($request->headers->all() as $key => $value) {
+            // Apenas strings simples para evitar problemas de serialização
+            if (is_string($key) && (is_string($value) || is_array($value))) {
+                $sanitizedHeaders[$key] = is_array($value) ? implode(', ', $value) : $value;
+            }
+        }
+
+        $logData = [
+            'subscription_id' => $result['subscription_id'] ?? null,
+            'domain' => $domain,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent() ?? 'Unknown',
+            'endpoint' => "GET /api/website/{$endpoint}/{$domain}",
+            'request_data' => [
                 'domain' => $domain,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'endpoint' => "GET /api/website/{$endpoint}/{$domain}",
-                'request_data' => [
-                    'domain' => $domain,
-                    'endpoint' => $endpoint,
-                    'headers' => $request->headers->all()
-                ],
-                'response_data' => $result,
-                'response_code' => 200
-            ]);
-        // })->onQueue('logs');
+                'endpoint' => $endpoint,
+                'method' => $request->method(),
+                'url' => $request->fullUrl(),
+                'query_params' => $request->query(),
+                'headers' => $sanitizedHeaders // Headers limpos
+            ],
+            'response_data' => is_array($result) ? $result : ['status' => 'processed'],
+            'response_code' => 200
+        ];
+
+        // Usar dispatch direto sem closure para evitar problemas de serialização
+        dispatch(new \App\Jobs\LogWebsiteActivity($logData))->onQueue('logs');
     }
 
     private function calculateErrorRate($subscription, $startDate)
