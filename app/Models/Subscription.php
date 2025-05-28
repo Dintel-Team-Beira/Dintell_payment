@@ -459,4 +459,28 @@ public function getDetailedStats()
         // Implementar lógica para verificar se o cliente tem método de pagamento
         return $this->client && $this->client->payment_method_id;
     }
+
+    public function getDaysOverdueAttribute()
+{
+    if ($this->ends_at && $this->ends_at < now()) {
+        return now()->diffInDays($this->ends_at);
+    }
+    return 0;
+}
+
+public function getAmountDueAttribute()
+{
+    if ($this->days_overdue > 0) {
+        $periodsOverdue = ceil($this->days_overdue / $this->plan->billing_cycle_days);
+        return $periodsOverdue * $this->plan->price;
+    }
+    return $this->plan->price;
+}
+
+public function getGracePeriodEndAttribute()
+{
+    return $this->suspended_at ?
+           $this->suspended_at->addDays(7) :
+           now()->addDays(7);
+}
 }
