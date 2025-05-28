@@ -15,7 +15,7 @@ class SubscriptionPlanController extends Controller
     public function index()
     {
         $plans = SubscriptionPlan::withCount('subscriptions')
-            // ->orderBy('is_featured', 'desc')
+            ->orderBy('is_featured', 'desc')
             ->orderBy('price')
             ->get();
 
@@ -224,5 +224,5 @@ class SubscriptionPlanController extends Controller
 
         return response()->json($stats);
     }
-    
+
 }
