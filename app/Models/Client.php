@@ -50,4 +50,13 @@ class Client extends Model
     {
         return $query->where('status', 'active');
     }
+
+     /**
+     * Verificar se tem método de pagamento válido
+     */
+    public function hasValidPaymentMethod()
+    {
+        // Implementar lógica específica do seu sistema
+        return !empty($this->payment_method_id) || !empty($this->card_token);
+    }
 }
