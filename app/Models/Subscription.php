@@ -431,4 +431,32 @@ public function getDetailedStats()
         ]
     ];
 }
+
+ /**
+     * Armazenar metadados da subscrição
+     */
+    public function setMetaData($key, $value)
+    {
+        $metadata = $this->metadata ?? [];
+        $metadata[$key] = $value;
+        $this->update(['metadata' => $metadata]);
+    }
+
+    /**
+     * Recuperar metadados da subscrição
+     */
+    public function getMetaData($key, $default = null)
+    {
+        $metadata = $this->metadata ?? [];
+        return $metadata[$key] ?? $default;
+    }
+
+    /**
+     * Verificar se tem método de pagamento válido
+     */
+    public function hasValidPaymentMethod()
+    {
+        // Implementar lógica para verificar se o cliente tem método de pagamento
+        return $this->client && $this->client->payment_method_id;
+    }
 }
