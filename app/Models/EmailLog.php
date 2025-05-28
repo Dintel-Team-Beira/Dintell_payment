@@ -17,12 +17,15 @@ class EmailLog extends Model
         'type',
         'content',
         'status',
-        'error_message',
-        'sent_at'
+        'sent_at',
+        'has_attachment',
+        'attachment_path',
+        'attachment_name'
     ];
 
     protected $casts = [
         'sent_at' => 'datetime',
+        'has_attachment' => 'boolean'
     ];
 
     // Relacionamentos
@@ -74,4 +77,16 @@ class EmailLog extends Model
             'error_message' => $errorMessage
         ]);
     }
+
+     // Scope para emails com anexos
+     public function scopeWithAttachments($query)
+     {
+         return $query->where('has_attachment', true);
+     }
+
+     // Scope por tipo de email
+     public function scopeByType($query, $type)
+     {
+         return $query->where('type', $type);
+     }
 }
