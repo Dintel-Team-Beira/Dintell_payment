@@ -1,5 +1,4 @@
 <?php
-// app/Notifications/SubscriptionActivatedNotification.php
 
 namespace App\Notifications;
 
