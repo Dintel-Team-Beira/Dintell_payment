@@ -1,9 +1,16 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
+use App\Notifications\SubscriptionActivatedNotification;
+use App\Notifications\SubscriptionRenewedNotification;
+use App\Notifications\SubscriptionExpiredNotification;
+use App\Notifications\SubscriptionExpiringNotification;
+use App\Notifications\SubscriptionCancelledNotification;
+use App\Notifications\SubscriptionSuspendedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -16,13 +23,13 @@ class SubscriptionController extends Controller
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('domain', 'like', "%{$search}%")
-                  ->orWhere('subdomain', 'like', "%{$search}%")
-                  ->orWhereHas('client', function($clientQuery) use ($search) {
-                      $clientQuery->where('name', 'like', "%{$search}%")
-                                  ->orWhere('email', 'like', "%{$search}%");
-                  });
+                    ->orWhere('subdomain', 'like', "%{$search}%")
+                    ->orWhereHas('client', function ($clientQuery) use ($search) {
+                        $clientQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -46,7 +53,7 @@ class SubscriptionController extends Controller
     // Controller simplificado usando o método do modelo
     public function show(Subscription $subscription)
     {
-        $subscription->load(['user', 'plan', 'apiLogs' => function($query) {
+        $subscription->load(['user', 'plan', 'apiLogs' => function ($query) {
             $query->latest()->limit(50);
         }]);
 
@@ -99,9 +106,9 @@ class SubscriptionController extends Controller
     {
         $plans = SubscriptionPlan::active()->get();
         $clients = Client::where('status', 'active')
-                        ->withCount('subscriptions')
-                        ->get();
-        return view('subscriptions.create', compact('plans','clients'));
+            ->withCount('subscriptions')
+            ->get();
+        return view('subscriptions.create', compact('plans', 'clients'));
     }
 
     public function store(Request $request)
@@ -122,20 +129,22 @@ class SubscriptionController extends Controller
             'status' => 'active',
             'last_payment_date' => now()
         ]);
+        $subscription->client->notify(new SubscriptionActivatedNotification($subscription));
 
         return redirect()->route('subscriptions.show', $subscription)
-                        ->with('success', 'Subscrição criada com sucesso!');
+            ->with('success', 'Subscrição criada com sucesso!');
     }
 
     public function edit(Subscription $subscription)
     {
         $plans = SubscriptionPlan::active()->get();
         $clients = Client::where('status', 'active')
-        ->withCount('subscriptions')
-        ->get();
-        return view('subscriptions.edit', compact('subscription', 'plans','clients'));
+            ->withCount('subscriptions')
+            ->get();
+        return view('subscriptions.edit', compact('subscription', 'plans', 'clients'));
     }
 
+    // Método update atualizado
     public function update(Request $request, Subscription $subscription)
     {
         $validated = $request->validate([
@@ -148,19 +157,33 @@ class SubscriptionController extends Controller
             'amount_paid' => 'required|numeric|min:0'
         ]);
 
+        $oldStatus = $subscription->status;
+
+        // Lógica para suspensão
         if ($validated['status'] === 'suspended' && $subscription->status !== 'suspended') {
             $validated['suspended_at'] = now();
+
+            // Enviar notificação de suspensão
+            $subscription->update($validated);
+            $subscription->client->notify(new SubscriptionSuspendedNotification($subscription));
         } elseif ($validated['status'] !== 'suspended') {
             $validated['suspended_at'] = null;
             $validated['suspension_reason'] = null;
+            $subscription->update($validated);
+
+            // Se saiu de suspensa para ativa, enviar notificação de ativação
+            if ($oldStatus === 'suspended' && $validated['status'] === 'active') {
+                $subscription->client->notify(new SubscriptionActivatedNotification($subscription));
+            }
+        } else {
+            $subscription->update($validated);
         }
 
-        $subscription->update($validated);
-
         return redirect()->route('subscriptions.show', $subscription)
-                        ->with('success', 'Subscrição atualizada com sucesso!');
+            ->with('success', 'Subscrição atualizada com sucesso!');
     }
 
+    // Método de suspensão atualizado
     public function suspend(Request $request, Subscription $subscription)
     {
         $validated = $request->validate([
@@ -175,8 +198,11 @@ class SubscriptionController extends Controller
             'suspension_page_config' => $validated['suspension_config'] ?? null
         ]);
 
+        // Enviar notificação de suspensão
+        $subscription->client->notify(new SubscriptionSuspendedNotification($subscription));
+
         return redirect()->route('subscriptions.show', $subscription)
-                        ->with('success', 'Subscrição suspensa com sucesso!');
+            ->with('success', 'Subscrição suspensa com sucesso!');
     }
 
     public function regenerateApiKey(Subscription $subscription)
@@ -186,7 +212,7 @@ class SubscriptionController extends Controller
         ]);
 
         return redirect()->route('subscriptions.show', $subscription)
-                        ->with('success', 'Chave API regenerada com sucesso!');
+            ->with('success', 'Chave API regenerada com sucesso!');
     }
 
     public function activate(Request $request, Subscription $subscription)
@@ -194,12 +220,13 @@ class SubscriptionController extends Controller
         $subscription->activate();
 
         return redirect()->route('subscriptions.show', $subscription)
-                        ->with('success', 'Subscrição ativada com sucesso!');
+            ->with('success', 'Subscrição ativada com sucesso!');
     }
 
     /**
      * Cancela uma assinatura
      */
+    // Método de cancelamento atualizado
     public function cancel(Request $request, Subscription $subscription)
     {
         $validated = $request->validate([
@@ -214,10 +241,15 @@ class SubscriptionController extends Controller
             'ends_at' => $validated['immediate'] ? now() : $subscription->ends_at
         ]);
 
+        // Enviar notificação de cancelamento
+        $subscription->client->notify(new SubscriptionCancelledNotification($subscription));
+
         return redirect()->route('subscriptions.show', $subscription)
-                        ->with('success', 'Subscrição cancelada com sucesso!');
+            ->with('success', 'Subscrição cancelada com sucesso!');
     }
 
+
+    // Método de renovação atualizado
     public function renew(Request $request, Subscription $subscription)
     {
         $validated = $request->validate([
@@ -226,78 +258,73 @@ class SubscriptionController extends Controller
             'payment_reference' => 'nullable|string|max:255'
         ]);
 
-        // Debug antes da renovação
-        \Log::info('Before renewal', [
-            'subscription_id' => $subscription->id,
-            'current_ends_at' => $subscription->ends_at,
-            'current_status' => $subscription->status,
-            'debug_info' => $subscription->debugRenewal()
-        ]);
-
         try {
-            // Processar renovação
             $subscription->renew(
                 $validated['amount_paid'],
                 $validated['payment_method'],
                 $validated['payment_reference'] ?? null
             );
 
-            // Recarregar dados do banco
-            $subscription->refresh();
-
-            // Debug após renovação
-            \Log::info('After renewal', [
-                'subscription_id' => $subscription->id,
-                'new_ends_at' => $subscription->ends_at,
-                'new_status' => $subscription->status,
-                'is_active' => $subscription->isActive(),
-                'can_access' => $subscription->canAccess()
-            ]);
+            // Enviar notificação de renovação
+            $subscription->client->notify(new SubscriptionRenewedNotification($subscription, $validated['amount_paid']));
 
             return redirect()->route('subscriptions.show', $subscription)
-                            ->with('success', 'Subscrição renovada com sucesso! Nova data de expiração: ' .
-                                   $subscription->ends_at->format('d/m/Y H:i'));
-
+                ->with('success', 'Subscrição renovada com sucesso!');
         } catch (\Exception $e) {
-            \Log::error('Renewal failed', [
-                'subscription_id' => $subscription->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
             return back()->withErrors(['error' => 'Erro ao renovar subscrição: ' . $e->getMessage()]);
         }
     }
 
-    /**
- * Método para debug da renovação (pode ser removido em produção)
- */
-public function debugRenewal(Subscription $subscription)
-{
-    $debugInfo = $subscription->debugRenewal();
 
-    return response()->json([
-        'subscription' => [
-            'id' => $subscription->id,
-            'domain' => $subscription->domain,
-            'current_status' => $subscription->status,
-            'manual_status' => $subscription->manual_status
-        ],
-        'plan' => [
-            'id' => $subscription->plan->id ?? null,
-            'name' => $subscription->plan->name ?? null,
-            'price' => $subscription->plan->price ?? null,
-            'billing_cycle_days' => $subscription->plan->billing_cycle_days ?? null
-        ],
-        'debug' => $debugInfo,
-        'methods_check' => [
-            'isActive' => $subscription->isActive(),
-            'isExpired' => $subscription->isExpired(),
-            'canAccess' => $subscription->canAccess(),
-            'days_until_expiry' => $subscription->days_until_expiry
-        ]
-    ]);
-}
+    // Método para marcar como expirada
+    public function markAsExpired(Subscription $subscription)
+    {
+        $subscription->update(['status' => 'expired']);
+
+        // Enviar notificação de expiração
+        $subscription->client->notify(new SubscriptionExpiredNotification($subscription));
+
+        return redirect()->route('subscriptions.show', $subscription)
+            ->with('success', 'Subscrição marcada como expirada!');
+    }
+
+    // Método para avisar sobre expiração próxima
+    public function sendExpirationWarning(Subscription $subscription, $daysLeft = 7)
+    {
+        $subscription->client->notify(new SubscriptionExpiringNotification($subscription, $daysLeft));
+
+        return response()->json(['message' => 'Aviso de expiração enviado!']);
+    }
+
+    /**
+     * Método para debug da renovação (pode ser removido em produção)
+     */
+    public function debugRenewal(Subscription $subscription)
+    {
+        $debugInfo = $subscription->debugRenewal();
+
+        return response()->json([
+            'subscription' => [
+                'id' => $subscription->id,
+                'domain' => $subscription->domain,
+                'current_status' => $subscription->status,
+                'manual_status' => $subscription->manual_status
+            ],
+            'plan' => [
+                'id' => $subscription->plan->id ?? null,
+                'name' => $subscription->plan->name ?? null,
+                'price' => $subscription->plan->price ?? null,
+                'billing_cycle_days' => $subscription->plan->billing_cycle_days ?? null
+            ],
+            'debug' => $debugInfo,
+            'methods_check' => [
+                'isActive' => $subscription->isActive(),
+                'isExpired' => $subscription->isExpired(),
+                'canAccess' => $subscription->canAccess(),
+                'days_until_expiry' => $subscription->days_until_expiry
+            ]
+        ]);
+    }
 
     /**
      * Alterna o status manual da assinatura
@@ -313,7 +340,7 @@ public function debugRenewal(Subscription $subscription)
         $statusMessage = $newStatus === 'enabled' ? 'habilitado' : 'desabilitado';
 
         return redirect()->route('subscriptions.show', $subscription)
-                        ->with('success', "Status manual da subscrição {$statusMessage} com sucesso!");
+            ->with('success', "Status manual da subscrição {$statusMessage} com sucesso!");
     }
 
     /**
@@ -325,15 +352,15 @@ public function debugRenewal(Subscription $subscription)
 
         if ($request->filled('q')) {
             $search = $request->q;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('domain', 'like', "%{$search}%")
-                  ->orWhereHas('client', function($clientQuery) use ($search) {
-                      $clientQuery->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('client', function ($clientQuery) use ($search) {
+                        $clientQuery->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
-        $subscriptions = $query->limit(10)->get()->map(function($subscription) {
+        $subscriptions = $query->limit(10)->get()->map(function ($subscription) {
             return [
                 'id' => $subscription->id,
                 'domain' => $subscription->domain,
