@@ -43,7 +43,8 @@ class Subscription extends Model
         'auto_renew',
         'email_notifications',
         'expiry_warning_days',
-        'last_warning_sent'
+        'last_warning_sent',
+        'metadata'
     ];
 
     protected $casts = [
@@ -62,7 +63,8 @@ class Subscription extends Model
         'storage_used_gb' => 'decimal:2',
         'bandwidth_used_gb' => 'decimal:2',
         'auto_renew' => 'boolean',
-        'email_notifications' => 'boolean'
+        'email_notifications' => 'boolean',
+        'metadata' => 'array'
     ];
 
     protected static function boot()
