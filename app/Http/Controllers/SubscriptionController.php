@@ -188,7 +188,8 @@ class SubscriptionController extends Controller
     {
         $validated = $request->validate([
             'reason' => 'required|string|max:500',
-            'suspension_config' => 'nullable|array'
+            'suspension_config' => 'nullable|array',
+            'send_notification' => 'nullable|boolean'
         ]);
 
         $subscription->update([
@@ -198,11 +199,21 @@ class SubscriptionController extends Controller
             'suspension_page_config' => $validated['suspension_config'] ?? null
         ]);
 
-        // Enviar notificação de suspensão
-        $subscription->client->notify(new SubscriptionSuspendedNotification($subscription));
+        // Enviar notificação detalhada se solicitado
+        if ($validated['send_notification'] ?? true) {
+            try {
+                $subscription->client->notify(new SubscriptionSuspendedNotification($subscription, true));
+                $notificationMessage = ' Notificação enviada por email.';
+            } catch (\Exception $e) {
+                \Log::error('Erro ao enviar notificação de suspensão: ' . $e->getMessage());
+                $notificationMessage = ' Erro ao enviar notificação por email.';
+            }
+        } else {
+            $notificationMessage = '';
+        }
 
         return redirect()->route('subscriptions.show', $subscription)
-            ->with('success', 'Subscrição suspensa com sucesso!');
+                        ->with('success', 'Subscrição suspensa com sucesso!' . $notificationMessage);
     }
 
     public function regenerateApiKey(Subscription $subscription)
