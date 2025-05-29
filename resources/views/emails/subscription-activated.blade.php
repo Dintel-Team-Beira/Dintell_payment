@@ -4,240 +4,551 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subscrição Ativada - {{ $company['name'] }}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            font-size: 13px;
-            line-height: 1.4;
-            color: #333333;
-            background-color: #f5f5f5;
+        * {
             margin: 0;
-            padding: 10px;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #ffffff;
+            padding: 40px 20px;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table {
+            border-collapse: collapse;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
         .email-container {
-            max-width: 620px;
+            max-width: 740px;
             margin: 0 auto;
             background: #ffffff;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e5e5;
         }
+
         .header {
-            background: #1a365d;
-            color: white;
-            padding: 15px 20px;
+            background: #ffffff;
+            padding:-6px 40px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+
+        .logo-table {
+            width: 100%;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            display: inline-block;
             text-align: center;
+            line-height: 40px;
+            margin-right: 16px;
+            vertical-align: middle;
         }
-        .header img {
-            max-width: 150px;
-            height: auto;
-        }
-        .header h1 {
-            margin: 8px 0 0 0;
+
+        .logo-text {
             font-size: 18px;
             font-weight: 600;
+            color: #1a1a1a;
+            vertical-align: middle;
         }
-        .header .slogan {
-            font-size: 11px;
-            opacity: 0.9;
-            margin-top: 3px;
-        }
-        .content {
-            padding: 20px;
-        }
-        .greeting {
-            font-size: 15px;
-            color: #1a365d;
-            margin-bottom: 15px;
+
+        .header h1 {
+            font-size: 28px;
             font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
         }
-        .intro-text {
-            margin-bottom: 18px;
-            line-height: 1.5;
+
+        .subtitle {
+            font-size: 16px;
+            color: #666666;
+            font-weight: 400;
         }
-        .compact-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 15px 0;
+
+        .content {
+            padding: 40px;
         }
-        .compact-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-            padding: 10px;
-            background: #f9f9f9;
+
+        .status-section {
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-left: 4px solid #1a1a1a;
+            margin-bottom: 32px;
         }
-        .card-label {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 3px;
+
+        .status-table {
+            width: 100%;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+
+        .status-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1a1a1a;
+            vertical-align: middle;
+        }
+
+        .greeting {
+            font-size: 20px;
+            color: #1a1a1a;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .intro {
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #1a1a1a;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: -0.01em;
+        }
+
+        .details-table {
+            width: 100%;
+            margin-bottom: 32px;
+        }
+
+        .details-row {
+            margin-bottom: 24px;
+        }
+
+        .detail-card {
+            width: 48%;
+            padding: 20px;
+            border: 1px solid #e5e5e5;
+            background: #fafafa;
+            vertical-align: top;
+
+        }
+
+        .detail-card-right {
+            width: 48%;
+            padding: 20px;
+            border: 1px solid #e5e5e5;
+            background: #fafafa;
+            vertical-align: top;
+            margin-bottom: 16px;
+        }
+
+        .detail-spacer {
+            width: 4%;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: block;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            color: #1a1a1a;
             font-weight: 600;
             display: block;
         }
-        .card-value {
-            font-size: 13px;
-            color: #1a365d;
-            font-weight: 500;
-            word-break: break-word;
+
+        .detail-value.highlight {
+            color: #dc2626;
         }
-        .status-active {
-            color: #28a745;
-            font-weight: bold;
+
+        .detail-value.success {
+            color: #10b981;
         }
-        .status-suspended {
-            color: #dc3545;
-            font-weight: bold;
+
+        .cta-section {
+            margin: 40px 0;
+            padding: 24px;
+            background: #f8f9fa;
+            border: 1px solid #e5e5e5;
         }
-        .expiration-date {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        .cta-container {
-            text-align: center;
-            margin: 20px 0;
-        }
+
         .cta-button {
             display: inline-block;
-            background: #1a365d;
+            background: #1a1a1a;
             color: white;
-            padding: 10px 20px;
+            padding: 14px 28px;
             text-decoration: none;
-            border-radius: 4px;
-            font-size: 13px;
+            font-size: 15px;
+            font-weight: 500;
+            border: none;
+        }
+
+        .cta-text {
+            font-size: 14px;
+            color: #666666;
+            margin-top: 12px;
+        }
+
+        .features-table {
+            width: 100%;
+        }
+
+        .feature-card {
+            width: 48%;
+            font-size: 14px;
+            color: #666666;
+            padding: 12px 16px;
+            background: #fafafa;
+            border-left: 2px solid #e5e5e5;
+            vertical-align: top;
+            margin-bottom: 16px;
+        }
+
+        .feature-spacer {
+            width: 4%;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 24px;
+            border: 1px solid #e5e5e5;
+            margin: 32px 0;
+        }
+
+        .info-title {
+            font-size: 16px;
+            color: #1a1a1a;
             font-weight: 600;
+            margin-bottom: 16px;
         }
+
+        .info-item {
+            font-size: 14px;
+            color: #666666;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-item strong {
+            color: #1a1a1a;
+        }
+
+        .company-section {
+            border-top: 1px solid #e5e5e5;
+            padding-top: 32px;
+            margin-top: 40px;
+        }
+
+        .company-title {
+            font-size: 16px;
+            color: #1a1a1a;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .company-table {
+            width: 100%;
+        }
+
+        .company-card {
+            width: 48%;
+            padding: 16px;
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            vertical-align: top;
+            margin-bottom: 16px;
+        }
+
+        .company-spacer {
+            width: 4%;
+        }
+
+        .company-label {
+            font-size: 12px;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            font-weight: 500;
+            display: block;
+        }
+
+        .company-value {
+            font-size: 14px;
+            color: #1a1a1a;
+            font-weight: 500;
+            display: block;
+        }
+
         .footer {
-            background: #f3f4f6;
-            padding: 12px;
-            text-align: center;
-            font-size: 11px;
-            color: #6b7280;
-            border-top: 1px solid #e0e0e0;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 24px 40px;
+            font-size: 13px;
         }
-        @media (max-width: 600px) {
-            .compact-grid {
-                grid-template-columns: repeat(2, 1fr);
+
+        .footer-table {
+            width: 100%;
+        }
+
+        .footer-left {
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .footer-right {
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        .footer a {
+            color: #ffffff;
+            text-decoration: none;
+            opacity: 0.8;
+            margin-left: 24px;
+        }
+
+        .footer a:hover {
+            opacity: 1;
+        }
+
+        /* Mobile Styles */
+        @media only screen and (max-width: 640px) {
+            body {
+                padding: 20px 16px !important;
+            }
+
+            .content {
+                padding: 24px !important;
+            }
+
+            .header {
+                padding: 32px 24px !important;
+            }
+
+            .header h1 {
+                font-size: 24px !important;
+            }
+
+            .detail-card,
+            .detail-card-right,
+            .feature-card,
+            .company-card {
+                width: 100% !important;
+                display: block !important;
+                margin-bottom: 16px !important;
+            }
+
+            .detail-spacer,
+            .feature-spacer,
+            .company-spacer {
+                display: none !important;
+            }
+
+            .footer-left,
+            .footer-right {
+                text-align: center !important;
+                display: block !important;
+                margin-bottom: 16px !important;
+            }
+
+            .footer a {
+                margin: 0 12px !important;
             }
         }
-        @media (max-width: 400px) {
-            .compact-grid {
-                grid-template-columns: 1fr;
-            }
+
+        /* Outlook-specific fixes */
+        <!--[if mso]>
+        .detail-card,
+        .detail-card-right,
+        .feature-card,
+        .company-card {
+            width: 48% !important;
         }
+        <![endif]-->
     </style>
 </head>
 <body>
     <div class="email-container">
-        <!-- Header -->
         <div class="header">
-            <img src="{{ $company['logo_url'] ?? 'https://beyondbusiness.co.mz/logo.png' }}" alt="{{ $company['name'] }} Logo">
-            <h1>Subscrição @if($subscription->is_active) Ativada @else Suspensa @endif</h1>
-            <div class="slogan">{{ $company['slogan'] }}</div>
+
+                            <img src="https://beyondbusiness.co.mz/logo.png" style="width: 200px; margin-left:20px;" alt="Logo">
+
         </div>
 
-        <!-- Content -->
         <div class="content">
-            <div class="greeting">
-                Prezado(a) {{ $client->name }},
+            <div class="status-section">
+                <table class="status-table" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td>
+                            <div class="status-icon">✓</div>
+                        </td>
+                        <td class="status-text">Subscrição Activa</td>
+                    </tr>
+                </table>
             </div>
 
-            <p class="intro-text">
-                @if($subscription->is_active)
-                Confirmamos com satisfação a ativação da sua subscrição. O seu website está agora online e funcionando perfeitamente.
-                @else
-                Informamos que o seu serviço foi suspenso temporariamente. Esta situação pode ser resolvida seguindo as instruções abaixo.
-                @endif
+            <div class="greeting">Olá {{ $client->name }},</div>
+
+            <p class="intro">
+                Confirmamos que a sua subscrição foi ativada com sucesso. O seu website está agora online e completamente funcional. Todos os serviços contratados estão disponíveis e prontos para uso.
             </p>
 
-            <!-- Compact Cards Grid -->
-            <div class="compact-grid">
-                <div class="compact-card">
-                    <span class="card-label">Domínio</span>
-                    <span class="card-value">{{ $subscription->domain }}</span>
-                </div>
-                <div class="compact-card">
-                    <span class="card-label">Plano Contratado</span>
-                    <span class="card-value">{{ $plan->name }}</span>
-                </div>
-                <div class="compact-card">
-                    <span class="card-label">Valor Pago</span>
-                    <span class="card-value">MT {{ number_format($subscription->amount_paid ?? $plan->price, 2) }}</span>
-                </div>
-                <div class="compact-card">
-                    <span class="card-label">Próximo Vencimento</span>
-                    <span class="card-value expiration-date">
-                        {{ $subscription->ends_at ? $subscription->ends_at->format('d/m/Y') : 'Sem vencimento' }}
-                    </span>
-                </div>
-                <div class="compact-card">
-                    <span class="card-label">Data de @if($subscription->is_active) Ativação @else Suspensão @endif</span>
-                    <span class="card-value">
-                        @if($subscription->is_active)
-                            {{ $subscription->starts_at->format('d/m/Y H:i') }}
-                        @else
-                            {{ $subscription->updated_at->format('d/m/Y H:i') }}
-                        @endif
-                    </span>
-                </div>
-                <div class="compact-card">
-                    <span class="card-label">Status do Serviço</span>
-                    <span class="card-value @if($subscription->is_active) status-active @else status-suspended @endif">
-                        @if($subscription->is_active) Ativo @else Suspenso @endif
-                    </span>
-                </div>
-                <div class="compact-card">
-                    <span class="card-label">Chave API</span>
-                    <span class="card-value">
-                        {{ substr($subscription->api_key ?? 'N/A', 0, 6) }}...{{ substr($subscription->api_key ?? '', -4) }}
-                    </span>
-                </div>
-                <div class="compact-card">
-                    <span class="card-label">Período de Carência</span>
-                    <span class="card-value">
-                        {{ $plan->grace_period_days ?? 15 }} dias
-                    </span>
-                </div>
-                <div class="compact-card">
-                    <span class="card-label">Contato de Suporte</span>
-                    <span class="card-value">{{ $company['email'] }}</span>
-                </div>
+            <div class="section">
+                <h2 class="section-title">Informações da Subscrição</h2>
 
-                @if(!$subscription->is_active)
-                <div class="compact-card" style="grid-column: span 3;">
-                    <span class="card-label">Motivo da Suspensão</span>
-                    <span class="card-value">{{ $subscription->suspension_reason ?? 'Pagamento pendente' }}</span>
-                </div>
-                @endif
+                <table class="details-table" cellpadding="0" cellspacing="0">
+                    <tr class="details-row">
+                        <td class="detail-card">
+                            <span class="detail-label">URL do Website</span>
+                            <span class="detail-value">{{ $subscription->domain }}</span>
+                        </td>
+                        <td class="detail-spacer"></td>
+                        <td class="detail-card-right">
+                            <span class="detail-label">Plano Contratado</span>
+                            <span class="detail-value">{{ $plan->name }}</span>
+                        </td>
+                    </tr>
+                    <tr class="details-row">
+                        <td class="detail-card">
+                            <span class="detail-label">Valor Pago</span>
+                            <span class="detail-value">MT {{ number_format($subscription->amount_paid ?? $plan->price, 2) }}</span>
+                        </td>
+                        <td class="detail-spacer"></td>
+                        <td class="detail-card-right">
+                            <span class="detail-label">Próximo Vencimento</span>
+                            <span class="detail-value highlight">
+                                {{ $subscription->ends_at ? $subscription->ends_at->format('d/m/Y') : 'Sem vencimento' }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr class="details-row">
+                        <td class="detail-card">
+                            <span class="detail-label">Data de Ativação</span>
+                            <span class="detail-value">{{ $subscription->starts_at->format('d/m/Y H:i') }}</span>
+                        </td>
+                        <td class="detail-spacer"></td>
+                        <td class="detail-card-right">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value success">Online</span>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
-            <!-- CTA Button -->
-            <div class="cta-container">
+            <div class="cta-section">
                 <a href="https://{{ $subscription->domain }}" class="cta-button">
-                    @if($subscription->is_active)
-                        Acessar Meu Website
-                    @else
-                        Regularizar Situação
-                    @endif
+                    Acessar Meu Website
                 </a>
+                <div class="cta-text">Clique para visitar o seu website agora mesmo</div>
             </div>
 
-            @if(!$subscription->is_active)
-            <div style="background: #fff8e1; border-left: 4px solid #ffc107; padding: 12px; margin: 15px 0; border-radius: 4px;">
-                <p style="margin: 0; font-size: 12px; color: #5d4037;">
-                    <strong>O que isso significa?</strong> O seu website {{ $subscription->domain }} está fora do ar e exibe uma página de manutenção até a reativação.
-                </p>
-            </div>
-            @endif
+            <div class="section">
+                <h2 class="section-title">Recursos Incluídos</h2>
 
-            <p style="margin-top: 15px; color: #6b7280; font-size: 12px; text-align: center;">
-                Agradecemos pela sua confiança em nossos serviços.
-            </p>
+                <table class="features-table" cellpadding="0" cellspacing="0">
+                    @if($plan->features && count($plan->features) > 0)
+                        @php
+                            $features = $plan->features;
+                            $chunks = array_chunk($features, 2);
+                        @endphp
+                        @foreach($chunks as $chunk)
+                        <tr>
+                            <td class="feature-card">{{ $chunk[0] }}</td>
+                            <td class="feature-spacer"></td>
+                            <td class="feature-card">{{ $chunk[1] ?? '' }}</td>
+                        </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td class="feature-card">{{ $plan->max_storage_gb }}GB de Armazenamento SSD</td>
+                            <td class="feature-spacer"></td>
+                            <td class="feature-card">{{ $plan->max_bandwidth_gb }}GB de Tráfego Mensal</td>
+                        </tr>
+                        <tr>
+                            <td class="feature-card">Suporte Técnico Especializado</td>
+                            <td class="feature-spacer"></td>
+                            <td class="feature-card">Monitoramento 24/7</td>
+                        </tr>
+                        <tr>
+                            <td class="feature-card">Backup Automático Diário</td>
+                            <td class="feature-spacer"></td>
+                            <td class="feature-card">Certificado SSL Gratuito</td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
+
+            <div class="info-section">
+                <h3 class="info-title">Informações Importantes</h3>
+                <div class="info-item">
+                    <strong>Chave da API:</strong> {{ substr($subscription->api_key ?? 'N/A', 0, 20) }}... (disponível no painel de controle)
+                </div>
+                <div class="info-item">
+                    <strong>Renovação:</strong> Receberá lembrete {{ $plan->billing_cycle_days }} dias antes do vencimento
+                </div>
+                <div class="info-item">
+                    <strong>Suporte Técnico:</strong> {{ $company['email'] }} | {{ $company['phone'] }}
+                </div>
+
+            </div>
         </div>
 
-        <!-- Footer -->
         <div class="footer">
-            <p>© {{ date('Y') }} {{ $company['name'] }} - Todos os direitos reservados</p>
-            <p>Suporte: {{ $company['phone'] }} | {{ $company['email'] }}</p>
+            <table class="footer-table" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="footer-left">© {{ date('Y') }} {{ $company['name'] }} - Todos os direitos reservados</td>
+                    <td class="footer-right">
+                        <a href="mailto:{{ $company['email'] }}">Suporte</a>
+                        <a href="{{ $company['website'] }}">Website</a>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </body>
