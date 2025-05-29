@@ -6,98 +6,95 @@
     <title>Subscrição Ativada - {{ $company['name'] }}</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.5;
-            color: #333;
-            background: #f8f9fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #333333;
+            background-color: #f5f5f5;
             margin: 0;
-            padding: 0;
+            padding: 10px;
         }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .email-container {
+            max-width: 620px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
         }
         .header {
             background: #1a365d;
             color: white;
-            padding: 20px;
+            padding: 15px 20px;
             text-align: center;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 500;
-        }
-        .header .slogan {
-            font-size: 11px;
-            opacity: 0.9;
-            margin-top: 5px;
         }
         .header img {
             max-width: 150px;
             height: auto;
-            display: block;
-            margin: 0 auto;
+        }
+        .header h1 {
+            margin: 8px 0 0 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .header .slogan {
+            font-size: 11px;
+            opacity: 0.9;
+            margin-top: 3px;
         }
         .content {
             padding: 20px;
         }
         .greeting {
-            font-size: 16px;
+            font-size: 15px;
             color: #1a365d;
             margin-bottom: 15px;
             font-weight: 600;
         }
-        .info-list {
-            margin: 20px 0;
+        .intro-text {
+            margin-bottom: 18px;
+            line-height: 1.5;
         }
-        .info-item {
-            border-left: 3px solid #1a365d;
-            padding: 10px 15px;
-            margin-bottom: 8px;
-            background: #f8f9fa;
-            border-radius: 3px;
+        .compact-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
         }
-        .info-item h4 {
-            margin: 0 0 5px 0;
-            font-size: 12px;
-            color: #374151;
+        .compact-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 10px;
+            background: #f9f9f9;
+        }
+        .card-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 3px;
             font-weight: 600;
+            display: block;
         }
-        .info-item p {
-            margin: 0;
-            font-size: 14px;
+        .card-value {
+            font-size: 13px;
             color: #1a365d;
             font-weight: 500;
+            word-break: break-word;
         }
-        .features {
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-suspended {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .expiration-date {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .cta-container {
+            text-align: center;
             margin: 20px 0;
-            padding: 15px;
-            border-left: 3px solid #1a365d;
-            background: #f8f9fa;
-            border-radius: 3px;
-        }
-        .features h3 {
-            color: #1a365d;
-            font-size: 14px;
-            margin: 0 0 10px 0;
-            font-weight: 600;
-        }
-        .features ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .features li {
-            padding: 5px 0;
-            font-size: 12px;
-            color: #333;
         }
         .cta-button {
             display: inline-block;
@@ -106,84 +103,35 @@
             padding: 10px 20px;
             text-decoration: none;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
-            margin: 20px 0;
-            text-align: center;
-        }
-        .important-info {
-            background: #d1ecf1;
-            border: 1px solid #17a2b8;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .important-info h3 {
-            color: #1a365d;
-            font-size: 14px;
-            margin: 0 0 10px 0;
-            font-weight: 600;
-        }
-        .important-info ul {
-            margin: 0;
-            padding-left: 15px;
-            font-size: 12px;
-            color: #333;
-        }
-        .company-info {
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-size: 11px;
-        }
-        .company-info h3 {
-            color: #1a365d;
-            font-size: 14px;
-            margin: 0 0 10px 0;
-            font-weight: 600;
-        }
-        .company-info p {
-            margin: 5px 0;
         }
         .footer {
             background: #f3f4f6;
-            padding: 15px;
+            padding: 12px;
             text-align: center;
             font-size: 11px;
             color: #6b7280;
-            border-bottom-left-radius: 5px;
-            border-bottom-right-radius: 5px;
+            border-top: 1px solid #e0e0e0;
         }
         @media (max-width: 600px) {
-            .container {
-                margin: 10px;
+            .compact-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
-            .content {
-                padding: 15px;
-            }
-            .header {
-                padding: 15px;
-            }
-            .header img {
-                max-width: 120px;
-            }
-            .cta-button {
-                display: block;
+        }
+        @media (max-width: 400px) {
+            .compact-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="email-container">
         <!-- Header -->
         <div class="header">
-            @if($company['logo'])
-            <img src="{{ $company['logo'] }}" alt="{{ $company['name'] }} Logo" style="max-width: 150px; height: auto;">
-            @else
-            <h1>{{ $company['name'] }}</h1>
-            @endif
+            <img src="{{ $company['logo_url'] ?? 'https://beyondbusiness.co.mz/logo.png' }}" alt="{{ $company['name'] }} Logo">
+            <h1>Subscrição @if($subscription->is_active) Ativada @else Suspensa @endif</h1>
             <div class="slogan">{{ $company['slogan'] }}</div>
         </div>
 
@@ -193,91 +141,103 @@
                 Prezado(a) {{ $client->name }},
             </div>
 
-            <p>Confirmamos com satisfação a ativação da sua subscrição. O seu website está agora online e funcionando perfeitamente.</p>
+            <p class="intro-text">
+                @if($subscription->is_active)
+                Confirmamos com satisfação a ativação da sua subscrição. O seu website está agora online e funcionando perfeitamente.
+                @else
+                Informamos que o seu serviço foi suspenso temporariamente. Esta situação pode ser resolvida seguindo as instruções abaixo.
+                @endif
+            </p>
 
-            <!-- Subscription Details -->
-            <div class="info-list">
-                <div class="info-item">
-                    <h4>Domínio</h4>
-                    <p>{{ $subscription->domain }}</p>
+            <!-- Compact Cards Grid -->
+            <div class="compact-grid">
+                <div class="compact-card">
+                    <span class="card-label">Domínio</span>
+                    <span class="card-value">{{ $subscription->domain }}</span>
                 </div>
-                <div class="info-item">
-                    <h4>Plano Contratado</h4>
-                    <p>{{ $plan->name }}</p>
+                <div class="compact-card">
+                    <span class="card-label">Plano Contratado</span>
+                    <span class="card-value">{{ $plan->name }}</span>
                 </div>
-                <div class="info-item">
-                    <h4>Valor Pago</h4>
-                    <p>MT {{ number_format($subscription->amount_paid ?? $plan->price, 2) }}</p>
+                <div class="compact-card">
+                    <span class="card-label">Valor Pago</span>
+                    <span class="card-value">MT {{ number_format($subscription->amount_paid ?? $plan->price, 2) }}</span>
                 </div>
-                <div class="info-item">
-                    <h4>Próximo Vencimento</h4>
-                    <p style="color: #dc3545; font-weight: bold;">
+                <div class="compact-card">
+                    <span class="card-label">Próximo Vencimento</span>
+                    <span class="card-value expiration-date">
                         {{ $subscription->ends_at ? $subscription->ends_at->format('d/m/Y') : 'Sem vencimento' }}
-                    </p>
+                    </span>
                 </div>
-                <div class="info-item">
-                    <h4>Data de Ativação</h4>
-                    <p>{{ $subscription->starts_at->format('d/m/Y H:i') }}</p>
+                <div class="compact-card">
+                    <span class="card-label">Data de @if($subscription->is_active) Ativação @else Suspensão @endif</span>
+                    <span class="card-value">
+                        @if($subscription->is_active)
+                            {{ $subscription->starts_at->format('d/m/Y H:i') }}
+                        @else
+                            {{ $subscription->updated_at->format('d/m/Y H:i') }}
+                        @endif
+                    </span>
                 </div>
-                <div class="info-item">
-                    <h4>Status do Serviço</h4>
-                    <p style="color: #1a365d; font-weight: bold;">Ativo</p>
+                <div class="compact-card">
+                    <span class="card-label">Status do Serviço</span>
+                    <span class="card-value @if($subscription->is_active) status-active @else status-suspended @endif">
+                        @if($subscription->is_active) Ativo @else Suspenso @endif
+                    </span>
                 </div>
-            </div>
+                <div class="compact-card">
+                    <span class="card-label">Chave API</span>
+                    <span class="card-value">
+                        {{ substr($subscription->api_key ?? 'N/A', 0, 6) }}...{{ substr($subscription->api_key ?? '', -4) }}
+                    </span>
+                </div>
+                <div class="compact-card">
+                    <span class="card-label">Período de Carência</span>
+                    <span class="card-value">
+                        {{ $plan->grace_period_days ?? 15 }} dias
+                    </span>
+                </div>
+                <div class="compact-card">
+                    <span class="card-label">Contato de Suporte</span>
+                    <span class="card-value">{{ $company['email'] }}</span>
+                </div>
 
-            <!-- Plan Features -->
-            <div class="features">
-                <h3>Recursos do seu Plano</h3>
-                <ul>
-                    @if($plan->features && count($plan->features) > 0)
-                        @foreach($plan->features as $feature)
-                            <li>{{ $feature }}</li>
-                        @endforeach
-                    @else
-                        <li>Hospedagem Premium com {{ $plan->max_storage_gb }}GB de Armazenamento</li>
-                        <li>{{ $plan->max_bandwidth_gb }}GB de Tráfego Mensal</li>
-                        <li>Suporte Técnico Especializado</li>
-                        <li>Monitoramento 24/7</li>
-                        <li>Backup Automático Diário</li>
-                    @endif
-                </ul>
+                @if(!$subscription->is_active)
+                <div class="compact-card" style="grid-column: span 3;">
+                    <span class="card-label">Motivo da Suspensão</span>
+                    <span class="card-value">{{ $subscription->suspension_reason ?? 'Pagamento pendente' }}</span>
+                </div>
+                @endif
             </div>
 
             <!-- CTA Button -->
-            <div style="text-align: center;">
-                <a href="https://{{ $subscription->domain }}" class="cta-button">Visitar Meu Website</a>
+            <div class="cta-container">
+                <a href="https://{{ $subscription->domain }}" class="cta-button">
+                    @if($subscription->is_active)
+                        Acessar Meu Website
+                    @else
+                        Regularizar Situação
+                    @endif
+                </a>
             </div>
 
-            <!-- Important Information -->
-            <div class="important-info">
-                <h3>Informações Importantes</h3>
-                <ul>
-                    <li><strong>Chave API:</strong> {{ substr($subscription->api_key ?? 'N/A', 0, 20) }}... (disponível no painel de controle)</li>
-                    <li><strong>Renovação:</strong> Lembrete será enviado {{ $plan->billing_cycle_days }} dias antes do vencimento (<span style="color: #dc3545; font-weight: bold;">{{ $subscription->ends_at ? $subscription->ends_at->format('d/m/Y') : 'N/A' }}</span>)</li>
-                    <li><strong>Suporte:</strong> {{ $company['email'] }} | {{ $company['phone'] }}</li>
-                </ul>
+            @if(!$subscription->is_active)
+            <div style="background: #fff8e1; border-left: 4px solid #ffc107; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                <p style="margin: 0; font-size: 12px; color: #5d4037;">
+                    <strong>O que isso significa?</strong> O seu website {{ $subscription->domain }} está fora do ar e exibe uma página de manutenção até a reativação.
+                </p>
             </div>
+            @endif
 
-            <!-- Company Information -->
-            <div class="company-info">
-                <h3>Contactos da {{ $company['name'] }}</h3>
-                <p><strong>NUIT:</strong> {{ $company['nuit'] }}</p>
-                <p><strong>Maputo:</strong> {{ $company['address_maputo'] }}</p>
-                <p><strong>Beira:</strong> {{ $company['address_beira'] }}</p>
-                <p><strong>Telefone:</strong> {{ $company['phone'] }}</p>
-                <p><strong>Email:</strong> {{ $company['email'] }}</p>
-                <p><strong>Website:</strong> {{ $company['website'] }}</p>
-            </div>
-
-            <p style="margin-top: 20px; color: #6b7280;">
-                Agradecemos a sua confiança em escolher a {{ $company['name'] }} para o seu projeto digital.
+            <p style="margin-top: 15px; color: #6b7280; font-size: 12px; text-align: center;">
+                Agradecemos pela sua confiança em nossos serviços.
             </p>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p>© {{ date('Y') }} {{ $company['name'] }} - {{ $company['slogan'] }}</p>
-            <p>Para suporte, entre em contacto: {{ $company['email'] }} | {{ $company['phone'] }}</p>
+            <p>© {{ date('Y') }} {{ $company['name'] }} - Todos os direitos reservados</p>
+            <p>Suporte: {{ $company['phone'] }} | {{ $company['email'] }}</p>
         </div>
     </div>
 </body>
