@@ -1,83 +1,264 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>Recibo {{ $receiptNumber }}</title>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; }
-        .company-name { font-size: 28px; font-weight: bold; color: #1e3a8a; margin-bottom: 5px; }
-        .company-slogan { font-size: 12px; color: #666; margin-bottom: 10px; }
-        .document-title { font-size: 24px; font-weight: bold; color: #059669; margin: 20px 0; }
-        .receipt-info { display: table; width: 100%; margin: 20px 0; }
-        .left-info, .right-info { display: table-cell; width: 50%; vertical-align: top; padding: 0 10px; }
-        .info-section { margin-bottom: 20px; }
-        .info-section h3 { background: #f8f9fa; padding: 8px; margin: 0 0 10px 0; font-size: 14px; border-left: 4px solid #059669; }
-        .amount-box { background: #d1fae5; border: 3px solid #059669; padding: 30px; text-align: center; margin: 30px 0; border-radius: 10px; }
-        .amount-box .amount { font-size: 36px; font-weight: bold; color: #059669; margin: 0; }
-        .amount-box .currency { font-size: 14px; color: #374151; margin-top: 5px; }
-        .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .details-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
-        .details-table .label { font-weight: bold; background: #f8f9fa; width: 40%; }
-        .footer { margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; font-size: 10px; text-align: center; }
-        .signature-section { margin-top: 60px; display: table; width: 100%; }
-        .signature-box { display: table-cell; width: 50%; text-align: center; }
-        .signature-line { border-top: 1px solid #000; margin-top: 50px; padding-top: 5px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        @page {
+            size: A4;
+            margin: 15mm; /* Margens padrão para A4 */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #1a365d;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a365d;
+            margin-bottom: 5px;
+        }
+
+        .company-slogan {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .company-contact {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .document-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1a365d;
+            margin: 20px 0 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .document-number {
+            font-size: 14px;
+            color: #374151;
+            margin-top: 5px;
+        }
+
+        .amount-box {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            border-radius: 5px;
+        }
+
+        .amount-box .amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a365d;
+            margin: 0;
+        }
+
+        .amount-box .currency {
+            font-size: 12px;
+            color: #374151;
+            margin-top: 5px;
+        }
+
+        .info-list {
+            margin: 20px 0;
+        }
+
+        .info-item {
+            border-left: 3px solid #1a365d;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+
+        .info-item h4 {
+            margin: 0 0 5px 0;
+            font-size: 12px;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .info-item p {
+            margin: 0;
+            font-size: 14px;
+            color: #1a365d;
+            font-weight: 500;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .details-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        .details-table .label {
+            background: #f8f9fa;
+            font-weight: bold;
+            width: 40%;
+        }
+
+        .details-table .total-row {
+            background: #1a365d;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .additional-info {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            page-break-before: always; /* Força quebra para a segunda página */
+        }
+
+        .additional-info h3 {
+            color: #1a365d;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .additional-info p {
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 1px solid #168;
+            margin-top: 40px;
+            padding-top: 5px;
+            font-size: 11px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .page-number {
+            position: fixed;
+            bottom: 15mm;
+            right: 15mm;
+            font-size: 10px;
+            color: #666;
+        }
+
+        /* Evitar quebras indesejadas */
+        .header, .document-title, .amount-box, .info-list, .details-table, .additional-info, .signature-section, .footer {
+            page-break-inside: avoid;
+        }
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Página 1 -->
     <div class="header">
         <div class="company-name">{{ $company['name'] }}</div>
-        <div class="company-slogan">{{ $company['slogan'] }}</div>
-        <div style="font-size: 11px; margin-top: 15px;">
+        <div class="company-slogan">{{ $company['name'] }}</div>
+        <div class="company-contact">
             NUIT: {{ $company['nuit'] }} | {{ $company['phone'] }} | {{ $company['email'] }}<br>
             {{ $company['address_maputo'] }}
         </div>
     </div>
 
-    <!-- Document Title -->
     <div class="document-title">
-        💰 RECIBO DE PAGAMENTO
-        <div style="font-size: 16px; color: #374151; margin-top: 5px;">
-            Nº {{ $receiptNumber }}
-        </div>
+        Recibo de Pagamento
+        <div class="document-number">N.º {{ $receiptNumber }}</div>
     </div>
 
-    <!-- Amount Box -->
     <div class="amount-box">
-        <div class="amount">MT {{ number_format($amount, 2) }}</div>
+        <div class="amount">MT {{ $amount }}</div>
         <div class="currency">Meticais Moçambicanos</div>
     </div>
 
-    <!-- Receipt Information -->
-    <div class="receipt-info">
-        <div class="left-info">
-            <div class="info-section">
-                <h3>👤 Dados do Cliente</h3>
-                <strong>Nome:</strong> {{ $client->name }}<br>
-                <strong>Email:</strong> {{ $client->email }}<br>
-                <strong>Telefone:</strong> {{ $client->phone ?? 'N/A' }}<br>
-                @if($client->nuit)
-                <strong>NUIT:</strong> {{ $client->nuit }}<br>
-                @endif
-                <strong>Cliente Nº:</strong> {{ str_pad($client->id, 6, '0', STR_PAD_LEFT) }}
-            </div>
+    <div class="info-list">
+        <div class="info-item">
+            <h4>Nome do Cliente</h4>
+            <p>{{ $client->name }}</p>
         </div>
-        <div class="right-info">
-            <div class="info-section">
-                <h3>📄 Dados do Pagamento</h3>
-                <strong>Data:</strong> {{ $paymentDate->format('d/m/Y H:i') }}<br>
-                <strong>Método:</strong> {{ $paymentMethod }}<br>
-                @if($paymentReference)
-                <strong>Referência:</strong> {{ $paymentReference }}<br>
-                @endif
-                <strong>Status:</strong> <span style="color: #059669;">✅ Confirmado</span>
-            </div>
+        <div class="info-item">
+            <h4>Email</h4>
+            <p>{{ $client->email }}</p>
+        </div>
+        <div class="info-item">
+            <h4>Telefone</h4>
+            <p>{{ $client->phone ?? 'N/A' }}</p>
+        </div>
+        @if($client->nuit)
+        <div class="info-item">
+            <h4>NUIT</h4>
+            <p>{{ $client->nuit }}</p>
+        </div>
+        @endif
+        <div class="info-item">
+            <h4>Cliente Nº</h4>
+            <p>{{ $client->id ? str_pad($client->id, 6, '0', STR_PAD_LEFT) : 'N/A' }}</p>
+        </div>
+        <div class="info-item">
+            <h4>Data do Pagamento</h4>
+            <p>{{ $paymentDate->format('d/m/Y H:i:s') }}</p>
+        </div>
+        <div class="info-item">
+            <h4>Método de Pagamento</h4>
+            <p>{{ $paymentMethod->name }}</p>
+        </div>
+        @if($paymentReference)
+        <div class="info-item">
+            <h4>Referência</h4>
+            <p>{{ $paymentReference }}</p>.
+        </div>
+        @endif
+        <div class="info-item">
+            <h4>Status</h4>
+            <p style="color: #1a365d;">Confirmado</p>
         </div>
     </div>
 
-    <!-- Service Details -->
     <table class="details-table">
         <tr>
             <td class="label">Serviço</td>
@@ -99,40 +280,35 @@
             <td class="label">IVA (16%)</td>
             <td>MT {{ number_format($iva_amount, 2) }}</td>
         </tr>
-        <tr style="background: #f0fdf4; font-weight: bold; font-size: 14px;">
+        <tr class="total-row">
             <td class="label">Total Pago</td>
             <td>MT {{ number_format($amount, 2) }}</td>
         </tr>
     </table>
 
-    <!-- Additional Information -->
-    <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <h3 style="margin-top: 0; color: #1e40af;">ℹ️ Informações Adicionais</h3>
-        <p style="margin: 5px 0;">• O serviço está ativo e funcionando normalmente</p>
-        <p style="margin: 5px 0;">• Válido para efeitos fiscais e contabilísticos</p>
-        <p style="margin: 5px 0;">• Em caso de dúvidas, contacte-nos através dos dados acima</p>
+    <!-- Página 2 -->
+    <div class="additional-info">
+        <h3>Informações Adicionais</h3>
+        <p>O serviço está ativo e funcionando normalmente.</p>
+        <p>Válido para efeitos fiscais e contabilísticos.</p>
+        <p>Em caso de dúvidas, contacte-nos através dos dados acima.</p>
     </div>
 
-    <!-- Signature Section -->
     <div class="signature-section">
         <div class="signature-box">
-            <div class="signature-line">
-                Assinatura do Cliente
-            </div>
+            <div class="signature-line">Assinatura do Cliente</div>
         </div>
         <div class="signature-box">
-            <div class="signature-line">
-                DINTELL, LDA
-            </div>
+            <div class="signature-line">DINTELL, LDA</div>
         </div>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
         <p><strong>{{ $company['name'] }}</strong> - {{ $company['slogan'] }}</p>
         <p>Documento emitido automaticamente em {{ now()->format('d/m/Y H:i:s') }}</p>
-        <p>Este recibo é válido sem assinatura, conforme legislação em vigor</p>
+        <p>Este recibo é válido sem assinatura, conforme legislação em vigor.</p>
     </div>
+
+    <div class="page-number">Página <span class="page-current"></span> de 2</div>
 </body>
 </html>
-
