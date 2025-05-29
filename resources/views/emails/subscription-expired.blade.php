@@ -3,270 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subscrição Expirada - DINTELL</title>
+    <title>Subscrição Expirada - {{ $company['name'] }}</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.5;
             color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #f5f5f5;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 0;
         }
         .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
         }
         .header {
             text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e5e5e5;
-            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #1a365d;
+            margin-bottom: 20px;
         }
-        .logo {
+        .header img {
+            max-width: 150px;
+            height: auto;
+        }
+        .greeting {
+            font-size: 16px;
             color: #1a365d;
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .slogan {
-            color: #666;
-            font-size: 12px;
-            font-style: italic;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
         .alert-box {
-            background-color: #f8d7da;
-            border-left: 4px solid #dc3545;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .alert-title {
-            font-weight: bold;
-            color: #721c24;
-            margin-bottom: 5px;
-        }
-        .grace-period-box {
-            background-color: #d1ecf1;
-            border-left: 4px solid #17a2b8;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .grace-period-title {
-            font-weight: bold;
-            color: #0c5460;
-            margin-bottom: 5px;
-        }
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        .info-table td {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .info-table td:first-child {
-            font-weight: bold;
-            width: 40%;
-            color: #555;
-        }
-        .amount-highlight {
-            background-color: #f8f9fa;
+            background: #f8f9fa;
+            border: 1px solid #dc3545;
             padding: 15px;
             border-radius: 5px;
-            text-align: center;
             margin: 20px 0;
         }
-        .amount-value {
-            font-size: 24px;
+        .alert-box h3 {
+            color: #dc3545;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        .grace-period-box {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .grace-period-box h3 {
+            color: #1a365d;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        .info-list {
+            margin: 20px 0;
+        }
+        .info-item {
+            border-left: 3px solid #1a365d;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+        .info-item h4 {
+            margin: 0 0 5px 0;
+            font-size: 12px;
+            color: #374151;
+            font-weight: 600;
+        }
+        .info-item p {
+            margin: 0;
+            font-size: 14px;
+            color: #1a365d;
+            font-weight: 500;
+        }
+        .timeline-list {
+            background: #f8f9fa;
+            border: 1px solid #dc3545;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .timeline-list h3 {
+            color: #1a365d;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        .timeline-item {
+            margin: 10px 0;
+        }
+        .timeline-item strong {
+            color: #1a365d;
+            font-weight: 600;
+        }
+        .timeline-item small {
+            color: #dc3545;
+        }
+        .amount-highlight {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .amount-highlight h4 {
+            color: #1a365d;
+            font-size: 14px;
+            margin: 0 0 5px 0;
+            font-weight: 600;
+        }
+        .amount-highlight .amount-value {
+            font-size: 18px;
             font-weight: bold;
             color: #1a365d;
+        }
+        .warning-section {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .warning-section h3 {
+            color: #dc3545;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        .warning-section ul {
+            margin: 0;
+            padding-left: 15px;
+            font-size: 12px;
+        }
+        .warning-section li {
+            margin: 8px 0;
+            color: #dc3545;
+        }
+        .payment-info {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .payment-info h3 {
+            color: #1a365d;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        .payment-info ul {
+            margin: 0;
+            padding-left: 15px;
+            font-size: 12px;
+        }
+        .payment-info li {
+            margin: 8px 0;
+        }
+        .contact-info-section {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .contact-info-section h3 {
+            color: #1a365d;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
         }
         .btn-container {
             text-align: center;
-            margin: 30px 0;
+            margin: 20px 0;
         }
         .btn-renew {
-            background-color: #dc3545;
+            background: #1a365d;
             color: white;
-            padding: 12px 30px;
+            padding: 10px 20px;
             text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
             display: inline-block;
-            transition: background-color 0.3s;
-        }
-        .btn-renew:hover {
-            background-color: #c82333;
-        }
-        .warning-section {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-        }
-        .timeline {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .timeline-item {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-            padding: 10px;
-        }
-        .timeline-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-weight: bold;
-            color: white;
-        }
-        .timeline-icon.expired {
-            background-color: #dc3545;
-        }
-        .timeline-icon.grace {
-            background-color: #17a2b8;
-        }
-        .timeline-icon.suspended {
-            background-color: #6c757d;
         }
         .footer {
-            border-top: 2px solid #e5e5e5;
-            padding-top: 20px;
-            margin-top: 30px;
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-        }
-        .contact-info {
-            margin-top: 15px;
-            font-size: 12px;
-        }
-        .urgent-notice {
-            background-color: #dc3545;
-            color: white;
+            background: #f3f4f6;
             padding: 15px;
             text-align: center;
-            border-radius: 5px;
-            margin: 20px 0;
-            font-weight: bold;
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .footer .contact-info {
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            .header {
+                padding-bottom: 10px;
+            }
+            .header img {
+                max-width: 120px;
+            }
+            .btn-renew {
+                display: block;
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <image src="https://beyondbusiness.co.mz/logo.png" alt="DINTELL Logo" style="width: 150px; height: auto;">
-        </div>
-
-        <div class="urgent-notice">
-            ⚠️ ATENÇÃO: SUBSCRIÇÃO EXPIRADA
+            @if($company['logo'])
+            <img src="{{ $company['logo'] }}" alt="{{ $company['name'] }} Logo" style="max-width: 150px; height: auto;">
+            @else
+            <div style="color: #1a365d; font-size: 24px; font-weight: bold;">{{ $company['name'] }}</div>
+            @endif
         </div>
 
         <div class="alert-box">
-            <div class="alert-title">Subscrição Expirada</div>
-            <p>Sua subscrição expirou em <strong>{{ $subscription->ends_at->format('d/m/Y H:i') }}</strong> e precisa ser renovada urgentemente.</p>
+            <h3>Subscrição Expirada</h3>
+            <p>Sua subscrição expirou em <span style="color: #dc3545; font-weight: bold;">{{ $subscription->ends_at->format('d/m/Y H:i') }}</span>. Renove urgentemente para evitar a suspensão.</p>
         </div>
 
-        <p>Prezado(a) <strong>{{ $client->name }}</strong>,</p>
+        <div class="greeting">
+            Prezado(a) {{ $client->name }},
+        </div>
 
         <p>Informamos que sua subscrição expirou. Para evitar a suspensão completa dos serviços, efetue a renovação durante o período de carência.</p>
 
-        <table class="info-table">
-            <tr>
-                <td>Domínio:</td>
-                <td><strong>{{ $subscription->domain }}</strong></td>
-            </tr>
-            <tr>
-                <td>Plano:</td>
-                <td><strong>{{ $plan->name }}</strong></td>
-            </tr>
-            <tr>
-                <td>Data de Expiração:</td>
-                <td><strong style="color: #dc3545;">{{ $subscription->ends_at->format('d/m/Y H:i') }}</strong></td>
-            </tr>
-            <tr>
-                <td>Status Atual:</td>
-                <td><strong style="color: #dc3545;">EXPIRADO</strong></td>
-            </tr>
-        </table>
-
-        <div class="grace-period-box">
-            <div class="grace-period-title">⏰ Período de Carência Ativo</div>
-            <p>Seus serviços continuarão funcionando até <strong>{{ $gracePeriodEnd->format('d/m/Y') }}</strong> ({{ $gracePeriodDays }} dias de carência).</p>
+        <div class="info-list">
+            <div class="info-item">
+                <h4>Domínio</h4>
+                <p>{{ $subscription->domain }}</p>
+            </div>
+            <div class="info-item">
+                <h4>Plano</h4>
+                <p>{{ $plan->name }}</p>
+            </div>
+            <div class="info-item">
+                <h4>Data de Expiração</h4>
+                <p style="color: #dc3545; font-weight: bold;">{{ $subscription->ends_at->format('d/m/Y H:i') }}</p>
+            </div>
+            <div class="info-item">
+                <h4>Status Atual</h4>
+                <p style="color: #dc3545; font-weight: bold;">Expirado</p>
+            </div>
         </div>
 
-        <div class="timeline">
-            <h4 style="margin-bottom: 15px; color: #1a365d;">Cronograma de Ações:</h4>
+        <div class="grace-period-box">
+            <h3>Período de Carência Ativo</h3>
+            <p>Seus serviços estão ativos até <span style="color: #dc3545; font-weight: bold;">{{ $gracePeriodEnd->format('d/m/Y') }}</span> ({{ $gracePeriodDays }} dias restantes).</p>
+        </div>
 
+        <div class="timeline-list">
+            <h3>Cronograma de Ações</h3>
             <div class="timeline-item">
-                <div class="timeline-icon expired">✗</div>
-                <div>
-                    <strong>{{ $subscription->ends_at->format('d/m/Y') }}</strong> - Subscrição Expirou<br>
-                    <small>Período de carência iniciado</small>
-                </div>
+                <strong>{{ $subscription->ends_at->format('d/m/Y') }}</strong> - Subscrição Expirou<br>
+                <small style="color: #dc3545;">Período de carência iniciado</small>
             </div>
-
             <div class="timeline-item">
-                <div class="timeline-icon grace">⏳</div>
-                <div>
-                    <strong>{{ $gracePeriodEnd->format('d/m/Y') }}</strong> - Fim do Período de Carência<br>
-                    <small>Últimos {{ $gracePeriodDays }} dias para renovar</small>
-                </div>
+                <strong>{{ $gracePeriodEnd->format('d/m/Y') }}</strong> - Fim do Período de Carência<br>
+                <small style="color: #dc3545;">Últimos {{ $gracePeriodDays }} dias para renovar</small>
             </div>
-
             <div class="timeline-item">
-                <div class="timeline-icon suspended">⚠</div>
-                <div>
-                    <strong>Após {{ $gracePeriodEnd->format('d/m/Y') }}</strong> - Suspensão Total<br>
-                    <small>Serviços serão completamente suspensos</small>
-                </div>
+                <strong>Após {{ $gracePeriodEnd->format('d/m/Y') }}</strong> - Suspensão Total<br>
+                <small style="color: #dc3545;">Serviços serão completamente suspensos</small>
             </div>
         </div>
 
         <div class="amount-highlight">
-            <div>Valor para Renovação</div>
+            <h4>Valor para Renovação</h4>
             <div class="amount-value">MT {{ number_format($plan->price, 2) }}</div>
         </div>
 
-
         <div class="warning-section">
-            <strong>⚠️ CONSEQUÊNCIAS DA NÃO RENOVAÇÃO:</strong>
-            <ul style="margin: 10px 0;">
-                <li>Website ficará offline após {{ $gracePeriodEnd->format('d/m/Y') }}</li>
-                <li>Emails corporativos serão suspensos</li>
-                <li>Backup de dados será mantido por 30 dias</li>
-                <li>Taxa adicional de 5% pode ser aplicada após o período de carência</li>
+            <h3>Consequências da Não Renovação</h3>
+            <ul>
+                <li>Website ficará offline após {{ $gracePeriodEnd->format('d/m/Y') }}.</li>
+                <li>Emails corporativos serão suspensos.</li>
+                <li>Backup de dados será mantido por 30 dias.</li>
+                <li>Taxa adicional de 5% pode ser aplicada após o período de carência.</li>
             </ul>
         </div>
 
-        <p><strong>Formas de Pagamento Urgente:</strong></p>
-        <ul>
-            <li><strong>Transferência bancária</strong> (confirmação imediata)</li>
-            <li><strong>Depósito bancário</strong> (enviar comprovativo)</li>
-            <li><strong>Pagamento presencial</strong> (escritório Maputo/Beira)</li>
-        </ul>
+        <div class="payment-info">
+            <h3>Formas de Pagamento</h3>
+            <ul>
+                <li>Transferência bancária (confirmação imediata).</li>
+                <li>Depósito bancário (enviar comprovativo).</li>
+                <li>Pagamento presencial (escritório Maputo/Beira).</li>
+            </ul>
+        </div>
 
-        <div style="background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p><strong>Precisa de Ajuda?</strong></p>
-            <p>Entre em contacto connosco imediatamente:</p>
-            <p>📞 <strong>{{ $company['phone'] }}</strong> | 📧 <strong>{{ $company['email'] }}</strong></p>
+        <div class="contact-info-section">
+            <h3>Precisa de Ajuda?</h3>
+            <p>Entre em contacto connosco:</p>
+            <p><strong>Telefone:</strong> {{ $company['phone'] }} | <strong>Email:</strong> {{ $company['email'] }}</p>
         </div>
 
 
+        <div class="footer">
+            <p>{{ $company['name'] }} - {{ $company['slogan'] }}</p>
+            <div class="contact-info">
+                <p>{{ $company['address_maputo'] }} | {{ $company['address_beira'] }}</p>
+                <p>Telefone: {{ $company['phone'] }} | Email: {{ $company['email'] }}</p>
+            </div>
+            <p>© {{ date('Y') }} {{ $company['name'] }}</p>
+        </div>
     </div>
 </body>
 </html>
