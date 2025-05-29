@@ -231,11 +231,7 @@
 <body>
     <div class="container">
         <div class="header">
-            @if($company['logo'])
-            <img src="{{ $company['logo'] }}" alt="{{ $company['name'] }} Logo" style="max-width: 150px; height: auto;">
-            @else
-            <div style="color: #1a365d; font-size: 24px; font-weight: bold;">{{ $company['name'] }}</div>
-            @endif
+            <image src="https://beyondbusiness.co.mz/logo.png" alt="DINTELL Logo" style="width: 150px; height: auto;">
         </div>
 
         <div class="alert-box">
