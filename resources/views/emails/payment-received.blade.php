@@ -25,8 +25,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>{{ $company['name'] }}</h1>
-            <div class="slogan">{{ $company['slogan'] }}</div>
+            <image src="https://beyondbusiness.co.mz/logo.png" alt="DINTELL Logo" style="width: 150px; height: auto;">
         </div>
 
         <!-- Content -->
