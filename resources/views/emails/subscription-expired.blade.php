@@ -9,7 +9,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             background-color: #f5f5f5;
         }
@@ -169,8 +169,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">dintell</div>
-            <div class="slogan">beyond technology, intelligence.</div>
+            <image src="https://beyondbusiness.co.mz/logo.png" alt="DINTELL Logo" style="width: 150px; height: auto;">
         </div>
 
         <div class="urgent-notice">
@@ -243,11 +242,6 @@
             <div class="amount-value">MT {{ number_format($plan->price, 2) }}</div>
         </div>
 
-        <div class="btn-container">
-            <a href="{{ route('subscriptions.renew', $subscription->id) }}" class="btn-renew">
-                Renovar Urgentemente
-            </a>
-        </div>
 
         <div class="warning-section">
             <strong>⚠️ CONSEQUÊNCIAS DA NÃO RENOVAÇÃO:</strong>
@@ -272,16 +266,7 @@
             <p>📞 <strong>{{ $company['phone'] }}</strong> | 📧 <strong>{{ $company['email'] }}</strong></p>
         </div>
 
-        <div class="footer">
-            <p><strong>{{ $company['name'] }}</strong></p>
-            <div class="contact-info">
-                <p>NUIT: {{ $company['nuit'] }}</p>
-                <p>{{ $company['address_maputo'] }}</p>
-                <p>{{ $company['address_beira'] }}</p>
-                <p>Tel: {{ $company['phone'] }} | Email: {{ $company['email'] }}</p>
-                <p>{{ $company['website'] }}</p>
-            </div>
-        </div>
+
     </div>
 </body>
 </html>
