@@ -39,6 +39,12 @@
             opacity: 0.9;
             margin-top: 5px;
         }
+        .header img {
+            max-width: 150px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
         .content {
             padding: 20px;
         }
@@ -54,7 +60,7 @@
         .info-item {
             border-left: 3px solid #1a365d;
             padding: 10px 15px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             background: #f8f9fa;
             border-radius: 3px;
         }
@@ -112,9 +118,9 @@
             border-radius: 5px;
             margin: 20px 0;
         }
-        .important-info h4 {
+        .important-info h3 {
             color: #1a365d;
-            font-size: 12px;
+            font-size: 14px;
             margin: 0 0 10px 0;
             font-weight: 600;
         }
@@ -126,15 +132,15 @@
         }
         .company-info {
             background: #f8f9fa;
+            border: 1px solid #ddd;
             padding: 15px;
             border-radius: 5px;
             margin-top: 20px;
             font-size: 11px;
-            border: 1px solid #ddd;
         }
-        .company-info h4 {
+        .company-info h3 {
             color: #1a365d;
-            font-size: 12px;
+            font-size: 14px;
             margin: 0 0 10px 0;
             font-weight: 600;
         }
@@ -160,6 +166,9 @@
             .header {
                 padding: 15px;
             }
+            .header img {
+                max-width: 120px;
+            }
             .cta-button {
                 display: block;
             }
@@ -170,7 +179,11 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
+            @if($company['logo'])
+            <img src="{{ $company['logo'] }}" alt="{{ $company['name'] }} Logo" style="max-width: 150px; height: auto;">
+            @else
             <h1>{{ $company['name'] }}</h1>
+            @endif
             <div class="slogan">{{ $company['slogan'] }}</div>
         </div>
 
@@ -198,7 +211,9 @@
                 </div>
                 <div class="info-item">
                     <h4>Próximo Vencimento</h4>
-                    <p>{{ $subscription->ends_at ? $subscription->ends_at->format('d/m/Y') : 'Sem vencimento' }}</p>
+                    <p style="color: #dc3545; font-weight: bold;">
+                        {{ $subscription->ends_at ? $subscription->ends_at->format('d/m/Y') : 'Sem vencimento' }}
+                    </p>
                 </div>
                 <div class="info-item">
                     <h4>Data de Ativação</h4>
@@ -206,7 +221,7 @@
                 </div>
                 <div class="info-item">
                     <h4>Status do Serviço</h4>
-                    <p style="color: #1a365d;">Ativo</p>
+                    <p style="color: #1a365d; font-weight: bold;">Ativo</p>
                 </div>
             </div>
 
@@ -214,16 +229,17 @@
             <div class="features">
                 <h3>Recursos do seu Plano</h3>
                 <ul>
-                    @if($plan->features)
+                    @if($plan->features && count($plan->features) > 0)
                         @foreach($plan->features as $feature)
                             <li>{{ $feature }}</li>
                         @endforeach
+                    @else
+                        <li>Hospedagem Premium com {{ $plan->max_storage_gb }}GB de Armazenamento</li>
+                        <li>{{ $plan->max_bandwidth_gb }}GB de Tráfego Mensal</li>
+                        <li>Suporte Técnico Especializado</li>
+                        <li>Monitoramento 24/7</li>
+                        <li>Backup Automático Diário</li>
                     @endif
-                    <li>Hospedagem Premium com {{ $plan->max_storage_gb }}GB de Armazenamento</li>
-                    <li>{{ $plan->max_bandwidth_gb }}GB de Tráfego Mensal</li>
-                    <li>Suporte Técnico Especializado</li>
-                    <li>Monitoramento 24/7</li>
-                    <li>Backup Automático Diário</li>
                 </ul>
             </div>
 
@@ -234,17 +250,17 @@
 
             <!-- Important Information -->
             <div class="important-info">
-                <h4>Informações Importantes</h4>
+                <h3>Informações Importantes</h3>
                 <ul>
-                    <li><strong>Chave API:</strong> {{ substr($subscription->api_key, 0, 20) }}... (disponível no painel de controle)</li>
-                    <li><strong>Renovação:</strong> {{ $plan->billing_cycle_days }} dias antes do vencimento</li>
+                    <li><strong>Chave API:</strong> {{ substr($subscription->api_key ?? 'N/A', 0, 20) }}... (disponível no painel de controle)</li>
+                    <li><strong>Renovação:</strong> Lembrete será enviado {{ $plan->billing_cycle_days }} dias antes do vencimento (<span style="color: #dc3545; font-weight: bold;">{{ $subscription->ends_at ? $subscription->ends_at->format('d/m/Y') : 'N/A' }}</span>)</li>
                     <li><strong>Suporte:</strong> {{ $company['email'] }} | {{ $company['phone'] }}</li>
                 </ul>
             </div>
 
             <!-- Company Information -->
             <div class="company-info">
-                <h4>Contactos da {{ $company['name'] }}</h4>
+                <h3>Contactos da {{ $company['name'] }}</h3>
                 <p><strong>NUIT:</strong> {{ $company['nuit'] }}</p>
                 <p><strong>Maputo:</strong> {{ $company['address_maputo'] }}</p>
                 <p><strong>Beira:</strong> {{ $company['address_beira'] }}</p>
@@ -254,15 +270,14 @@
             </div>
 
             <p style="margin-top: 20px; color: #6b7280;">
-                Agradecemos a sua confiança em escolher a DINTELL para o seu projeto digital.
+                Agradecemos a sua confiança em escolher a {{ $company['name'] }} para o seu projeto digital.
             </p>
         </div>
 
         <!-- Footer -->
         <div class="footer">
             <p>© {{ date('Y') }} {{ $company['name'] }} - {{ $company['slogan'] }}</p>
-            <p>Este e-mail foi enviado automaticamente. Por favor, não responda diretamente.</p>
-            <p>Para suporte, entre em contacto: {{ $company['email'] }}</p>
+            <p>Para suporte, entre em contacto: {{ $company['email'] }} | {{ $company['phone'] }}</p>
         </div>
     </div>
 </body>
