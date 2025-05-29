@@ -198,8 +198,7 @@
 <body>
     <!-- Página 1 -->
     <div class="header">
-        <div class="company-name">{{ $company['name'] }}</div>
-        <div class="company-slogan">{{ $company['name'] }}</div>
+        <image src="https://beyondbusiness.co.mz/logo.png" alt="DINTELL Logo" style="width: 150px; height: auto;">
         <div class="company-contact">
             NUIT: {{ $company['nuit'] }} | {{ $company['phone'] }} | {{ $company['email'] }}<br>
             {{ $company['address_maputo'] }}
