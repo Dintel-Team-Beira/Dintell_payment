@@ -1,117 +1,290 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>Comprovativo de Renovação {{ $renewalNumber }}</title>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #7c3aed; padding-bottom: 20px; }
-        .company-name { font-size: 28px; font-weight: bold; color: #7c3aed; margin-bottom: 5px; }
-        .document-title { font-size: 22px; font-weight: bold; color: #7c3aed; margin: 20px 0; }
-        .renewal-badge { background: #7c3aed; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; display: inline-block; margin: 10px 0; }
-        .info-grid { display: table; width: 100%; margin: 20px 0; }
-        .info-left, .info-right { display: table-cell; width: 50%; vertical-align: top; padding: 0 15px; }
-        .info-box { background: #f8fafc; border-left: 4px solid #7c3aed; padding: 15px; margin-bottom: 15px; }
-        .info-box h4 { margin: 0 0 8px 0; color: #374151; font-size: 14px; text-transform: uppercase; }
-        .info-box p { margin: 0; font-size: 16px; font-weight: 600; color: #111827; }
-        .timeline { background: #faf5ff; border: 2px solid #a855f7; padding: 20px; margin: 20px 0; border-radius: 8px; }
-        .timeline h3 { color: #7c3aed; margin-top: 0; }
-        .timeline-item { display: flex; align-items: center; margin: 15px 0; }
-        .timeline-icon { width: 30px; height: 30px; border-radius: 50%; background: #7c3aed; color: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold; }
-        .timeline-content { flex: 1; }
-        .amount-highlight { background: #f0fdf4; border: 2px solid #10b981; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
-        .amount-highlight h2 { color: #059669; margin: 0; font-size: 24px; }
-        .service-details { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .service-details th, .service-details td { border: 1px solid #d1d5db; padding: 12px; text-align: left; }
-        .service-details th { background: #f9fafb; font-weight: bold; }
-        .footer { margin-top: 40px; border-top: 2px solid #e5e7eb; padding-top: 20px; text-align: center; font-size: 11px; color: #6b7280; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        @page {
+            size: A4;
+            margin: 15mm; /* Margens padrão para A4 */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #1a365d;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a365d;
+            margin-bottom: 5px;
+        }
+
+        .company-slogan {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .company-contact {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .document-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1a365d;
+            margin: 20px 0 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .info-list {
+            margin: 20px 0;
+        }
+
+        .info-item {
+            border-left: 3px solid #1a365d;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+
+        .info-item h4 {
+            margin: 0 0 5px 0;
+            font-size: 12px;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .info-item p {
+            margin: 0;
+            font-size: 14px;
+            color: #1a365d;
+            font-weight: 500;
+        }
+
+        .timeline {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 3px solid #1a365d;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+
+        .timeline h3 {
+            color: #1a365d;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .timeline-item {
+            margin: 10px 0;
+        }
+
+        .timeline-item strong {
+            color: #1a365d;
+            font-weight: 600;
+        }
+
+        .timeline-item small {
+            color: #dc3545; /* Vermelho para expiração, azul para outros */
+        }
+
+        .timeline-item.payment small {
+            color: #1a365d;
+        }
+
+        .timeline-item.new-expiry small {
+            color: #1a365d;
+        }
+
+        .amount-highlight {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            border-radius: 5px;
+        }
+
+        .amount-highlight h2 {
+            color: #1a365d;
+            font-size: 20px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .amount-highlight p {
+            color: #374151;
+            margin: 5px 0 0 0;
+            font-size: 12px;
+        }
+
+        .service-details {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            page-break-before: always; /* Força quebra para a segunda página */
+        }
+
+        .service-details th,
+        .service-details td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 11px;
+        }
+
+        .service-details th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .service-details .total-row {
+            background: #1a365d;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .status-info h3 {
+            color: #1a365d;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .status-info p {
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        .important-notes {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .important-notes h4 {
+            color: #1a365d;
+            font-size: 12px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .important-notes ul {
+            margin: 0;
+            padding-left: 15px;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .footer {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        /* Evitar quebras indesejadas dentro das seções */
+        .header, .document-title, .info-list, .timeline, .amount-highlight, .service-details, .status-info, .important-notes, .footer {
+            page-break-inside: avoid;
+        }
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Página 1 -->
     <div class="header">
         <div class="company-name">{{ $company['name'] }}</div>
-        <div style="font-size: 12px; color: #666; margin-bottom: 10px;">{{ $company['slogan'] }}</div>
-        <div style="font-size: 11px;">
+        <div class="company-slogan">{{ $company['slogan'] }}</div>
+        <div class="company-contact">
             NUIT: {{ $company['nuit'] }} | {{ $company['address_maputo'] }}<br>
             {{ $company['phone'] }} | {{ $company['email'] }}
         </div>
     </div>
 
-    <!-- Document Title -->
-    <div class="document-title">
-        🔄 COMPROVATIVO DE RENOVAÇÃO
-        <div class="renewal-badge">{{ $renewalNumber }}</div>
-    </div>
+    <div class="document-title">Comprovativo de Renovação {{ $renewalNumber }}</div>
 
-    <!-- Client and Service Info -->
-    <div class="info-grid">
-        <div class="info-left">
-            <div class="info-box">
-                <h4>Cliente</h4>
-                <p>{{ $client->name }}</p>
-            </div>
-            <div class="info-box">
-                <h4>Email</h4>
-                <p>{{ $client->email }}</p>
-            </div>
-            <div class="info-box">
-                <h4>Telefone</h4>
-                <p>{{ $client->phone ?? 'N/A' }}</p>
-            </div>
+    <div class="info-list">
+        <div class="info-item">
+            <h4>Cliente</h4>
+            <p>{{ $client->name }}</p>
         </div>
-        <div class="info-right">
-            <div class="info-box">
-                <h4>Domínio</h4>
-                <p>{{ $subscription->domain }}</p>
-            </div>
-            <div class="info-box">
-                <h4>Plano</h4>
-                <p>{{ $plan->name }}</p>
-            </div>
-            <div class="info-box">
-                <h4>Data da Renovação</h4>
-                <p>{{ $renewalDate->format('d/m/Y H:i') }}</p>
-            </div>
+        <div class="info-item">
+            <h4>Email</h4>
+            <p>{{ $client->email }}</p>
+        </div>
+        <div class="info-item">
+            <h4>Telefone</h4>
+            <p>{{ $client->phone ?? 'N/A' }}</p>
+        </div>
+        <div class="info-item">
+            <h4>Domínio</h4>
+            <p>{{ $subscription->domain }}</p>
+        </div>
+        <div class="info-item">
+            <h4>Plano</h4>
+            <p>{{ $plan->name }}</p>
+        </div>
+        <div class="info-item">
+            <h4>Data da Renovação</h4>
+            <p>{{ $renewalDate->format('d/m/Y H:i') }}</p>
         </div>
     </div>
 
-    <!-- Timeline -->
     <div class="timeline">
-        <h3>📅 Cronologia da Renovação</h3>
-
+        <h3>Cronologia da Renovação</h3>
         <div class="timeline-item">
-            <div class="timeline-icon">1</div>
-            <div class="timeline-content">
-                <strong>Expiração Anterior:</strong> {{ $oldExpiryDate ? $oldExpiryDate->format('d/m/Y') : 'Serviço Expirado' }}<br>
-                <small style="color: #ef4444;">O serviço estava prestes a expirar</small>
-            </div>
+            <strong>Expiração Anterior:</strong> {{ $oldExpiryDate ? $oldExpiryDate->format('d/m/Y') : 'Serviço Expirado' }}<br>
+            <small style="color: #dc3545;">O serviço estava prestes a expirar</small>
         </div>
-
-        <div class="timeline-item">
-            <div class="timeline-icon">2</div>
-            <div class="timeline-content">
-                <strong>Pagamento Processado:</strong> {{ $renewalDate->format('d/m/Y H:i') }}<br>
-                <small style="color: #059669;">Valor: MT {{ number_format($amount, 2) }}</small>
-            </div>
+        <div class="timeline-item payment">
+            <strong>Pagamento Processado:</strong> {{ $renewalDate->format('d/m/Y H:i') }}<br>
+            <small>Valor: MT {{ number_format($amount, 2) }}</small>
         </div>
-
-        <div class="timeline-item">
-            <div class="timeline-icon">3</div>
-            <div class="timeline-content">
-                <strong>Nova Expiração:</strong> {{ $newExpiryDate->format('d/m/Y') }}<br>
-                <small style="color: #10b981;">Serviço estendido por {{ $subscription->plan->billing_cycle_days }} dias</small>
-            </div>
+        <div class="timeline-item new-expiry">
+            <strong>Nova Expiração:</strong> {{ $newExpiryDate->format('d/m/Y') }}<br>
+            <small>Serviço estendido por {{ $subscription->plan->billing_cycle_days }} dias</small>
         </div>
     </div>
 
-    <!-- Amount Highlight -->
     <div class="amount-highlight">
         <h2>MT {{ number_format($amount, 2) }}</h2>
-        <p style="margin: 5px 0 0 0; color: #374151;">Valor da Renovação</p>
+        <p>Valor da Renovação</p>
     </div>
 
-    <!-- Service Details -->
+    <!-- Página 2 -->
     <table class="service-details">
         <thead>
             <tr>
@@ -134,34 +307,31 @@
                 <td colspan="2" style="text-align: right; font-weight: bold;">IVA ({{ $iva_rate }}%):</td>
                 <td>MT {{ number_format($iva_amount, 2) }}</td>
             </tr>
-            <tr style="background: #f0fdf4; font-weight: bold;">
-                <td colspan="2" style="text-align: right; font-size: 14px;">Total Pago:</td>
-                <td style="font-size: 14px;">MT {{ number_format($amount, 2) }}</td>
+            <tr class="total-row">
+                <td colspan="2" style="text-align: right;">Total Pago:</td>
+                <td>MT {{ number_format($amount, 2) }}</td>
             </tr>
         </tbody>
     </table>
 
-    <!-- Status Information -->
-    <div style="background: #dbeafe; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <h3 style="color: #1e40af; margin-top: 0;">📊 Status do Serviço</h3>
-        <p style="margin: 5px 0;"><strong>Website:</strong> {{ $subscription->domain }} - <span style="color: #059669;">🟢 Ativo</span></p>
-        <p style="margin: 5px 0;"><strong>Plano:</strong> {{ $plan->name }}</p>
-        <p style="margin: 5px 0;"><strong>Recursos:</strong> {{ $plan->max_storage_gb }}GB Storage, {{ $plan->max_bandwidth_gb }}GB Bandwidth</p>
-        <p style="margin: 5px 0;"><strong>Próxima Renovação:</strong> {{ $newExpiryDate->format('d/m/Y') }}</p>
+    <div class="status-info">
+        <h3>Status do Serviço</h3>
+        <p><strong>Website:</strong> {{ $subscription->domain }} - Ativo</p>
+        <p><strong>Plano:</strong> {{ $plan->name }}</p>
+        <p><strong>Recursos:</strong> {{ $plan->max_storage_gb }}GB Storage, {{ $plan->max_bandwidth_gb }}GB Bandwidth</p>
+        <p><strong>Próxima Renovação:</strong> {{ $newExpiryDate->format('d/m/Y') }}</p>
     </div>
 
-    <!-- Important Notes -->
-    <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <h4 style="color: #92400e; margin-top: 0;">⚠️ Informações Importantes</h4>
-        <ul style="margin: 0; padding-left: 20px; color: #92400e;">
-            <li>Este comprovativo confirma a renovação do seu serviço</li>
-            <li>O seu website continuará funcionando normalmente</li>
-            <li>Receberá lembrete antes da próxima renovação</li>
-            <li>Guarde este documento para seus registos</li>
+    <div class="important-notes">
+        <h4>Informações Importantes</h4>
+        <ul>
+            <li>Este comprovativo confirma a renovação do seu serviço.</li>
+            <li>O seu website continuará funcionando normalmente.</li>
+            <li>Receberá um lembrete antes da próxima renovação.</li>
+            <li>Guarde este documento para seus registos.</li>
         </ul>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
         <p><strong>{{ $company['name'] }}</strong> - {{ $company['slogan'] }}</p>
         <p>Documento gerado automaticamente em {{ now()->format('d/m/Y H:i:s') }}</p>
