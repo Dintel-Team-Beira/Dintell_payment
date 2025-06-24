@@ -1,6 +1,7 @@
 <?php
 // routes/api.php
 
+use App\Http\Controllers\Api\BillingApiController;
 use App\Http\Controllers\Api\SubscriptionVerificationController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\EmailController;
@@ -58,4 +59,21 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     // Route::get('api/plans/active', [PlansController::class, 'getActivePlans'])->name('api.plans.active');
     // Route::get('api/plans/statistics', [PlansController::class, 'statistics'])->name('api.plans.statistics');
     Route::get('/api/email-stats', [EmailController::class, 'apiStats'])->name('api.email.stats');
+});
+
+
+Route::middleware(['auth:sanctum'])->prefix('v1/billing')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [BillingApiController::class, 'dashboard']);
+
+    // Faturas
+    Route::get('/invoices', [BillingApiController::class, 'invoices']);
+    Route::get('/invoices/{invoice}', [BillingApiController::class, 'invoice']);
+    Route::post('/invoices/{invoice}/mark-as-paid', [BillingApiController::class, 'markInvoiceAsPaid']);
+
+    // Cotações
+    Route::get('/quotes', [BillingApiController::class, 'quotes']);
+    Route::get('/quotes/{quote}', [BillingApiController::class, 'quote']);
+    Route::post('/quotes/{quote}/convert-to-invoice', [BillingApiController::class, 'convertQuoteToInvoice']);
 });
