@@ -6,7 +6,9 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionPlanController;
 use App\Http\Controllers\SuspensionPageController;
 use App\Http\Controllers\ApiLogController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__ . '/auth.php';
@@ -106,4 +108,47 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //     Route::get('/', [SettingsController::class, 'index'])->name('settings.index');
     //     Route::post('/', [SettingsController::class, 'update'])->name('settings.update');
     // });
+});
+
+
+Route::middleware(['auth'])->group(function () {
+
+    // Dashboard de Faturação
+    Route::get('/billing/dashboard', [App\Http\Controllers\BillingController::class, 'dashboard'])->name('billing.dashboard');
+    Route::get('/billing/reports', [App\Http\Controllers\BillingController::class, 'reports'])->name('billing.reports');
+
+    // Cotações
+    Route::get('/quotes/index', [App\Http\Controllers\QuoteController::class, 'index'])->name('quotes.index');
+    Route::prefix('quotes')->name('quotes.')->group(function () {
+        Route::get('/create', [App\Http\Controllers\QuoteController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\QuoteController::class, 'store'])->name('store');
+        Route::get('/{quote}', [App\Http\Controllers\QuoteController::class, 'show'])->name('show');
+        Route::get('/{quote}/edit', [App\Http\Controllers\QuoteController::class, 'edit'])->name('edit');
+        Route::put('/{quote}', [App\Http\Controllers\QuoteController::class, 'update'])->name('update');
+        Route::delete('/{quote}', [App\Http\Controllers\QuoteController::class, 'destroy'])->name('destroy');
+        Route::post('/{quote}/convert-to-invoice', [App\Http\Controllers\QuoteController::class, 'convertToInvoice'])->name('convert-to-invoice');
+        Route::patch('/{quote}/status', [App\Http\Controllers\QuoteController::class, 'updateStatus'])->name('update-status');
+        Route::get('/{quote}/pdf', [App\Http\Controllers\QuoteController::class, 'downloadPdf'])->name('download-pdf');
+    });
+
+    // Faturas
+    Route::get('/invoices/index', [App\Http\Controllers\InvoiceController::class, 'index'])->name('invoices.index');
+    Route::prefix('invoices')->name('invoices.')->group(function () {
+        Route::get('/create', [App\Http\Controllers\InvoiceController::class, 'create'])->name('create');
+        Route::post('/store', [App\Http\Controllers\InvoiceController::class, 'store'])->name('store');
+        Route::get('/{invoice}', [App\Http\Controllers\InvoiceController::class, 'show'])->name('show');
+        Route::get('/{invoice}/edit', [App\Http\Controllers\InvoiceController::class, 'edit'])->name('edit');
+        Route::put('/{invoice}', [App\Http\Controllers\InvoiceController::class, 'update'])->name('update');
+        Route::delete('/{invoice}', [App\Http\Controllers\InvoiceController::class, 'destroy'])->name('destroy');
+        Route::post('/{invoice}/mark-as-paid', [App\Http\Controllers\InvoiceController::class, 'markAsPaid'])->name('mark-as-paid');
+        Route::patch('/{invoice}/status', [App\Http\Controllers\InvoiceController::class, 'updateStatus'])->name('update-status');
+        Route::get('/{invoice}/pdf', [App\Http\Controllers\InvoiceController::class, 'downloadPdf'])->name('download-pdf');
+        Route::post('/{invoice}/send-email', [App\Http\Controllers\InvoiceController::class, 'sendByEmail'])->name('send-email');
+    });
+
+    // Configurações de Faturação
+    Route::prefix('billing/settings')->name('billing.settings.')->group(function () {
+        Route::get('/', [App\Http\Controllers\BillingSettingsController::class, 'index'])->name('index');
+        Route::put('/', [App\Http\Controllers\BillingSettingsController::class, 'update'])->name('update');
+    });
 });
