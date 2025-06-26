@@ -4,7 +4,13 @@
 use App\Http\Controllers\Api\BillingApiController;
 use App\Http\Controllers\Api\SubscriptionVerificationController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\BillingController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 // API pública para verificação de domínios
@@ -76,4 +82,81 @@ Route::middleware(['auth:sanctum'])->prefix('v1/billing')->group(function () {
     Route::get('/quotes', [BillingApiController::class, 'quotes']);
     Route::get('/quotes/{quote}', [BillingApiController::class, 'quote']);
     Route::post('/quotes/{quote}/convert-to-invoice', [BillingApiController::class, 'convertQuoteToInvoice']);
+});
+
+
+
+  // API Routes para AJAX
+  Route::prefix('api')->name('api.')->group(function () {
+    Route::get('/clients/search', [ClientController::class, 'search'])->name('clients.search');
+    Route::get('/invoices/stats', [InvoiceController::class, 'stats'])->name('invoices.stats');
+    Route::get('/quotes/stats', [QuoteController::class, 'stats'])->name('quotes.stats');
+    Route::get('/dashboard/chart-data', [BillingController::class, 'getChartDataApi'])->name('dashboard.chart-data');
+    Route::get('/dashboard/stats', [BillingController::class, 'getStats'])->name('dashboard.stats');
+
+    // Ações em lote
+    Route::post('/bulk-delete', [BillingController::class, 'bulkDelete'])->name('bulk-delete');
+    Route::post('/bulk-send', [BillingController::class, 'bulkSend'])->name('bulk-send');
+    Route::post('/bulk-archive', [BillingController::class, 'bulkArchive'])->name('bulk-archive');
+});
+
+
+
+
+
+
+
+// Rotas para produtos
+Route::prefix('products')->group(function () {
+    Route::get('/active', [QuoteController::class, 'getActiveProducts']);
+    Route::get('/categories', [ProductController::class, 'getCategories']);
+    Route::get('/search', [ProductController::class, 'search']);
+    Route::get('/{product}', [ProductController::class, 'show']);
+    Route::post('/bulk-delete', [ProductController::class, 'bulkDelete']);
+    Route::post('/bulk-deactivate', [ProductController::class, 'bulkDeactivate']);
+    Route::post('/{product}/toggle-status', [ProductController::class, 'toggleStatus']);
+});
+
+// Rotas para serviços
+Route::prefix('services')->group(function () {
+    Route::get('/active', [QuoteController::class, 'getActiveServices']);
+    Route::get('/categories', [ServiceController::class, 'getCategories']);
+    Route::get('/complexity-levels', [ServiceController::class, 'getComplexityLevels']);
+    Route::get('/templates', [ServiceController::class, 'getTemplates']);
+    Route::get('/search', [ServiceController::class, 'search']);
+    Route::get('/{service}', [ServiceController::class, 'show']);
+    Route::post('/bulk-delete', [ServiceController::class, 'bulkDelete']);
+    Route::post('/bulk-deactivate', [ServiceController::class, 'bulkDeactivate']);
+    Route::post('/{service}/toggle-status', [ServiceController::class, 'toggleStatus']);
+});
+
+// Rotas para cotações
+Route::prefix('quotes')->group(function () {
+    Route::get('/statistics', [QuoteController::class, 'getStatistics']);
+    Route::post('/{quote}/send-email', [QuoteController::class, 'sendEmail']);
+    Route::post('/{quote}/convert-to-invoice', [QuoteController::class, 'convertToInvoice']);
+    Route::post('/{quote}/update-status', [QuoteController::class, 'updateStatus']);
+    Route::get('/{quote}/pdf', [QuoteController::class, 'downloadPdf']);
+    Route::post('/{quote}/duplicate', [QuoteController::class, 'duplicate']);
+});
+
+// Rotas para clientes (se necessário)
+Route::prefix('clients')->group(function () {
+    Route::get('/active', function () {
+        return response()->json(\App\Models\Client::where('is_active', true)->orderBy('name')->get(['id', 'name', 'email', 'phone']));
+    });
+    Route::get('/search', function (\Illuminate\Http\Request $request) {
+        $query = \App\Models\Client::where('is_active', true);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        return response()->json($query->orderBy('name')->get(['id', 'name', 'email', 'phone']));
+    });
 });
