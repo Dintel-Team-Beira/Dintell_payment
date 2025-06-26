@@ -6,16 +6,16 @@
 <div class="flex items-center gap-x-4">
     <!-- Filters -->
     <form method="GET" class="flex items-center gap-x-3">
-        <div class="relative">
-            {{-- <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        {{-- <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg class="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
                 </svg>
-            </div> --}}
-            {{-- <input type="text" name="search" value="{{ request('search') }}"
+            </div>
+            <input type="text" name="search" value="{{ request('search') }}"
                    placeholder="Buscar email, assunto ou cliente..."
-                   class="block w-80 rounded-xl border-0 py-2.5 pl-10 pr-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm transition-all"> --}}
-        </div>
+                   class="block w-80 rounded-xl border-0 py-2.5 pl-10 pr-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm transition-all">
+        </div> --}}
 
         <select name="status" class="rounded-xl border-0 py-2.5 pl-4 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-blue-500 sm:text-sm transition-all">
             <option value="">Todos os status</option>
@@ -33,7 +33,7 @@
             @endforeach
         </select>
 
-        {{-- <input type="date" name="date_from" value="{{ request('date_from') }}"
+        <input type="date" name="date_from" value="{{ request('date_from') }}"
                class="rounded-xl border-0 py-2.5 pl-4 pr-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-blue-500 sm:text-sm transition-all">
 
         <input type="date" name="date_to" value="{{ request('date_to') }}"
@@ -44,7 +44,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
             </svg>
             Filtrar
-        </button> --}}
+        </button>
 
         @if(request()->hasAny(['search', 'status', 'type', 'date_from', 'date_to']))
         <a href="{{ route('email-logs.index') }}" class="inline-flex items-center px-3 py-2 text-sm text-gray-600 transition-all rounded-lg hover:text-gray-900 hover:bg-gray-100">
@@ -57,7 +57,7 @@
     </form>
 
     <!-- Action Buttons -->
-    <div class="flex items-center space-x-3">
+    {{-- <div class="flex items-center space-x-3">
         <button onclick="openTestModal()" class="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50 transition-all">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -72,7 +72,7 @@
             </svg>
             Exportar
         </a>
-    </div>
+    </div> --}}
 </div>
 @endsection
 
