@@ -9,6 +9,9 @@ use App\Http\Controllers\ApiLogController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__ . '/auth.php';
@@ -148,7 +151,65 @@ Route::middleware(['auth'])->group(function () {
 
     // Configurações de Faturação
     Route::prefix('billing/settings')->name('billing.settings.')->group(function () {
-        Route::get('/', [App\Http\Controllers\BillingSettingsController::class, 'index'])->name('index');
-        Route::put('/', [App\Http\Controllers\BillingSettingsController::class, 'update'])->name('update');
+        Route::get('/', [App\Http\Controllers\BillingController::class, 'index'])->name('index');
+        Route::put('/', [App\Http\Controllers\BillingController::class, 'update'])->name('update');
     });
+});
+
+
+ // Configurações
+ Route::prefix('configuracoes')->name('settings.')->group(function () {
+    Route::get('/', [SettingsController::class, 'index'])->name('index');
+    Route::get('/empresa', [SettingsController::class, 'company'])->name('company');
+    Route::post('/empresa', [SettingsController::class, 'updateCompany'])->name('company.update');
+    Route::get('/faturamento', [SettingsController::class, 'billing'])->name('billing');
+    Route::post('/faturamento', [SettingsController::class, 'updateBilling'])->name('billing.update');
+    Route::get('/notificacoes', [SettingsController::class, 'notifications'])->name('notifications');
+    Route::post('/notificacoes', [SettingsController::class, 'updateNotifications'])->name('notifications.update');
+    Route::get('/impostos', [SettingsController::class, 'taxes'])->name('taxes');
+    Route::post('/impostos', [SettingsController::class, 'updateTaxes'])->name('taxes.update');
+    Route::get('/backup', [SettingsController::class, 'backup'])->name('backup');
+    Route::post('/reset', [SettingsController::class, 'reset'])->name('reset');
+});
+
+// Produtos
+Route::get('/produtos/index',[ProductController::class, 'index']);
+Route::resource('produtos/create', ProductController::class)->names([
+    'index' => 'products.index',
+    'create' => 'products.create',
+    'store' => 'products.store',
+    'show' => 'products.show',
+    'edit' => 'products.edit',
+    'update' => 'products.update',
+    'destroy' => 'products.destroy'
+]);
+
+// Rotas específicas de produtos
+Route::prefix('produtos')->name('products.')->group(function () {
+    Route::get('{product}/duplicate', [ProductController::class, 'duplicate'])->name('duplicate');
+    Route::post('{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('toggle-status');
+    Route::get('export', [ProductController::class, 'export'])->name('export');
+    Route::post('import', [ProductController::class, 'import'])->name('import');
+    Route::get('low-stock', [ProductController::class, 'lowStock'])->name('low-stock');
+});
+
+// Serviços
+Route::get('servicos/dintell',[ServiceController::class, 'index'])->name('novo');
+Route::get('servicos/dintell',[ServiceController::class, 'index'])->name('servicos');
+Route::resource('servicos', ServiceController::class)->names([
+    'index' => 'services.index',
+    'create' => 'services.create',
+    'store' => 'services.store',
+    'show' => 'services.show',
+    'edit' => 'services.edit',
+    'update' => 'services.update',
+    'destroy' => 'services.destroy'
+]);
+
+// Rotas específicas de serviços
+Route::prefix('servicos')->name('services.')->group(function () {
+    Route::get('{service}/duplicate', [ServiceController::class, 'duplicate'])->name('duplicate');
+    Route::post('{service}/toggle-status', [ServiceController::class, 'toggleStatus'])->name('toggle-status');
+    Route::get('export', [ServiceController::class, 'export'])->name('export');
+    Route::post('import', [ServiceController::class, 'import'])->name('import');
 });
