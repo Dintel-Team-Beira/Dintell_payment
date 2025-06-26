@@ -4,6 +4,7 @@
 // app/Http/Controllers/BillingController.php
 namespace App\Http\Controllers;
 
+use App\Models\BillingSetting;
 use App\Models\Invoice;
 use App\Models\Quote;
 use App\Models\Client;
@@ -12,6 +13,14 @@ use Illuminate\Http\Request;
 
 class BillingController extends Controller
 {
+
+    public function index()
+    {
+        $settings = BillingSetting::getSettings();
+
+        return view('settings.index', compact('settings'));
+    }
+
     public function dashboard()
     {
         // Estatísticas gerais
