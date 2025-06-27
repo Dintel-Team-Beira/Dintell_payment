@@ -35,7 +35,314 @@
                         <div class="flex items-center">
                             <div class="p-2 mr-3 bg-blue-100 rounded-lg">
                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Informações da Fatura</h3>
+                                <p class="text-sm text-gray-600">Dados básicos da fatura</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            <div>
+                                <label for="client_id" class="block mb-2 text-sm font-medium text-gray-700">Cliente *</label>
+                                <select name="client_id" id="client_id"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('client_id') border-red-300 @enderror"
+                                        required>
+                                    <option value="">Selecione um cliente</option>
+                                    @foreach($clients as $client)
+                                        <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
+                                            {{ $client->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('client_id')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="invoice_date" class="block mb-2 text-sm font-medium text-gray-700">Data da Fatura *</label>
+                                <input type="date" name="invoice_date" id="invoice_date"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('invoice_date') border-red-300 @enderror"
+                                       value="{{ old('invoice_date', date('Y-m-d')) }}" required>
+                                @error('invoice_date')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            <div>
+                                <label for="payment_terms_days" class="block mb-2 text-sm font-medium text-gray-700">Prazo de Pagamento (dias) *</label>
+                                <input type="number" name="payment_terms_days" id="payment_terms_days"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('payment_terms_days') border-red-300 @enderror"
+                                       value="{{ old('payment_terms_days', 30) }}" min="0" max="365" required>
+                                @error('payment_terms_days')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="due_date" class="block mb-2 text-sm font-medium text-gray-700">Data de Vencimento</label>
+                                <input type="date" name="due_date" id="due_date"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                                       readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seleção de Produtos e Serviços -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="p-2 mr-3 bg-green-100 rounded-lg">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Produtos & Serviços</h3>
+                                    <p class="text-sm text-gray-600">Adicione itens à sua fatura</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button type="button" id="addProductBtn"
+                                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                    Adicionar Produto
+                                </button>
+                                <button type="button" id="addServiceBtn"
+                                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-700 border border-green-200 rounded-md bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    Adicionar Serviço
+                                </button>
+                                <button type="button" id="addCustomItemBtn"
+                                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-purple-700 border border-purple-200 rounded-md bg-purple-50 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                    </svg>
+                                    Item Personalizado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <!-- Lista de Itens Selecionados -->
+                        <div id="selectedItems" class="space-y-4">
+                            <div class="py-12 text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                                <p class="text-lg font-medium">Nenhum item selecionado</p>
+                                <p class="text-sm">Adicione produtos, serviços ou itens personalizados para começar</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações e Termos -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="p-2 mr-3 bg-purple-100 rounded-lg">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Observações e Termos</h3>
+                                <p class="text-sm text-gray-600">Informações adicionais da fatura</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div>
+                            <label for="notes" class="block mb-2 text-sm font-medium text-gray-700">Observações</label>
+                            <textarea name="notes" id="notes" rows="4"
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      placeholder="Observações sobre a fatura...">{{ old('notes') }}</textarea>
+                        </div>
+
+                        <div>
+                            <label for="terms_conditions" class="block mb-2 text-sm font-medium text-gray-700">Termos e Condições</label>
+                            <textarea name="terms_conditions" id="terms_conditions" rows="4"
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      placeholder="Termos e condições da fatura...">{{ old('terms_conditions') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Resumo Financeiro -->
+                <div class="sticky bg-white border border-gray-200 shadow-sm rounded-xl top-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="p-2 mr-3 bg-yellow-100 rounded-lg">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Resumo Financeiro</h3>
+                                <p class="text-sm text-gray-600">Totais da fatura</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-700">Subtotal:</span>
+                                <span id="subtotalDisplay" class="text-sm font-bold text-gray-900">0,00 MT</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-700">IVA:</span>
+                                <span id="taxDisplay" class="text-sm font-bold text-gray-900">0,00 MT</span>
+                            </div>
+                            <div class="flex items-center justify-between px-4 py-3 border-l-4 border-blue-500 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100">
+                                <span class="text-lg font-bold text-blue-800">TOTAL:</span>
+                                <span id="totalDisplay" class="text-xl font-bold text-blue-800">0,00 MT</span>
+                            </div>
+                        </div>
+
+                        <!-- Estatísticas Rápidas -->
+                        <div class="pt-6 mt-6 border-t border-gray-200">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600" id="itemCount">0</div>
+                                    <div class="text-xs text-gray-500">Itens</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600" id="avgPrice">0</div>
+                                    <div class="text-xs text-gray-500">Preço Médio</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+                    <div class="p-6">
+                        <div class="space-y-3">
+                            <button type="submit" id="saveInvoiceBtn"
+                                    class="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-medium text-white transition-colors bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Salvar Fatura
+                            </button>
+
+                            <button type="button" id="previewBtn"
+                                    class="inline-flex items-center justify-center w-full px-6 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Visualizar
+                            </button>
+
+                            <a href="{{ route('invoices.index') }}"
+                               class="inline-flex items-center justify-center w-full px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Cancelar
+                            </a>
+                        </div>
+
+                        <div class="pt-6 mt-6 border-t border-gray-200">
+                            <div class="flex items-center justify-center text-xs text-gray-500">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Campos marcados com * são obrigatórios
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Modal de Seleção de Produtos -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div class="px-6 pt-6 pb-4 bg-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="flex items-center text-lg font-medium text-gray-900">
+                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            Selecionar Produtos
+                        </h3>
+                        <button type="button" class="text-gray-400 hover:text-gray-600" onclick="closeProductModal()">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="mb-4">
+                        <input type="text" id="productSearch" placeholder="Buscar produtos..."
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div class="overflow-y-auto max-h-96" id="productList">
+                        <!-- Produtos serão carregados via JavaScript -->
+                    </div>
+                </div>
+
+                <div class="flex justify-between px-6 py-3 bg-gray-50">
+                    <button type="button"
+                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                            onclick="closeProductModal()">
+                        Fechar
+                    </button>
+                    <button type="button"
+                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                            onclick="addSelectedProducts()">
+                        Adicionar Selecionados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Seleção de Serviços -->
+    <div id="serviceModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div class="px-6 pt-6 pb-4 bg-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="flex items-center text-lg font-medium text-gray-900">
+                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
                             Selecionar Serviços
                         </h3>
@@ -101,14 +408,14 @@
                         <div>
                             <label for="customItemName" class="block text-sm font-medium text-gray-700">Nome do Item *</label>
                             <input type="text" id="customItemName"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                                   class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500"
                                    placeholder="Digite o nome do item">
                         </div>
 
                         <div>
                             <label for="customItemDescription" class="block text-sm font-medium text-gray-700">Descrição</label>
                             <textarea id="customItemDescription" rows="3"
-                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                                      class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500"
                                       placeholder="Descrição opcional do item"></textarea>
                         </div>
 
@@ -116,19 +423,19 @@
                             <div>
                                 <label for="customItemQuantity" class="block text-sm font-medium text-gray-700">Quantidade *</label>
                                 <input type="number" id="customItemQuantity" value="1" min="0.1" step="0.1"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                       class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500">
                             </div>
                             <div>
                                 <label for="customItemPrice" class="block text-sm font-medium text-gray-700">Preço Unitário *</label>
                                 <input type="number" id="customItemPrice" value="0" min="0" step="0.01"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                       class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500">
                             </div>
                         </div>
 
                         <div>
                             <label for="customItemTax" class="block text-sm font-medium text-gray-700">Taxa de IVA (%)</label>
-                            <input type="number" id="customItemTax" value="{{ $settings->default_tax_rate ?? 17 }}" min="0" max="100" step="0.01"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                            <input type="number" id="customItemTax" value="17" min="0" max="100" step="0.01"
+                                   class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500">
                         </div>
                     </div>
                 </div>
@@ -205,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('customItemDescription').value = '';
         document.getElementById('customItemQuantity').value = '1';
         document.getElementById('customItemPrice').value = '0';
-        document.getElementById('customItemTax').value = '{{ $settings->default_tax_rate ?? 17 }}';
+        document.getElementById('customItemTax').value = '17';
     }
 
     function closeCustomItemModal() {
@@ -448,7 +755,7 @@ document.addEventListener('DOMContentLoaded', function() {
             description: item.description || '',
             quantity: customQuantity || (type === 'service' && item.estimated_hours ? item.estimated_hours : 1),
             unit_price: type === 'product' ? item.price : (item.fixed_price > 0 ? item.fixed_price : item.hourly_rate || item.price),
-            tax_rate: item.tax_rate || {{ $settings->default_tax_rate ?? 17 }},
+            tax_rate: item.tax_rate || 17,
             category: item.category || '',
             complexity: item.complexity_level || ''
         };
@@ -530,7 +837,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
 
                         <!-- Hidden inputs para o form -->
-                        <input type="hidden" name="items[${item.index}][description]" value="${item.name}">
+                        <input type="hidden" name="items[${item.index}][description]" value="${item.name}" class="hidden-description">
                         <input type="hidden" name="items[${item.index}][quantity]" value="${item.quantity}" class="hidden-quantity">
                         <input type="hidden" name="items[${item.index}][unit_price]" value="${item.unit_price}" class="hidden-price">
                         <input type="hidden" name="items[${item.index}][tax_rate]" value="${item.tax_rate}" class="hidden-tax">
@@ -572,9 +879,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (item) {
                     if (this.classList.contains('item-quantity')) {
                         item.quantity = parseFloat(this.value) || 0;
+                        document.querySelector(`input[name="items[${index}][quantity]"]`).value = item.quantity;
+                    } else if (this.classList.contains('item-price')) {
+                        item.unit_price = parseFloat(this.value) || 0;
                         document.querySelector(`input[name="items[${index}][unit_price]"]`).value = item.unit_price;
                     } else if (this.classList.contains('item-tax')) {
-                        item.tax_rate = parseFloat(this.value) || 0;
                         document.querySelector(`input[name="items[${index}][tax_rate]"]`).value = item.tax_rate;
                     }
 
@@ -630,11 +939,44 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
+        // Validar se todos os itens têm dados válidos
+        let hasInvalidItems = false;
+        selectedItems.forEach(item => {
+            if (!item.name || item.quantity <= 0 || item.unit_price < 0) {
+                hasInvalidItems = true;
+            }
+        });
+
+        if (hasInvalidItems) {
+            e.preventDefault();
+            showNotification('Verifique se todos os itens têm dados válidos', 'warning');
+            return false;
+        }
+
+        // Debug: Log dos dados que serão enviados
+        console.log('Dados da fatura:', {
+            client_id: document.getElementById('client_id').value,
+            invoice_date: document.getElementById('invoice_date').value,
+            payment_terms_days: document.getElementById('payment_terms_days').value,
+            items: selectedItems.map(item => ({
+                description: item.name,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                tax_rate: item.tax_rate
+            }))
+        });
+
         // Show loading state
         const submitButton = document.getElementById('saveInvoiceBtn');
         const originalText = submitButton.innerHTML;
         submitButton.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Salvando...';
         submitButton.disabled = true;
+
+        // Restaurar botão em caso de erro
+        setTimeout(() => {
+            submitButton.innerHTML = originalText;
+            submitButton.disabled = false;
+        }, 10000);
     }
 
     // Utilitários
@@ -894,6 +1236,133 @@ label:has(+ select[required])::after {
 
 #customItemModal .focus\:ring-purple-500:focus {
     box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.5);
+}
+
+/* Purple theme for custom items */
+.bg-purple-100 {
+    background-color: rgb(243 232 255);
+}
+
+.text-purple-800 {
+    color: rgb(107 33 168);
+}
+
+.border-purple-200 {
+    border-color: rgb(196 181 253);
+}
+
+.bg-purple-50 {
+    background-color: rgb(250 245 255);
+}
+
+.text-purple-700 {
+    color: rgb(126 34 206);
+}
+
+.hover\:bg-purple-100:hover {
+    background-color: rgb(243 232 255);
+}
+
+.focus\:ring-purple-500:focus {
+    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.5);
+}
+
+.bg-purple-600 {
+    background-color: rgb(147 51 234);
+}
+
+.hover\:bg-purple-700:hover {
+    background-color: rgb(126 34 206);
+}
+
+.focus\:ring-offset-2:focus {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(168, 85, 247, 0.5);
+}
+
+/* Green theme adjustments */
+.bg-green-50 {
+    background-color: rgb(240 253 244);
+}
+
+.text-green-600 {
+    color: rgb(22 163 74);
+}
+
+/* Blue theme adjustments */
+.bg-blue-50 {
+    background-color: rgb(239 246 255);
+}
+
+.text-blue-600 {
+    color: rgb(37 99 235);
+}
+
+.text-blue-800 {
+    color: rgb(30 64 175);
+}
+
+/* Yellow theme for financial summary */
+.bg-yellow-100 {
+    background-color: rgb(254 249 195);
+}
+
+.text-yellow-600 {
+    color: rgb(202 138 4);
+}
+
+/* Enhanced modal styling */
+.fixed.inset-0.z-50 {
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Improved checkbox styling */
+input[type="checkbox"]:checked {
+    background-color: currentColor;
+    border-color: transparent;
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e");
+}
+
+/* Enhanced form field focus */
+.focus\:border-transparent:focus {
+    border-color: transparent;
+}
+
+/* Loading spinner for submit button */
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive grid for mobile */
+@media (max-width: 768px) {
+    .xl\:grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .xl\:col-span-2 {
+        grid-column: span 1;
+    }
+
+    .sticky {
+        position: static;
+    }
+
+    .space-x-3 {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .space-x-3 > * + * {
+        margin-left: 0;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none;
+    }
 }
 </style>
 @endpush
