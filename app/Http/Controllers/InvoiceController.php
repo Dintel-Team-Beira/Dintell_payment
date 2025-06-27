@@ -104,10 +104,15 @@ class InvoiceController extends Controller
         try {
             DB::beginTransaction();
 
+            // Garantir que payment_terms_days seja um número
+            $paymentTermsDays = (int) $validated['payment_terms_days'];
+
             // Calcular totais
             $totals = $this->calculateInvoiceTotals($validated['items']);
+
+            // Calcular data de vencimento corretamente
             $dueDate = Carbon::parse($validated['invoice_date'])
-                ->addDays($validated['payment_terms_days']);
+                ->addDays($paymentTermsDays);
 
             // Criar fatura
             $invoice = Invoice::create([
@@ -115,7 +120,7 @@ class InvoiceController extends Controller
                 'quote_id' => $validated['quote_id'] ?? null,
                 'invoice_date' => $validated['invoice_date'],
                 'due_date' => $dueDate,
-                'payment_terms_days' => $validated['payment_terms_days'],
+                'payment_terms_days' => $paymentTermsDays,
                 'subtotal' => $totals['subtotal'],
                 'tax_amount' => $totals['tax_amount'],
                 'total' => $totals['total'],
@@ -137,9 +142,59 @@ class InvoiceController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
+            \Log::error('Erro ao criar fatura: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+                'exception' => $e
+            ]);
+
             return back()->withInput()
                 ->with('error', 'Erro ao criar fatura: ' . $e->getMessage());
         }
+    }
+
+    private function calculateInvoiceTotals($items)
+    {
+        $subtotal = 0;
+        $taxAmount = 0;
+
+        foreach ($items as $item) {
+            $quantity = (float) $item['quantity'];
+            $unitPrice = (float) $item['unit_price'];
+            $taxRate = (float) ($item['tax_rate'] ?? 0);
+
+            $itemSubtotal = $quantity * $unitPrice;
+            $itemTax = $itemSubtotal * ($taxRate / 100);
+
+            $subtotal += $itemSubtotal;
+            $taxAmount += $itemTax;
+        }
+
+        return [
+            'subtotal' => $subtotal,
+            'tax_amount' => $taxAmount,
+            'total' => $subtotal + $taxAmount
+        ];
+    }
+
+    private function createInvoiceItem($invoice, $itemData)
+    {
+        $quantity = (float) $itemData['quantity'];
+        $unitPrice = (float) $itemData['unit_price'];
+        $taxRate = (float) ($itemData['tax_rate'] ?? 0);
+
+        $subtotal = $quantity * $unitPrice;
+        $taxAmount = $subtotal * ($taxRate / 100);
+        $total = $subtotal + $taxAmount;
+
+        return $invoice->items()->create([
+            'description' => $itemData['description'],
+            'quantity' => $quantity,
+            'unit_price' => $unitPrice,
+            'tax_rate' => $taxRate,
+            'subtotal' => $subtotal,
+            'tax_amount' => $taxAmount,
+            'total' => $total
+        ]);
     }
 
     public function show(Invoice $invoice)
@@ -521,73 +576,90 @@ class InvoiceController extends Controller
     }
 
     // Private Methods
-    private function calculateInvoiceTotals(array $items)
-    {
-        $subtotal = 0;
-        $taxAmount = 0;
+    // private function calculateInvoiceTotals(array $items)
+    // {
+    //     $subtotal = 0;
+    //     $taxAmount = 0;
 
-        foreach ($items as $item) {
-            $quantity = floatval($item['quantity']);
-            $unitPrice = floatval($item['unit_price']);
-            $taxRate = floatval($item['tax_rate'] ?? 0);
+    //     foreach ($items as $item) {
+    //         $quantity = floatval($item['quantity']);
+    //         $unitPrice = floatval($item['unit_price']);
+    //         $taxRate = floatval($item['tax_rate'] ?? 0);
 
-            $itemSubtotal = $quantity * $unitPrice;
-            $itemTax = $itemSubtotal * ($taxRate / 100);
+    //         $itemSubtotal = $quantity * $unitPrice;
+    //         $itemTax = $itemSubtotal * ($taxRate / 100);
 
-            $subtotal += $itemSubtotal;
-            $taxAmount += $itemTax;
-        }
+    //         $subtotal += $itemSubtotal;
+    //         $taxAmount += $itemTax;
+    //     }
 
-        return [
-            'subtotal' => $subtotal,
-            'tax_amount' => $taxAmount,
-            'total' => $subtotal + $taxAmount
-        ];
-    }
+    //     return [
+    //         'subtotal' => $subtotal,
+    //         'tax_amount' => $taxAmount,
+    //         'total' => $subtotal + $taxAmount
+    //     ];
+    // }
 
-    private function createInvoiceItem(Invoice $invoice, array $itemData)
-    {
-        return InvoiceItem::create([
-            'invoice_id' => $invoice->id,
-            'description' => $itemData['description'],
-            'quantity' => $itemData['quantity'],
-            'unit_price' => $itemData['unit_price'],
-            'tax_rate' => $itemData['tax_rate'] ?? 0,
-        ]);
-    }
+    // private function createInvoiceItem(Invoice $invoice, array $itemData)
+    // {
+    //     return InvoiceItem::create([
+    //         'invoice_id' => $invoice->id,
+    //         'description' => $itemData['description'],
+    //         'quantity' => $itemData['quantity'],
+    //         'unit_price' => $itemData['unit_price'],
+    //         'tax_rate' => $itemData['tax_rate'] ?? 0,
+    //     ]);
+    // }
 
     private function getInvoiceStats()
     {
         $currentMonth = Carbon::now();
         $lastMonth = Carbon::now()->subMonth();
+        $today = Carbon::today();
 
         $stats = [
+            // Total de faturas
             'total_invoices' => Invoice::count(),
-            'total_pending' => Invoice::where('status', 'sent')->sum('total'),
-            'pending_count' => Invoice::where('status', 'sent')->count(),
-            'total_overdue' => Invoice::where('status', 'overdue')->sum('total'),
-            'count_overdue' => Invoice::where('status', 'overdue')->count(),
+
+            // Faturas pendentes (status = 'draft' ou due_date ainda não passou)
+            'total_pending' => Invoice::whereIn('status', ['draft', 'sent'])
+                ->where('due_date', '>=', $today)
+                ->sum('total'),
+            'pending_count' => Invoice::whereIn('status', ['draft', 'sent'])
+                ->where('due_date', '>=', $today)
+                ->count(),
+
+            // Faturas vencidas (due_date passou e não foram pagas)
+            'total_overdue' => Invoice::whereIn('status', ['draft', 'sent'])
+                ->where('due_date', '<', $today)
+                ->sum('total'),
+            'count_overdue' => Invoice::whereIn('status', ['draft', 'sent'])
+                ->where('due_date', '<', $today)
+                ->count(),
+
+            // Faturas pagas este mês
             'total_paid_this_month' => Invoice::where('status', 'paid')
-                ->whereMonth('paid_at', $currentMonth->month)
-                ->whereYear('paid_at', $currentMonth->year)
+                ->whereMonth('updated_at', $currentMonth->month) // ou use paid_at se existir
+                ->whereYear('updated_at', $currentMonth->year)
                 ->sum('total'),
             'paid_count_this_month' => Invoice::where('status', 'paid')
-                ->whereMonth('paid_at', $currentMonth->month)
-                ->whereYear('paid_at', $currentMonth->year)
+                ->whereMonth('updated_at', $currentMonth->month)
+                ->whereYear('updated_at', $currentMonth->year)
                 ->count(),
         ];
 
         // Calcular média de dias para pagamento
         $paidInvoices = Invoice::where('status', 'paid')
-            ->whereNotNull('paid_at')
+            ->whereNotNull('updated_at') // ou paid_at se tiver essa coluna
             ->get();
 
         $totalDays = 0;
         $count = 0;
 
         foreach ($paidInvoices as $invoice) {
-            if ($invoice->paid_at && $invoice->invoice_date) {
-                $days = $invoice->invoice_date->diffInDays($invoice->paid_at);
+            if ($invoice->updated_at && $invoice->invoice_date) {
+                // Se tiver paid_at, use: $invoice->paid_at
+                $days = Carbon::parse($invoice->invoice_date)->diffInDays($invoice->updated_at);
                 $totalDays += $days;
                 $count++;
             }
@@ -614,6 +686,7 @@ class InvoiceController extends Controller
                                  ->sum('total')
         ];
 
+        // Calcular percentual de crescimento
         if ($lastMonthStats['total_invoices'] > 0) {
             $stats['invoices_growth'] = (($currentMonthStats['total_invoices'] - $lastMonthStats['total_invoices']) / $lastMonthStats['total_invoices']) * 100;
         } else {
@@ -628,7 +701,6 @@ class InvoiceController extends Controller
 
         return $stats;
     }
-
     private function generateSimplePdf(Invoice $invoice)
     {
         // Implementação simples de PDF se o serviço não estiver disponível
