@@ -130,6 +130,8 @@ Route::prefix('services')->group(function () {
     Route::post('/{service}/toggle-status', [ServiceController::class, 'toggleStatus']);
 });
 
+// Route::get('/products/active', [ProductController::class, 'getActiveProducts']);
+// Route::get('/services/active', [ServiceController::class, 'getActiveServices']);
 // Rotas para cotações
 Route::prefix('quotes')->group(function () {
     Route::get('/statistics', [QuoteController::class, 'getStatistics']);
