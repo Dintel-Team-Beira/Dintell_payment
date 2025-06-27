@@ -160,3 +160,28 @@ Route::prefix('clients')->group(function () {
         return response()->json($query->orderBy('name')->get(['id', 'name', 'email', 'phone']));
     });
 });
+
+
+
+
+  // API de Faturas
+  Route::prefix('invoices')->group(function () {
+    Route::get('/', [InvoiceController::class, 'apiIndex']);
+    Route::post('/', [InvoiceController::class, 'apiStore']);
+    Route::get('/{invoice}', [InvoiceController::class, 'apiShow']);
+    Route::put('/{invoice}', [InvoiceController::class, 'apiUpdate']);
+    Route::delete('/{invoice}', [InvoiceController::class, 'apiDestroy']);
+
+    // Ações específicas via API
+    Route::post('/{invoice}/mark-paid', [InvoiceController::class, 'apiMarkAsPaid']);
+    Route::patch('/{invoice}/status', [InvoiceController::class, 'apiUpdateStatus']);
+    Route::post('/{invoice}/send-email', [InvoiceController::class, 'apiSendEmail']);
+
+    // Estatísticas
+    Route::get('/stats/dashboard', [InvoiceController::class, 'apiDashboardStats']);
+    Route::get('/stats/monthly', [InvoiceController::class, 'apiMonthlyStats']);
+});
+
+// API de Clientes para Faturas
+Route::get('/clients/{client}/quotes', [InvoiceController::class, 'getClientQuotes']);
+Route::get('/quotes/{quote}/items', [InvoiceController::class, 'getQuoteItems']);
