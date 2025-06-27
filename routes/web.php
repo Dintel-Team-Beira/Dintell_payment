@@ -10,6 +10,7 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
@@ -122,6 +123,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Cotações
     Route::get('/quotes/index', [App\Http\Controllers\QuoteController::class, 'index'])->name('quotes.index');
+
     Route::prefix('quotes')->name('quotes.')->group(function () {
         Route::get('/create', [App\Http\Controllers\QuoteController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\QuoteController::class, 'store'])->name('store');
@@ -132,22 +134,71 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{quote}/convert-to-invoice', [App\Http\Controllers\QuoteController::class, 'convertToInvoice'])->name('convert-to-invoice');
         Route::patch('/{quote}/status', [App\Http\Controllers\QuoteController::class, 'updateStatus'])->name('update-status');
         Route::get('/{quote}/pdf', [App\Http\Controllers\QuoteController::class, 'downloadPdf'])->name('download-pdf');
+
+        Route::get('/export/data', [QuoteController::class, 'export'])->name('export');
     });
+
+
+    // Rotas para cotações
+Route::prefix('quotes')->group(function () {
+    Route::get('/statistics', [QuoteController::class, 'getStatistics']);
+    Route::post('/{quote}/send-email', [QuoteController::class, 'sendEmail']);
+    // Route::post('/{quote}/convert-to-invoice', [QuoteController::class, 'convertToInvoice']);
+    Route::post('/{quote}/update-status', [QuoteController::class, 'updateStatus']);
+    // Route::get('/{quote}/pdf', [QuoteController::class, 'downloadPdf']);
+    Route::post('/{quote}/duplicate', [QuoteController::class, 'duplicate']);
+});
 
     // Faturas
     Route::get('/invoices/index', [App\Http\Controllers\InvoiceController::class, 'index'])->name('invoices.index');
-    Route::prefix('invoices')->name('invoices.')->group(function () {
-        Route::get('/create', [App\Http\Controllers\InvoiceController::class, 'create'])->name('create');
-        Route::post('/store', [App\Http\Controllers\InvoiceController::class, 'store'])->name('store');
-        Route::get('/{invoice}', [App\Http\Controllers\InvoiceController::class, 'show'])->name('show');
-        Route::get('/{invoice}/edit', [App\Http\Controllers\InvoiceController::class, 'edit'])->name('edit');
-        Route::put('/{invoice}', [App\Http\Controllers\InvoiceController::class, 'update'])->name('update');
-        Route::delete('/{invoice}', [App\Http\Controllers\InvoiceController::class, 'destroy'])->name('destroy');
-        Route::post('/{invoice}/mark-as-paid', [App\Http\Controllers\InvoiceController::class, 'markAsPaid'])->name('mark-as-paid');
-        Route::patch('/{invoice}/status', [App\Http\Controllers\InvoiceController::class, 'updateStatus'])->name('update-status');
-        Route::get('/{invoice}/pdf', [App\Http\Controllers\InvoiceController::class, 'downloadPdf'])->name('download-pdf');
-        Route::post('/{invoice}/send-email', [App\Http\Controllers\InvoiceController::class, 'sendByEmail'])->name('send-email');
-    });
+    // Route::prefix('invoices')->name('invoices.')->group(function () {
+    //     Route::get('/create', [App\Http\Controllers\InvoiceController::class, 'create'])->name('create');
+    //     Route::post('/store', [App\Http\Controllers\InvoiceController::class, 'store'])->name('store');
+    //     Route::get('/{invoice}', [App\Http\Controllers\InvoiceController::class, 'show'])->name('show');
+    //     Route::get('/{invoice}/edit', [App\Http\Controllers\InvoiceController::class, 'edit'])->name('edit');
+    //     Route::put('/{invoice}', [App\Http\Controllers\InvoiceController::class, 'update'])->name('update');
+    //     Route::delete('/{invoice}', [App\Http\Controllers\InvoiceController::class, 'destroy'])->name('destroy');
+    //     Route::post('/{invoice}/mark-as-paid', [App\Http\Controllers\InvoiceController::class, 'markAsPaid'])->name('mark-as-paid');
+    //     Route::patch('/{invoice}/status', [App\Http\Controllers\InvoiceController::class, 'updateStatus'])->name('update-status');
+    //     Route::get('/{invoice}/pdf', [App\Http\Controllers\InvoiceController::class, 'downloadPdf'])->name('download-pdf');
+    //     Route::post('/{invoice}/send-email', [App\Http\Controllers\InvoiceController::class, 'sendByEmail'])->name('send-email');
+    // });
+
+
+
+
+        // Faturas - Rotas principais já existentes
+        Route::prefix('invoices')->name('invoices.')->group(function () {
+            // Route::get('/', [InvoiceController::class, 'index'])->name('index');
+            Route::get('/create', [InvoiceController::class, 'create'])->name('create');
+            Route::post('/store', [InvoiceController::class, 'store'])->name('store');
+            Route::get('/{invoice}', [InvoiceController::class, 'show'])->name('show');
+            Route::get('/{invoice}/edit', [InvoiceController::class, 'edit'])->name('edit');
+            Route::put('/{invoice}', [InvoiceController::class, 'update'])->name('update');
+            Route::delete('/{invoice}', [InvoiceController::class, 'destroy'])->name('destroy');
+
+            // Ações específicas de faturas
+            Route::post('/{invoice}/mark-as-paid', [InvoiceController::class, 'markAsPaid'])->name('mark-as-paid');
+            Route::patch('/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('update-status');
+            Route::get('/{invoice}/pdf', [InvoiceController::class, 'downloadPdf'])->name('download-pdf');
+            Route::post('/{invoice}/send-email', [InvoiceController::class, 'sendByEmail'])->name('send-email');
+            Route::post('/{invoice}/duplicate', [InvoiceController::class, 'duplicate'])->name('duplicate');
+
+            // Ações em massa
+            Route::post('/bulk-update-status', [InvoiceController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
+            Route::get('/bulk-download-pdf', [InvoiceController::class, 'bulkDownloadPdf'])->name('bulk-download-pdf');
+
+            // Exportação
+            Route::get('/export/data', [InvoiceController::class, 'export'])->name('export');
+        });
+
+        // API Routes para AJAX - Faturas
+        Route::prefix('api')->name('api.')->group(function () {
+            Route::get('/clients/{client}/quotes', [InvoiceController::class, 'getClientQuotes'])->name('clients.quotes');
+            Route::get('/quotes/{quote}/items', [InvoiceController::class, 'getQuoteItems'])->name('quotes.items');
+            Route::get('/invoices/stats', [InvoiceController::class, 'getStats'])->name('invoices.stats');
+        });
+
 
     // Configurações de Faturação
     Route::prefix('billing/settings')->name('billing.settings.')->group(function () {
