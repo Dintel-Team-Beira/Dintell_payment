@@ -26,12 +26,12 @@
 @section('content')
 <div class="mx-auto space-y-8">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    {{-- <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Configurações do Sistema</h1>
             <p class="mt-2 text-gray-600">Gerencie todas as configurações e preferências do sistema</p>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Navigation Tabs -->
     <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
