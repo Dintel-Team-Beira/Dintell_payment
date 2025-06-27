@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class Quote extends Model
 {
@@ -18,6 +19,7 @@ class Quote extends Model
         'valid_until',
         'subtotal',
         'tax_amount',
+        'discount_amount',
         'total',
         'status',
         'notes',
@@ -33,6 +35,7 @@ class Quote extends Model
         'valid_until' => 'date',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'total' => 'decimal:2',
         'sent_at' => 'datetime',
         'status_updated_at' => 'datetime',
@@ -83,6 +86,11 @@ class Quote extends Model
         return $this->belongsTo(Invoice::class);
     }
 
+    public function notes()
+    {
+        return $this->hasMany(QuoteNote::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {
@@ -117,6 +125,18 @@ class Quote extends Model
     public function scopeByStatus($query, $status)
     {
         return $query->where('status', $status);
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function($q) use ($search) {
+            $q->where('quote_number', 'like', "%{$search}%")
+              ->orWhere('notes', 'like', "%{$search}%")
+              ->orWhereHas('client', function($clientQuery) use ($search) {
+                  $clientQuery->where('name', 'like', "%{$search}%")
+                             ->orWhere('email', 'like', "%{$search}%");
+              });
+        });
     }
 
     // Accessors
@@ -155,6 +175,11 @@ class Quote extends Model
         return number_format($this->tax_amount, 2, ',', '.') . ' MT';
     }
 
+    public function getFormattedDiscountAmountAttribute()
+    {
+        return number_format($this->discount_amount, 2, ',', '.') . ' MT';
+    }
+
     public function getFormattedTotalAttribute()
     {
         return number_format($this->total, 2, ',', '.') . ' MT';
@@ -185,6 +210,16 @@ class Quote extends Model
     }
 
     // Business Logic Methods
+    public function isExpired()
+    {
+        return $this->is_expired;
+    }
+
+    public function hasNotes()
+    {
+        return !empty($this->notes) || $this->notes()->exists();
+    }
+
     public function canConvertToInvoice()
     {
         return $this->status === self::STATUS_ACCEPTED &&
@@ -209,6 +244,11 @@ class Quote extends Model
                !$this->is_expired;
     }
 
+    public function canDuplicate()
+    {
+        return true; // Sempre pode duplicar
+    }
+
     public function markAsExpired()
     {
         if ($this->is_expired && $this->status !== self::STATUS_EXPIRED) {
@@ -219,64 +259,223 @@ class Quote extends Model
         }
     }
 
-    public function convertToInvoice()
+    public function duplicate()
     {
-        if (!$this->canConvertToInvoice()) {
-            throw new \Exception('Esta cotação não pode ser convertida em fatura.');
+        $newQuote = $this->replicate();
+        $newQuote->quote_number = null; // Será gerado automaticamente
+        $newQuote->status = self::STATUS_DRAFT;
+        $newQuote->sent_at = null;
+        $newQuote->status_updated_at = null;
+        $newQuote->converted_to_invoice_at = null;
+        $newQuote->invoice_id = null;
+        $newQuote->quote_date = Carbon::today();
+        $newQuote->valid_until = Carbon::today()->addDays(30);
+        $newQuote->save();
+
+        // Copiar itens
+        foreach ($this->items as $item) {
+            $newItem = $item->replicate();
+            $newItem->quote_id = $newQuote->id;
+            $newItem->save();
         }
 
-        $invoiceData = [
-            'client_id' => $this->client_id,
-            'quote_id' => $this->id,
-            'invoice_date' => Carbon::today(),
-            'due_date' => Carbon::today()->addDays(30),
-            'subtotal' => $this->subtotal,
-            'tax_amount' => $this->tax_amount,
-            'total' => $this->total,
-            'status' => 'pending',
-            'notes' => $this->notes
-        ];
-
-        $invoice = Invoice::create($invoiceData);
-
-        // Copiar itens da cotação para a fatura
-        foreach ($this->items as $quoteItem) {
-            $invoice->items()->create([
-                'type' => $quoteItem->type,
-                'item_id' => $quoteItem->item_id,
-                'name' => $quoteItem->name,
-                'description' => $quoteItem->description,
-                'quantity' => $quoteItem->quantity,
-                'unit_price' => $quoteItem->unit_price,
-                'tax_rate' => $quoteItem->tax_rate,
-                'category' => $quoteItem->category,
-                'unit' => $quoteItem->unit,
-                'complexity_level' => $quoteItem->complexity_level,
-                'estimated_hours' => $quoteItem->estimated_hours
-            ]);
-        }
-
-        // Marcar cotação como convertida
-        $this->update([
-            'converted_to_invoice_at' => now(),
-            'invoice_id' => $invoice->id
-        ]);
-
-        return $invoice;
+        return $newQuote;
     }
 
+    // public function convertToInvoice()
+    // {
+    //     if (!$this->canConvertToInvoice()) {
+    //         throw new \Exception('Esta cotação não pode ser convertida em fatura.');
+    //     }
+
+    //     $invoiceData = [
+    //         'client_id' => $this->client_id,
+    //         'quote_id' => $this->id,
+    //         'invoice_date' => Carbon::today(),
+    //         'due_date' => Carbon::today()->addDays(30),
+    //         'subtotal' => $this->subtotal,
+    //         'tax_amount' => $this->tax_amount,
+    //         'discount_amount' => $this->discount_amount ?? 0,
+    //         'total' => $this->total,
+    //         'status' => 'pending',
+    //         'notes' => $this->notes
+    //     ];
+
+    //     $invoice = Invoice::create($invoiceData);
+
+    //     // Copiar itens da cotação para a fatura
+    //     foreach ($this->items as $quoteItem) {
+    //         $invoice->items()->create([
+    //             'type' => $quoteItem->type,
+    //             'item_id' => $quoteItem->item_id,
+    //             'name' => $quoteItem->name,
+    //             'description' => $quoteItem->description,
+    //             'quantity' => $quoteItem->quantity,
+    //             'unit_price' => $quoteItem->unit_price,
+    //             'tax_rate' => $quoteItem->tax_rate,
+    //             'category' => $quoteItem->category,
+    //             'unit' => $quoteItem->unit,
+    //             'complexity_level' => $quoteItem->complexity_level,
+    //             'estimated_hours' => $quoteItem->estimated_hours
+    //         ]);
+    //     }
+
+    //     // Marcar cotação como convertida
+    //     $this->update([
+    //         'converted_to_invoice_at' => now(),
+    //         'invoice_id' => $invoice->id
+    //     ]);
+
+    //     return $invoice;
+    // }
+
+
+    // nova// No modelo Quote, método convertToInvoice() corrigido:
+
+public function convertToInvoice()
+{
+    if (!$this->canConvertToInvoice()) {
+        throw new \Exception('Esta cotação não pode ser convertida em fatura.');
+    }
+
+    $invoiceData = [
+        'client_id' => $this->client_id,
+        'quote_id' => $this->id,
+        'invoice_date' => Carbon::today(),
+        'due_date' => Carbon::today()->addDays(30),
+        'subtotal' => $this->subtotal,
+        'tax_amount' => $this->tax_amount,
+        'discount_amount' => $this->discount_amount ?? 0,
+        'total' => $this->total,
+        'status' => 'draft',
+        'notes' => $this->notes,
+        'invoice_number' => $this->generateInvoiceNumber()
+    ];
+
+    $invoice = Invoice::create($invoiceData);
+
+    // Copiar itens da cotação para a fatura - MAPEAMENTO CORRETO DOS CAMPOS
+    foreach ($this->items as $quoteItem) {
+        // Calcular totais
+        $subtotalItem = $quoteItem->quantity * $quoteItem->unit_price;
+        $taxItem = $subtotalItem * (($quoteItem->tax_rate ?? 0) / 100);
+        $totalItem = $subtotalItem + $taxItem;
+
+        // Preparar dados com mapeamento correto
+        $itemData = [
+            'invoice_id' => $invoice->id,
+            'description' => $quoteItem->description ?? $quoteItem->name ?? '',
+            'quantity' => $quoteItem->quantity,
+            'unit_price' => $quoteItem->unit_price,
+            'tax_rate' => $quoteItem->tax_rate ?? 0,
+            'total_price' => $totalItem, // ← CORRIGIDO: Usar total_price em vez de total
+        ];
+
+        // Adicionar campos opcionais se existirem
+        $optionalFields = [
+            'name' => $quoteItem->name ?? '',
+            'type' => $quoteItem->type ?? 'product',
+            'item_id' => $quoteItem->item_id ?? null,
+            'category' => $quoteItem->category ?? null,
+            'unit' => $quoteItem->unit ?? null,
+            'complexity_level' => $quoteItem->complexity_level ?? null,
+            'estimated_hours' => $quoteItem->estimated_hours ?? null
+        ];
+
+        foreach ($optionalFields as $field => $value) {
+            if (Schema::hasColumn('invoice_items', $field)) {
+                $itemData[$field] = $value;
+            }
+        }
+
+        $invoice->items()->create($itemData);
+    }
+
+    // Marcar cotação como convertida
+    $updateData = [];
+    if (Schema::hasColumn('quotes', 'converted_to_invoice_at')) {
+        $updateData['converted_to_invoice_at'] = now();
+    }
+    if (Schema::hasColumn('quotes', 'invoice_id')) {
+        $updateData['invoice_id'] = $invoice->id;
+    }
+
+    if (!empty($updateData)) {
+        $this->update($updateData);
+    }
+
+    return $invoice;
+}
+
+// Método auxiliar para descobrir a estrutura da tabela automaticamente
+private function getInvoiceItemData($quoteItem, $invoiceId)
+{
+    // Verificar quais campos existem na tabela
+    $columns = Schema::getColumnListing('invoice_items');
+
+    // Calcular totais
+    $subtotal = $quoteItem->quantity * $quoteItem->unit_price;
+    $tax = $subtotal * (($quoteItem->tax_rate ?? 0) / 100);
+    $total = $subtotal + $tax;
+
+    // Mapear campos baseado na estrutura real da tabela
+    $data = ['invoice_id' => $invoiceId];
+
+    // Campos obrigatórios com fallbacks
+    $fieldMappings = [
+        'name' => $quoteItem->name ?? 'Item',
+        'description' => $quoteItem->description ?? $quoteItem->name ?? '',
+        'quantity' => $quoteItem->quantity,
+        'unit_price' => $quoteItem->unit_price,
+        'tax_rate' => $quoteItem->tax_rate ?? 0,
+        'total' => $total,
+        'total_price' => $total, // Ambos os nomes possíveis
+        'type' => $quoteItem->type ?? 'product',
+        'item_id' => $quoteItem->item_id ?? null,
+        'category' => $quoteItem->category ?? null,
+        'unit' => $quoteItem->unit ?? null,
+        'complexity_level' => $quoteItem->complexity_level ?? null,
+        'estimated_hours' => $quoteItem->estimated_hours ?? null
+    ];
+
+    // Adicionar apenas campos que existem na tabela
+    foreach ($fieldMappings as $field => $value) {
+        if (in_array($field, $columns)) {
+            $data[$field] = $value;
+        }
+    }
+
+    return $data;
+}
     public function calculateTotals()
     {
         $subtotal = $this->items()->sum(\DB::raw('quantity * unit_price'));
         $taxAmount = $this->items()->sum(\DB::raw('(quantity * unit_price) * (tax_rate / 100)'));
+        $discountAmount = $this->discount_amount ?? 0;
 
         $this->update([
             'subtotal' => $subtotal,
             'tax_amount' => $taxAmount,
-            'total' => $subtotal + $taxAmount
+            'discount_amount' => $discountAmount,
+            'total' => $subtotal + $taxAmount - $discountAmount
         ]);
     }
+// Método auxiliar para gerar número da fatura
+private function generateInvoiceNumber()
+{
+    $prefix = 'FAT';
+    $lastInvoice = Invoice::orderBy('id', 'desc')->first();
 
+    if ($lastInvoice && $lastInvoice->invoice_number) {
+        // Extrair número da última fatura
+        preg_match('/\d+$/', $lastInvoice->invoice_number, $matches);
+        $nextNumber = isset($matches[0]) ? (int)$matches[0] + 1 : 1;
+    } else {
+        $nextNumber = 1;
+    }
+
+    return $prefix . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+}
     // Statistics Methods
     public static function getConversionRate()
     {
@@ -294,6 +493,47 @@ class Quote extends Model
             'accepted' => self::thisMonth()->accepted()->count(),
             'pending' => self::thisMonth()->pending()->count()
         ];
+    }
+
+    public static function getStatsForDashboard()
+    {
+        $currentMonth = Carbon::now();
+        $lastMonth = Carbon::now()->subMonth();
+
+        $currentStats = [
+            'total_quotes' => self::thisMonth()->count(),
+            'total_amount' => self::thisMonth()->sum('total'),
+            'pending_count' => self::pending()->count(),
+            'pending_amount' => self::pending()->sum('total'),
+            'accepted_count' => self::accepted()->count(),
+            'accepted_amount' => self::accepted()->sum('total'),
+            'conversion_rate' => self::getConversionRate(),
+            'conversion_target' => 75
+        ];
+
+        // Calcular crescimento comparado ao mês anterior
+        $lastMonthStats = [
+            'total_quotes' => self::whereMonth('created_at', $lastMonth->month)
+                                 ->whereYear('created_at', $lastMonth->year)
+                                 ->count(),
+            'total_amount' => self::whereMonth('created_at', $lastMonth->month)
+                                 ->whereYear('created_at', $lastMonth->year)
+                                 ->sum('total')
+        ];
+
+        if ($lastMonthStats['total_quotes'] > 0) {
+            $currentStats['quotes_growth'] = (($currentStats['total_quotes'] - $lastMonthStats['total_quotes']) / $lastMonthStats['total_quotes']) * 100;
+        } else {
+            $currentStats['quotes_growth'] = $currentStats['total_quotes'] > 0 ? 100 : 0;
+        }
+
+        if ($lastMonthStats['total_amount'] > 0) {
+            $currentStats['amount_growth'] = (($currentStats['total_amount'] - $lastMonthStats['total_amount']) / $lastMonthStats['total_amount']) * 100;
+        } else {
+            $currentStats['amount_growth'] = $currentStats['total_amount'] > 0 ? 100 : 0;
+        }
+
+        return $currentStats;
     }
 
     // Event Listeners
@@ -318,11 +558,18 @@ class Quote extends Model
 
     private static function generateQuoteNumber()
     {
-        $settings = BillingSetting::getSettings();
-        $prefix = $settings->quote_prefix ?? 'COT';
-        $nextNumber = $settings->next_quote_number ?? 1;
-
-        $settings->increment('next_quote_number');
+        // Tentar usar BillingSetting se existir, caso contrário usar lógica padrão
+        try {
+            $settings = BillingSetting::getSettings();
+            $prefix = $settings->quote_prefix ?? 'COT';
+            $nextNumber = $settings->next_quote_number ?? 1;
+            $settings->increment('next_quote_number');
+        } catch (\Exception $e) {
+            // Se não existir BillingSetting, usar lógica padrão
+            $prefix = 'COT';
+            $lastQuote = self::orderBy('id', 'desc')->first();
+            $nextNumber = $lastQuote ? (int)substr($lastQuote->quote_number, strrpos($lastQuote->quote_number, '-') + 1) + 1 : 1;
+        }
 
         return $prefix . '-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
     }
