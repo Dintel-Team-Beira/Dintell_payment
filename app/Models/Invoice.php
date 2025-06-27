@@ -92,4 +92,6 @@ class Invoice extends Model
             }
         });
     }
+
+    // Invoice.php
 }
