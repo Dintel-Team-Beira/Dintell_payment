@@ -2,283 +2,899 @@
 
 @section('title', 'Nova Fatura')
 
-@section('header-actions')
-<div class="flex items-center gap-x-4">
-    <a href="{{ route('invoices.index') }}"
-       class="flex items-center px-3 py-2 text-sm font-semibold text-white bg-gray-600 rounded-md shadow-sm hover:bg-gray-500">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-        </svg>
-        Voltar
-    </a>
-</div>
-@endsection
-
 @section('content')
-<div class="mx-auto space-y-6">
+<div class="px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="mb-4 sm:mb-0">
+                <h1 class="text-3xl font-bold text-gray-900">Nova Fatura</h1>
+                <p class="mt-2 text-gray-600">Crie uma fatura personalizada para seu cliente</p>
+            </div>
+            <div>
+                <a href="{{ route('invoices.index') }}"
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Voltar
+                </a>
+            </div>
+        </div>
+    </div>
 
+    <form action="{{ route('invoices.store') }}" method="POST" id="invoiceForm">
+        @csrf
 
-    <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-        <div class="p-6">
-            <form action="{{ route('invoices.store') }}" method="POST" id="invoiceForm">
-                @csrf
-
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    <div class="sm:col-span-2">
-                        <label for="client_id" class="block text-sm font-medium text-gray-700">Cliente *</label>
-                        <select name="client_id" id="client_id"
-                                class="mt-1 block w-full p-5 rounded-md border-0 py-1.5 pl-3 pr-8 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm @error('client_id') ring-red-500 @enderror"
-                                required>
-                            <option value="">Selecione um cliente</option>
-                            @foreach($clients as $client)
-                                <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                                    {{ $client->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('client_id')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+        <div class="grid grid-cols-1 gap-8 xl:grid-cols-3">
+            <!-- Coluna Principal -->
+            <div class="space-y-8 xl:col-span-2">
+                <!-- Informações Básicas -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="p-2 mr-3 bg-blue-100 rounded-lg">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Selecionar Serviços
+                        </h3>
+                        <button type="button" class="text-gray-400 hover:text-gray-600" onclick="closeServiceModal()">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
                     </div>
 
-                    <div>
-                        <label for="invoice_date" class="block text-sm font-medium text-gray-700">Data da Fatura *</label>
-                        <input type="date" name="invoice_date" id="invoice_date"
-                               class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm @error('invoice_date') ring-red-500 @enderror"
-                               value="{{ old('invoice_date', date('Y-m-d')) }}" required>
-                        @error('invoice_date')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                    <div class="mb-4">
+                        <input type="text" id="serviceSearch" placeholder="Buscar serviços..."
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
                     </div>
 
-                    <div>
-                        <label for="payment_terms_days" class="block text-sm font-medium text-gray-700">Prazo de Pagamento (dias) *</label>
-                        <input type="number" name="payment_terms_days" id="payment_terms_days"
-                               class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm @error('payment_terms_days') ring-red-500 @enderror"
-                               value="{{ old('payment_terms_days', 30) }}" min="0" max="365" required>
-                        @error('payment_terms_days')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                    <div class="overflow-y-auto max-h-96" id="serviceList">
+                        <!-- Serviços serão carregados via JavaScript -->
                     </div>
                 </div>
 
-                <!-- Itens da Fatura -->
-                <div class="mt-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Itens da Fatura</h3>
-                    <p class="mt-1 text-sm text-gray-500">Adicione os itens da fatura abaixo</p>
-                    <div class="mt-4 overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-300" id="itemsTable">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Descrição</th>
-                                    <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Qtd</th>
-                                    <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Preço Unit.</th>
-                                    <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">IVA (%)</th>
-                                    <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total</th>
-                                    <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Ação</th>
-                                </tr>
-                            </thead>
-                            <tbody id="itemsTableBody" class="bg-white divide-y divide-gray-200">
-                                <tr class="item-row">
-                                    <td class="px-4 py-3">
-                                        <input type="text" name="items[0][description]"
-                                               class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm"
-                                               placeholder="Descrição do item" required>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <input type="number" name="items[0][quantity]"
-                                               class="item-quantity block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm"
-                                               value="1" min="1" step="1" required>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <input type="number" name="items[0][unit_price]"
-                                               class="item-price block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm"
-                                               value="0" min="0" step="0.01" required>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <input type="number" name="items[0][tax_rate]"
-                                               class="item-tax block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm"
-                                               value="{{ $settings->default_tax_rate }}" min="0" max="100" step="0.01">
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <input type="text" class="item-total block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 bg-gray-50 sm:text-sm" readonly>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <button type="button" class="text-red-600 remove-item hover:text-red-900">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="flex justify-between px-6 py-3 bg-gray-50">
+                    <button type="button"
+                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                            onclick="closeServiceModal()">
+                        Fechar
+                    </button>
+                    <button type="button"
+                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm"
+                            onclick="addSelectedServices()">
+                        Adicionar Selecionados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Item Personalizado -->
+    <div id="customItemModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="px-6 pt-6 pb-4 bg-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="flex items-center text-lg font-medium text-gray-900">
+                            <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Adicionar Item Personalizado
+                        </h3>
+                        <button type="button" class="text-gray-400 hover:text-gray-600" onclick="closeCustomItemModal()">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
                     </div>
 
-                    <button type="button" id="addItem"
-                            class="inline-flex items-center px-3 py-2 mt-4 text-sm font-semibold text-white bg-green-600 rounded-md shadow-sm hover:bg-green-500">
-                        <svg class="w-5 h-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
-                        </svg>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="customItemName" class="block text-sm font-medium text-gray-700">Nome do Item *</label>
+                            <input type="text" id="customItemName"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                                   placeholder="Digite o nome do item">
+                        </div>
+
+                        <div>
+                            <label for="customItemDescription" class="block text-sm font-medium text-gray-700">Descrição</label>
+                            <textarea id="customItemDescription" rows="3"
+                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                                      placeholder="Descrição opcional do item"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="customItemQuantity" class="block text-sm font-medium text-gray-700">Quantidade *</label>
+                                <input type="number" id="customItemQuantity" value="1" min="0.1" step="0.1"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label for="customItemPrice" class="block text-sm font-medium text-gray-700">Preço Unitário *</label>
+                                <input type="number" id="customItemPrice" value="0" min="0" step="0.01"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="customItemTax" class="block text-sm font-medium text-gray-700">Taxa de IVA (%)</label>
+                            <input type="number" id="customItemTax" value="{{ $settings->default_tax_rate ?? 17 }}" min="0" max="100" step="0.01"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between px-6 py-3 bg-gray-50">
+                    <button type="button"
+                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                            onclick="closeCustomItemModal()">
+                        Cancelar
+                    </button>
+                    <button type="button"
+                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:text-sm"
+                            onclick="addCustomItem()">
                         Adicionar Item
                     </button>
                 </div>
-
-                <!-- Totais e Observações -->
-                <div class="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
-                    <div class="space-y-6 lg:col-span-2">
-                        <div>
-                            <label for="notes" class="block text-sm font-medium text-gray-700">Observações</label>
-                            <textarea name="notes" id="notes"
-                                      class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm"
-                                      rows="3">{{ old('notes') }}</textarea>
-                        </div>
-
-                        <div>
-                            <label for="terms_conditions" class="block text-sm font-medium text-gray-700">Termos e Condições</label>
-                            <textarea name="terms_conditions" id="terms_conditions"
-                                      class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm"
-                                      rows="3">{{ old('terms_conditions') }}</textarea>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-                            <div class="px-4 py-3 border-b border-gray-200">
-                                <h3 class="text-lg font-semibold text-gray-900">Totais</h3>
-                            </div>
-                            <div class="p-4 space-y-3">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">Subtotal:</span>
-                                    <span id="subtotalDisplay" class="font-medium text-gray-900">0,00 MT</span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-gray-600">IVA:</span>
-                                    <span id="taxDisplay" class="font-medium text-gray-900">0,00 MT</span>
-                                </div>
-                                <div class="flex justify-between pt-2 text-lg font-semibold text-gray-900 border-t">
-                                    <span>Total:</span>
-                                    <span id="totalDisplay">0,00 MT</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center mt-6 gap-x-4">
-                    <button type="submit"
-                            class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-500">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-                        </svg>
-                        Salvar Fatura
-                    </button>
-                    <a href="{{ route('invoices.index') }}"
-                       class="inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 rounded-md shadow-sm hover:bg-gray-200">
-                        Cancelar
-                    </a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let itemIndex = 1;
+    let itemIndex = 0;
+    let selectedItems = [];
+    let products = [];
+    let services = [];
 
-    // Adicionar item
-    document.getElementById('addItem').addEventListener('click', function() {
-        const tbody = document.getElementById('itemsTableBody');
-        const newRow = document.querySelector('.item-row').cloneNode(true);
+    // Carregar produtos e serviços
+    loadProducts();
+    loadServices();
 
-        // Atualizar índices dos inputs
-        const inputs = newRow.querySelectorAll('input');
-        inputs.forEach(input => {
-            if (input.name) {
-                input.name = input.name.replace('[0]', '[' + itemIndex + ']');
-                input.value = input.name.includes('quantity') ? '1' :
-                             input.name.includes('tax_rate') ? '{{ $settings->default_tax_rate }}' :
-                             input.name.includes('unit_price') ? '0' : '';
-                if (input.classList.contains('item-total')) {
-                    input.value = '';
-                }
-            }
-        });
+    // Event Listeners
+    document.getElementById('addProductBtn').addEventListener('click', openProductModal);
+    document.getElementById('addServiceBtn').addEventListener('click', openServiceModal);
+    document.getElementById('addCustomItemBtn').addEventListener('click', openCustomItemModal);
+    document.getElementById('productSearch').addEventListener('input', filterProducts);
+    document.getElementById('serviceSearch').addEventListener('input', filterServices);
+    document.getElementById('invoiceForm').addEventListener('submit', handleFormSubmit);
 
-        tbody.appendChild(newRow);
-        itemIndex++;
+    // Event listeners para datas
+    document.getElementById('invoice_date').addEventListener('change', updateDueDate);
+    document.getElementById('payment_terms_days').addEventListener('change', updateDueDate);
 
-        attachEventListeners(newRow);
-        calculateTotals();
-    });
+    // Funções de Modal
+    function openProductModal() {
+        document.getElementById('productModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        renderProducts();
+    }
 
-    // Remover item
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-item')) {
-            const rows = document.querySelectorAll('.item-row');
-            if (rows.length > 1) {
-                e.target.closest('.item-row').remove();
-                calculateTotals();
-            }
+    function closeProductModal() {
+        document.getElementById('productModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    function openServiceModal() {
+        document.getElementById('serviceModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        renderServices();
+    }
+
+    function closeServiceModal() {
+        document.getElementById('serviceModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    function openCustomItemModal() {
+        document.getElementById('customItemModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        // Limpar campos
+        document.getElementById('customItemName').value = '';
+        document.getElementById('customItemDescription').value = '';
+        document.getElementById('customItemQuantity').value = '1';
+        document.getElementById('customItemPrice').value = '0';
+        document.getElementById('customItemTax').value = '{{ $settings->default_tax_rate ?? 17 }}';
+    }
+
+    function closeCustomItemModal() {
+        document.getElementById('customItemModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    // Atualizar data de vencimento
+    function updateDueDate() {
+        const invoiceDate = document.getElementById('invoice_date').value;
+        const paymentTerms = parseInt(document.getElementById('payment_terms_days').value) || 30;
+
+        if (invoiceDate) {
+            const date = new Date(invoiceDate);
+            date.setDate(date.getDate() + paymentTerms);
+            document.getElementById('due_date').value = date.toISOString().split('T')[0];
         }
-    });
+    }
 
-    // Anexar eventos aos campos existentes
-    document.querySelectorAll('.item-row').forEach(row => {
-        attachEventListeners(row);
-    });
+    // Carregar dados
+    function loadProducts() {
+        fetch('/api/products/active')
+            .then(response => response.json())
+            .then(data => {
+                products = data;
+                renderProducts();
+            })
+            .catch(error => {
+                console.error('Erro ao carregar produtos:', error);
+                showNotification('Erro ao carregar produtos', 'error');
+            });
+    }
 
-    function attachEventListeners(row) {
-        const quantity = row.querySelector('.item-quantity');
-        const price = row.querySelector('.item-price');
-        const tax = row.querySelector('.item-tax');
+    function loadServices() {
+        fetch('/api/services/active')
+            .then(response => response.json())
+            .then(data => {
+                services = data;
+                renderServices();
+            })
+            .catch(error => {
+                console.error('Erro ao carregar serviços:', error);
+                showNotification('Erro ao carregar serviços', 'error');
+            });
+    }
 
-        [quantity, price, tax].forEach(input => {
-            input.addEventListener('input', calculateRowTotal);
+    // Renderizar produtos
+    function renderProducts(filter = '') {
+        const productList = document.getElementById('productList');
+        const filteredProducts = products.filter(product =>
+            product.name.toLowerCase().includes(filter.toLowerCase()) ||
+            product.code.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        if (filteredProducts.length === 0) {
+            productList.innerHTML = `
+                <div class="py-8 text-center text-gray-500">
+                    <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <p>Nenhum produto encontrado</p>
+                </div>
+            `;
+            return;
+        }
+
+        productList.innerHTML = filteredProducts.map(product => `
+            <div class="flex items-center p-4 mb-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 product-item" data-id="${product.id}">
+                <input type="checkbox" class="w-4 h-4 mr-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">${product.name}</h4>
+                            <p class="text-xs text-gray-500">${product.code}</p>
+                            ${product.description ? `<p class="mt-1 text-xs text-gray-600">${product.description.substring(0, 100)}...</p>` : ''}
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-semibold text-green-600">${formatCurrency(product.price)}</p>
+                            <p class="text-xs text-gray-500">Estoque: ${product.stock_quantity}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Adicionar event listeners aos checkboxes
+        productList.querySelectorAll('.product-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (e.target.type !== 'checkbox') {
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                }
+            });
         });
     }
 
-    function calculateRowTotal(e) {
-        const row = e.target.closest('.item-row');
-        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
-        const price = parseFloat(row.querySelector('.item-price').value) || 0;
-        const taxRate = parseFloat(row.querySelector('.item-tax').value) || 0;
+    // Renderizar serviços
+    function renderServices(filter = '') {
+        const serviceList = document.getElementById('serviceList');
+        const filteredServices = services.filter(service =>
+            service.name.toLowerCase().includes(filter.toLowerCase()) ||
+            service.code.toLowerCase().includes(filter.toLowerCase())
+        );
 
-        const subtotal = quantity * price;
-        const tax = subtotal * (taxRate / 100);
-        const total = subtotal + tax;
+        if (filteredServices.length === 0) {
+            serviceList.innerHTML = `
+                <div class="py-8 text-center text-gray-500">
+                    <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <p>Nenhum serviço encontrado</p>
+                </div>
+            `;
+            return;
+        }
 
-        row.querySelector('.item-total').value = total.toFixed(2);
+        serviceList.innerHTML = filteredServices.map(service => `
+            <div class="flex items-center p-4 mb-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 service-item" data-id="${service.id}">
+                <input type="checkbox" class="w-4 h-4 mr-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">${service.name}</h4>
+                            <p class="text-xs text-gray-500">${service.code}</p>
+                            ${service.description ? `<p class="mt-1 text-xs text-gray-600">${service.description.substring(0, 100)}...</p>` : ''}
+                            <div class="flex items-center mt-1 space-x-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                    ${service.category}
+                                </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                    ${service.complexity_level}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            ${service.fixed_price > 0 ?
+                                `<p class="text-sm font-semibold text-green-600">${formatCurrency(service.fixed_price)}</p>
+                                 <p class="text-xs text-gray-500">Preço fixo</p>` :
+                                `<p class="text-sm font-semibold text-green-600">${formatCurrency(service.hourly_rate)}/h</p>
+                                 <p class="text-xs text-gray-500">Por hora</p>`
+                            }
+                            ${service.estimated_hours ? `<p class="text-xs text-gray-500">${service.estimated_hours}h estimadas</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
 
+        // Adicionar event listeners aos checkboxes
+        serviceList.querySelectorAll('.service-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (e.target.type !== 'checkbox') {
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                }
+            });
+        });
+    }
+
+    // Filtros
+    function filterProducts(e) {
+        renderProducts(e.target.value);
+    }
+
+    function filterServices(e) {
+        renderServices(e.target.value);
+    }
+
+    // Adicionar produtos selecionados
+    window.addSelectedProducts = function() {
+        const checkedProducts = document.querySelectorAll('#productList input[type="checkbox"]:checked');
+
+        checkedProducts.forEach(checkbox => {
+            const productElement = checkbox.closest('.product-item');
+            const productId = productElement.dataset.id;
+            const product = products.find(p => p.id == productId);
+
+            if (product && !selectedItems.find(item => item.type === 'product' && item.id == productId)) {
+                addItemToInvoice(product, 'product');
+            }
+        });
+
+        closeProductModal();
+        showNotification('Produtos adicionados com sucesso!', 'success');
+    };
+
+    // Adicionar serviços selecionados
+    window.addSelectedServices = function() {
+        const checkedServices = document.querySelectorAll('#serviceList input[type="checkbox"]:checked');
+
+        checkedServices.forEach(checkbox => {
+            const serviceElement = checkbox.closest('.service-item');
+            const serviceId = serviceElement.dataset.id;
+            const service = services.find(s => s.id == serviceId);
+
+            if (service && !selectedItems.find(item => item.type === 'service' && item.id == serviceId)) {
+                addItemToInvoice(service, 'service');
+            }
+        });
+
+        closeServiceModal();
+        showNotification('Serviços adicionados com sucesso!', 'success');
+    };
+
+    // Adicionar item personalizado
+    window.addCustomItem = function() {
+        const name = document.getElementById('customItemName').value.trim();
+        const description = document.getElementById('customItemDescription').value.trim();
+        const quantity = parseFloat(document.getElementById('customItemQuantity').value) || 1;
+        const price = parseFloat(document.getElementById('customItemPrice').value) || 0;
+        const taxRate = parseFloat(document.getElementById('customItemTax').value) || 0;
+
+        if (!name) {
+            showNotification('Nome do item é obrigatório', 'warning');
+            return;
+        }
+
+        const customItem = {
+            id: 'custom_' + Date.now(),
+            name: name,
+            description: description,
+            price: price,
+            tax_rate: taxRate
+        };
+
+        addItemToInvoice(customItem, 'custom', quantity);
+        closeCustomItemModal();
+        showNotification('Item personalizado adicionado!', 'success');
+    };
+
+    // Adicionar item à fatura
+    function addItemToInvoice(item, type, customQuantity = null) {
+        const newItem = {
+            index: itemIndex++,
+            id: item.id,
+            type: type,
+            name: item.name,
+            code: item.code || 'CUSTOM-' + Date.now(),
+            description: item.description || '',
+            quantity: customQuantity || (type === 'service' && item.estimated_hours ? item.estimated_hours : 1),
+            unit_price: type === 'product' ? item.price : (item.fixed_price > 0 ? item.fixed_price : item.hourly_rate || item.price),
+            tax_rate: item.tax_rate || {{ $settings->default_tax_rate ?? 17 }},
+            category: item.category || '',
+            complexity: item.complexity_level || ''
+        };
+
+        selectedItems.push(newItem);
+        renderSelectedItems();
         calculateTotals();
     }
 
+    // Renderizar itens selecionados
+    function renderSelectedItems() {
+        const container = document.getElementById('selectedItems');
+
+        if (selectedItems.length === 0) {
+            container.innerHTML = `
+                <div class="py-12 text-center text-gray-500">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <p class="text-lg font-medium">Nenhum item selecionado</p>
+                    <p class="text-sm">Adicione produtos, serviços ou itens personalizados para começar</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = selectedItems.map(item => `
+            <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 item-card" data-index="${item.index}">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2 space-x-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                item.type === 'product' ? 'bg-blue-100 text-blue-800' :
+                                item.type === 'service' ? 'bg-green-100 text-green-800' :
+                                'bg-purple-100 text-purple-800'
+                            }">
+                                ${item.type === 'product' ? 'Produto' : item.type === 'service' ? 'Serviço' : 'Personalizado'}
+                            </span>
+                            <span class="text-xs text-gray-500">${item.code}</span>
+                        </div>
+                        <h4 class="mb-1 text-sm font-medium text-gray-900">${item.name}</h4>
+                        ${item.description ? `<p class="mb-3 text-xs text-gray-600">${item.description.substring(0, 100)}...</p>` : ''}
+
+                        <div class="grid grid-cols-4 gap-3">
+                            <div>
+                                <label class="block mb-1 text-xs font-medium text-gray-700">Quantidade</label>
+                                <input type="number"
+                                       class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 item-quantity"
+                                       value="${item.quantity}"
+                                       min="0.1"
+                                       step="0.1"
+                                       data-index="${item.index}">
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-medium text-gray-700">Preço Unit.</label>
+                                <input type="number"
+                                       class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 item-price"
+                                       value="${item.unit_price}"
+                                       min="0"
+                                       step="0.01"
+                                       data-index="${item.index}">
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-medium text-gray-700">IVA (%)</label>
+                                <input type="number"
+                                       class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 item-tax"
+                                       value="${item.tax_rate}"
+                                       min="0"
+                                       max="100"
+                                       step="0.01"
+                                       data-index="${item.index}">
+                            </div>
+                            <div>
+                                <label class="block mb-1 text-xs font-medium text-gray-700">Total</label>
+                                <div class="px-2 py-1 text-sm font-medium text-green-600 rounded bg-green-50 item-total" data-index="${item.index}">
+                                    ${formatCurrency(calculateItemTotal(item))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden inputs para o form -->
+                        <input type="hidden" name="items[${item.index}][description]" value="${item.name}">
+                        <input type="hidden" name="items[${item.index}][quantity]" value="${item.quantity}" class="hidden-quantity">
+                        <input type="hidden" name="items[${item.index}][unit_price]" value="${item.unit_price}" class="hidden-price">
+                        <input type="hidden" name="items[${item.index}][tax_rate]" value="${item.tax_rate}" class="hidden-tax">
+                    </div>
+                    <button type="button"
+                            class="p-1 ml-4 text-red-600 hover:text-red-800 remove-item"
+                            data-index="${item.index}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        // Adicionar event listeners
+        attachItemEventListeners();
+    }
+
+    // Anexar event listeners aos itens
+    function attachItemEventListeners() {
+        // Remover itens
+        document.querySelectorAll('.remove-item').forEach(button => {
+            button.addEventListener('click', function() {
+                const index = parseInt(this.dataset.index);
+                selectedItems = selectedItems.filter(item => item.index !== index);
+                renderSelectedItems();
+                calculateTotals();
+                showNotification('Item removido', 'info');
+            });
+        });
+
+        // Atualizar valores
+        document.querySelectorAll('.item-quantity, .item-price, .item-tax').forEach(input => {
+            input.addEventListener('input', function() {
+                const index = parseInt(this.dataset.index);
+                const item = selectedItems.find(item => item.index === index);
+
+                if (item) {
+                    if (this.classList.contains('item-quantity')) {
+                        item.quantity = parseFloat(this.value) || 0;
+                        document.querySelector(`input[name="items[${index}][unit_price]"]`).value = item.unit_price;
+                    } else if (this.classList.contains('item-tax')) {
+                        item.tax_rate = parseFloat(this.value) || 0;
+                        document.querySelector(`input[name="items[${index}][tax_rate]"]`).value = item.tax_rate;
+                    }
+
+                    // Atualizar total do item
+                    const totalElement = document.querySelector(`.item-total[data-index="${index}"]`);
+                    if (totalElement) {
+                        totalElement.textContent = formatCurrency(calculateItemTotal(item));
+                    }
+
+                    calculateTotals();
+                }
+            });
+        });
+    }
+
+    // Calcular total do item
+    function calculateItemTotal(item) {
+        const subtotal = item.quantity * item.unit_price;
+        const tax = subtotal * (item.tax_rate / 100);
+        return subtotal + tax;
+    }
+
+    // Calcular totais
     function calculateTotals() {
         let subtotal = 0;
         let totalTax = 0;
+        let totalItems = selectedItems.length;
 
-        document.querySelectorAll('.item-row').forEach(row => {
-            const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
-            const price = parseFloat(row.querySelector('.item-price').value) || 0;
-            const taxRate = parseFloat(row.querySelector('.item-tax').value) || 0;
-
-            const itemSubtotal = quantity * price;
-            const itemTax = itemSubtotal * (taxRate / 100);
+        selectedItems.forEach(item => {
+            const itemSubtotal = item.quantity * item.unit_price;
+            const itemTax = itemSubtotal * (item.tax_rate / 100);
 
             subtotal += itemSubtotal;
             totalTax += itemTax;
         });
 
         const total = subtotal + totalTax;
+        const avgPrice = totalItems > 0 ? total / totalItems : 0;
 
-        document.getElementById('subtotalDisplay').textContent = subtotal.toFixed(2) + ' MT';
-        document.getElementById('taxDisplay').textContent = totalTax.toFixed(2) + ' MT';
-        document.getElementById('totalDisplay').textContent = total.toFixed(2) + ' MT';
+        // Atualizar display
+        document.getElementById('subtotalDisplay').textContent = formatCurrency(subtotal);
+        document.getElementById('taxDisplay').textContent = formatCurrency(totalTax);
+        document.getElementById('totalDisplay').textContent = formatCurrency(total);
+        document.getElementById('itemCount').textContent = totalItems;
+        document.getElementById('avgPrice').textContent = formatCurrency(avgPrice);
     }
 
-    // Calcular totais iniciais
-    calculateTotals();
+    // Submissão do formulário
+    function handleFormSubmit(e) {
+        if (selectedItems.length === 0) {
+            e.preventDefault();
+            showNotification('Adicione pelo menos um item à fatura', 'warning');
+            return false;
+        }
+
+        // Show loading state
+        const submitButton = document.getElementById('saveInvoiceBtn');
+        const originalText = submitButton.innerHTML;
+        submitButton.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Salvando...';
+        submitButton.disabled = true;
+    }
+
+    // Utilitários
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('pt-MZ', {
+            style: 'currency',
+            currency: 'MZN',
+            minimumFractionDigits: 2
+        }).format(value).replace('MTn', 'MT');
+    }
+
+    // Sistema de notificações
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notification => notification.remove());
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification fixed top-4 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+
+        const colors = {
+            success: 'bg-green-50 border border-green-200 text-green-800',
+            error: 'bg-red-50 border border-red-200 text-red-800',
+            info: 'bg-blue-50 border border-blue-200 text-blue-800',
+            warning: 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+        };
+
+        const icons = {
+            success: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>',
+            error: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>',
+            info: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>',
+            warning: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>'
+        };
+
+        notification.className += ` ${colors[type]}`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0 mr-3">
+                    ${icons[type]}
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium">${message}</p>
+                </div>
+                <div class="ml-3">
+                    <button class="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none" onclick="this.closest('.notification').remove()">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Animate in
+        setTimeout(() => {
+            notification.classList.remove('translate-x-full');
+            notification.classList.add('translate-x-0');
+        }, 100);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 5000);
+    }
+
+    // Expor funções globais
+    window.closeProductModal = closeProductModal;
+    window.closeServiceModal = closeServiceModal;
+    window.closeCustomItemModal = closeCustomItemModal;
+    window.addCustomItem = addCustomItem;
+
+    // Inicializar data de vencimento
+    updateDueDate();
 });
 </script>
+@endpush
+
+@push('styles')
+<style>
+/* Loading animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Animation for notifications */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification {
+    animation: slideInRight 0.3s ease-out;
+}
+
+/* Custom focus styles */
+.focus\:ring-2:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Hover transitions */
+.transition-colors {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+/* Item card hover effects */
+.item-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.item-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Modal overlay */
+.modal-overlay {
+    backdrop-filter: blur(4px);
+}
+
+/* Sticky sidebar */
+.sticky {
+    position: sticky;
+    top: 2rem;
+}
+
+/* Enhanced form inputs */
+input:focus, select:focus, textarea:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Button hover effects */
+button:hover:not(:disabled), a:hover {
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    transform: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Custom scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+    .grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .space-x-3 > * + * {
+        margin-left: 0;
+        margin-top: 0.75rem;
+    }
+
+    .flex.space-x-3 {
+        flex-direction: column;
+    }
+}
+
+/* Enhanced card styling */
+.bg-white {
+    transition: all 0.2s ease-in-out;
+}
+
+.bg-white:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Gradient backgrounds */
+.bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+/* Price display styling */
+.item-total {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+/* Selection styling */
+.product-item:hover, .service-item:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.product-item input:checked + *, .service-item input:checked + * {
+    background-color: #dbeafe;
+}
+
+/* Badge styling improvements */
+.inline-flex.items-center {
+    align-items: center;
+}
+
+/* Enhanced visibility for required fields */
+label:has(+ input[required])::after,
+label:has(+ select[required])::after {
+    content: ' *';
+    color: #ef4444;
+}
+
+/* Custom item modal styling */
+#customItemModal .bg-purple-50 {
+    background-color: rgb(250 245 255);
+}
+
+#customItemModal .text-purple-600 {
+    color: rgb(147 51 234);
+}
+
+#customItemModal .border-purple-500 {
+    border-color: rgb(168 85 247);
+}
+
+#customItemModal .focus\:ring-purple-500:focus {
+    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.5);
+}
+</style>
+@endpush
 @endsection
