@@ -131,8 +131,7 @@ class QuoteController extends Controller
 
             DB::commit();
 
-            return redirect()->route('quotes.show', $quote)
-                ->with('success', 'Cotação criada com sucesso!');
+return redirect('/quotes/' . $quote->id)->with('success', 'Cotação criada com sucesso!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -256,28 +255,60 @@ class QuoteController extends Controller
         }
     }
 
+    // public function convertToInvoice(Quote $quote)
+    // {
+    //     if (!$quote->canConvertToInvoice()) {
+    //         return back()->with('error', 'Esta cotação não pode ser convertida em fatura.');
+    //     }
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         $invoice = $quote->convertToInvoice();
+
+    //         DB::commit();
+
+    //         return redirect()->route('invoices.show', $invoice)
+    //             ->with('success', 'Cotação convertida em fatura com sucesso!');
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+
+    //         return back()->with('error', 'Erro ao converter cotação: ' . $e->getMessage());
+    //     }
+    // }
+
+
+        /**
+     * Converter cotação para fatura (atualizado)
+     */
     public function convertToInvoice(Quote $quote)
     {
-        if (!$quote->canConvertToInvoice()) {
-            return back()->with('error', 'Esta cotação não pode ser convertida em fatura.');
-        }
-
         try {
-            DB::beginTransaction();
+            if (!$quote->canConvertToInvoice()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Esta cotação não pode ser convertida em fatura.'
+                ], 400);
+            }
 
             $invoice = $quote->convertToInvoice();
 
-            DB::commit();
-
-            return redirect()->route('invoices.show', $invoice)
-                ->with('success', 'Cotação convertida em fatura com sucesso!');
+            return response()->json([
+                'success' => true,
+                'message' => 'Cotação convertida em fatura com sucesso!',
+                'invoice_id' => $invoice->id,
+                'redirect_url' => route('invoices.show', $invoice)
+            ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-
-            return back()->with('error', 'Erro ao converter cotação: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao converter cotação: ' . $e->getMessage()
+            ], 500);
         }
     }
+
 
     public function updateStatus(Request $request, Quote $quote)
     {
@@ -346,17 +377,70 @@ class QuoteController extends Controller
         }
     }
 
+    // public function downloadPdf(Quote $quote)
+    // {
+    //     try {
+    //         $pdf = $this->pdfService->generateQuotePdf($quote);
+    //         return $pdf->download("cotacao-{$quote->quote_number}.pdf");
+
+    //     } catch (\Exception $e) {
+    //         return back()->with('error', 'Erro ao gerar PDF: ' . $e->getMessage());
+    //     }
+    // }
+
+     /**
+     * Download PDF da cotação
+     */
     public function downloadPdf(Quote $quote)
     {
         try {
-            $pdf = $this->pdfService->generateQuotePdf($quote);
-            return $pdf->download("cotacao-{$quote->quote_number}.pdf");
-
+            return $this->pdfService->downloadQuotePdf($quote);
         } catch (\Exception $e) {
-            return back()->with('error', 'Erro ao gerar PDF: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao gerar PDF: ' . $e->getMessage()
+            ], 500);
         }
     }
 
+
+     /**
+     * Preview do PDF (retorna base64 para modal)
+     */
+    public function previewPdf(Quote $quote)
+    {
+        try {
+            $pdf = $this->pdfService->generateQuotePdf($quote);
+            $base64 = base64_encode($pdf);
+
+            return response()->json([
+                'success' => true,
+                'pdf_data' => 'data:application/pdf;base64,' . $base64
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao gerar preview: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+     /**
+     * Stream PDF para visualização no navegador
+     */
+    public function viewPdf(Quote $quote)
+    {
+        try {
+            $pdf = $this->pdfService->generateQuotePdf($quote);
+
+            return response($pdf, 200)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'inline; filename="cotacao_' . $quote->quote_number . '.pdf"');
+        } catch (\Exception $e) {
+            abort(500, 'Erro ao gerar PDF: ' . $e->getMessage());
+        }
+    }
     public function sendEmail(Request $request, Quote $quote)
     {
         $request->validate([
