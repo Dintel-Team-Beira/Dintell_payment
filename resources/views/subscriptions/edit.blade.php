@@ -33,7 +33,7 @@
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Cliente *</label>
-                    <select name="client_id" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="client_id" required class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         @foreach($clients as $client)
                             <option value="{{ $client->id }}" {{ old('client_id', $subscription->client_id) == $client->id ? 'selected' : '' }}>
                                 {{ $client->name }} ({{ $client->email }})
@@ -45,7 +45,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Plano *</label>
-                    <select name="subscription_plan_id" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="subscription_plan_id" required class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         @foreach($plans as $plan)
                             <option value="{{ $plan->id }}" {{ old('subscription_plan_id', $subscription->subscription_plan_id) == $plan->id ? 'selected' : '' }}>
                                 {{ $plan->name }} - MT {{ number_format($plan->price, 2) }}
@@ -78,7 +78,7 @@
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Status *</label>
-                    <select name="status" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="status" required class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="active" {{ old('status', $subscription->status) === 'active' ? 'selected' : '' }}>Ativo</option>
                         <option value="inactive" {{ old('status', $subscription->status) === 'inactive' ? 'selected' : '' }}>Inativo</option>
                         <option value="suspended" {{ old('status', $subscription->status) === 'suspended' ? 'selected' : '' }}>Suspenso</option>
@@ -91,7 +91,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Controle Manual *</label>
-                    <select name="manual_status" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="manual_status" required class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="enabled" {{ old('manual_status', $subscription->manual_status) === 'enabled' ? 'selected' : '' }}>Habilitado</option>
                         <option value="disabled" {{ old('manual_status', $subscription->manual_status) === 'disabled' ? 'selected' : '' }}>Desabilitado</option>
                     </select>
@@ -151,13 +151,13 @@
                     <label class="block text-sm font-medium text-gray-700">Valor Pago *</label>
                     <input type="number" step="0.01" name="amount_paid"
                            value="{{ old('amount_paid', $subscription->amount_paid) }}" required
-                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                           class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     @error('amount_paid')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Método de Pagamento</label>
-                    <select name="payment_method" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="payment_method" class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="">Selecionar método</option>
                         <option value="mpesa" {{ old('payment_method', $subscription->payment_method) === 'mpesa' ? 'selected' : '' }}>MPesa</option>
                         <option value="visa" {{ old('payment_method', $subscription->payment_method) === 'visa' ? 'selected' : '' }}>Visa</option>
