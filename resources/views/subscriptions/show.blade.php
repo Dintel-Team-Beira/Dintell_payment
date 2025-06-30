@@ -274,7 +274,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Método de Pagamento</label>
-                <select name="payment_method" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="payment_method" class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="mpesa">MPesa</option>
                     <option value="visa">Visa</option>
                     <option value="bank_transfer">Transferência</option>
