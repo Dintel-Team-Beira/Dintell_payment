@@ -49,7 +49,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Ciclo de Cobrança *</label>
-                    <select name="billing_cycle" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="billing_cycle" required class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="monthly" {{ old('billing_cycle') === 'monthly' ? 'selected' : '' }}>Mensal</option>
                         <option value="quarterly" {{ old('billing_cycle') === 'quarterly' ? 'selected' : '' }}>Trimestral</option>
                         <option value="yearly" {{ old('billing_cycle') === 'yearly' ? 'selected' : '' }}>Anual</option>
@@ -61,7 +61,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Dias do Ciclo *</label>
                     <input type="number" name="billing_cycle_days" value="{{ old('billing_cycle_days', 30) }}" required
-                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                           class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     @error('billing_cycle_days')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
             </div>
