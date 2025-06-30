@@ -187,3 +187,12 @@ Route::prefix('clients')->group(function () {
 // API de Clientes para Faturas
 Route::get('/clients/{client}/quotes', [InvoiceController::class, 'getClientQuotes']);
 Route::get('/quotes/{quote}/items', [InvoiceController::class, 'getQuoteItems']);
+
+
+
+Route::get('/dashboard-stats', [BillingController::class, 'getDashboardStats'])->name('api.dashboard.stats');
+Route::get('/chart-data', [BillingController::class, 'getChartData'])->name('api.chart.data');
+Route::get('/top-clients', [BillingController::class, 'getTopClients'])->name('api.top.clients');
+Route::get('/expired-quotes', [BillingController::class, 'getExpiredQuotes'])->name('api.expired-quotes');
+Route::get('/quote-stats', [BillingController::class, 'getQuoteStats'])->name('api.quote-stats');
+Route::post('/mark-expired-quotes', [BillingController::class, 'markExpiredQuotes'])->name('api.mark-expired-quotes');
