@@ -742,6 +742,7 @@ function deleteQuote(quoteId) {
 
 // Função para duplicar cotação
 function duplicateQuote(quoteId) {
+
     if (confirm('Deseja criar uma cópia desta cotação?')) {
         fetch(`/quotes/${quoteId}/duplicate`, {
             method: 'POST',
@@ -752,6 +753,7 @@ function duplicateQuote(quoteId) {
         })
         .then(response => response.json())
         .then(data => {
+
             if (data.success) {
                 showNotification('Cotação duplicada com sucesso!', 'success');
                 if (data.redirect_url) {
