@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\InvoiceMail;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Client;
@@ -12,6 +13,7 @@ use App\Services\InvoicePdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class InvoiceController extends Controller
 {
@@ -441,33 +443,61 @@ class InvoiceController extends Controller
         }
     }
 
+   /**
+     * Enviar fatura por email
+     */
     public function sendByEmail(Request $request, Invoice $invoice)
     {
         $request->validate([
             'email' => 'required|email',
             'subject' => 'required|string|max:255',
-            'message' => 'nullable|string'
+            'message' => 'nullable|string|max:1000'
         ]);
 
         try {
-            // Implementar envio de email
-            // Mail::to($request->email)->send(new InvoiceMail($invoice, $request->subject, $request->message));
+            // Enviar email com PDF anexado
+            Mail::to($request->email)->send(new InvoiceMail(
+                $invoice,
+                $request->subject,
+                $request->message
+            ));
 
+            // Atualizar status da fatura
             $invoice->update([
                 'status' => 'sent',
+                'sent_at' => now()
+            ]);
+
+            // Log da ação (opcional)
+            \Log::info('Fatura enviada por email', [
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'email' => $request->email,
                 'sent_at' => now()
             ]);
 
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Fatura enviada por email com sucesso!'
+                    'message' => 'Fatura enviada por email com sucesso!',
+                    'data' => [
+                        'invoice_status' => $invoice->status,
+                        'sent_at' => $invoice->sent_at->format('d/m/Y H:i')
+                    ]
                 ]);
             }
 
             return back()->with('success', 'Fatura enviada por email com sucesso!');
 
         } catch (\Exception $e) {
+            // Log do erro
+            \Log::error('Erro ao enviar fatura por email', [
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'email' => $request->email,
+                'error' => $e->getMessage()
+            ]);
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -476,6 +506,29 @@ class InvoiceController extends Controller
             }
 
             return back()->with('error', 'Erro ao enviar email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Teste de configuração de email (método auxiliar)
+     */
+    public function testEmailConfig()
+    {
+        try {
+            // Teste simples de configuração
+            $config = config('mail');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Configuração de email válida',
+                'mailer' => $config['default'] ?? 'N/A',
+                'host' => $config['mailers'][$config['default']]['host'] ?? 'N/A'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro na configuração de email: ' . $e->getMessage()
+            ], 500);
         }
     }
 
