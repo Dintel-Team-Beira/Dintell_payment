@@ -120,6 +120,11 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard de Faturação
     Route::get('/billing/dashboard', [App\Http\Controllers\BillingController::class, 'dashboard'])->name('billing.dashboard');
     Route::get('/billing/reports', [App\Http\Controllers\BillingController::class, 'reports'])->name('billing.reports');
+        // Relatórios detalhados
+        Route::get('/reports', [BillingController::class, 'reports'])->name('billing.reports');
+
+        // Exportação de dados
+        Route::get('/export', [BillingController::class, 'export'])->name('billing.export');
 
     // Cotações
     Route::get('/quotes/index', [App\Http\Controllers\QuoteController::class, 'index'])->name('quotes.index');
@@ -138,6 +143,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export/data', [QuoteController::class, 'export'])->name('export');
     });
 
+        // Configurações de faturação
+        Route::prefix('billing/settings')->name('billing.settings.')->group(function () {
+            Route::get('/', [BillingController::class, 'index'])->name('index');
+            Route::post('/update', [BillingController::class, 'updateSettings'])->name('update');
+        });
 
     // Rotas para cotações
 Route::prefix('quotes')->group(function () {
