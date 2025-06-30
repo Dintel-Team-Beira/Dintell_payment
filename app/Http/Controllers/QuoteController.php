@@ -255,59 +255,59 @@ return redirect('/quotes/' . $quote->id)->with('success', 'Cotação criada com 
         }
     }
 
-    // public function convertToInvoice(Quote $quote)
-    // {
-    //     if (!$quote->canConvertToInvoice()) {
-    //         return back()->with('error', 'Esta cotação não pode ser convertida em fatura.');
-    //     }
+    public function convertToInvoice(Quote $quote)
+    {
+        if (!$quote->canConvertToInvoice()) {
+            return back()->with('error', 'Esta cotação não pode ser convertida em fatura.');
+        }
 
-    //     try {
-    //         DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-    //         $invoice = $quote->convertToInvoice();
+            $invoice = $quote->convertToInvoice();
 
-    //         DB::commit();
+            DB::commit();
 
-    //         return redirect()->route('invoices.show', $invoice)
-    //             ->with('success', 'Cotação convertida em fatura com sucesso!');
+            return redirect()->route('invoices.show', $invoice)
+                ->with('success', 'Cotação convertida em fatura com sucesso!');
 
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
+        } catch (\Exception $e) {
+            DB::rollBack();
 
-    //         return back()->with('error', 'Erro ao converter cotação: ' . $e->getMessage());
-    //     }
-    // }
+            return back()->with('error', 'Erro ao converter cotação: ' . $e->getMessage());
+        }
+    }
 
 
         /**
      * Converter cotação para fatura (atualizado)
      */
-    public function convertToInvoice(Quote $quote)
-    {
-        try {
-            if (!$quote->canConvertToInvoice()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Esta cotação não pode ser convertida em fatura.'
-                ], 400);
-            }
+    // public function convertToInvoice(Quote $quote)
+    // {
+    //     try {
+    //         if (!$quote->canConvertToInvoice()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Esta cotação não pode ser convertida em fatura.'
+    //             ], 400);
+    //         }
 
-            $invoice = $quote->convertToInvoice();
+    //         $invoice = $quote->convertToInvoice();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Cotação convertida em fatura com sucesso!',
-                'invoice_id' => $invoice->id,
-                'redirect_url' => route('invoices.show', $invoice)
-            ]);
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Cotação convertida em fatura com sucesso!',
+    //             'invoice_id' => $invoice->id,
+    //             'redirect_url' => route('invoices.show', $invoice)
+    //         ]);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao converter cotação: ' . $e->getMessage()
-            ], 500);
-        }
-    }
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Erro ao converter cotação: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
 
     public function updateStatus(Request $request, Quote $quote)
