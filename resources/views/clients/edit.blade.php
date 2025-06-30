@@ -28,7 +28,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Status *</label>
-                    <select name="status" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select name="status" required class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="active" {{ old('status', $client->status) === 'active' ? 'selected' : '' }}>Ativo</option>
                         <option value="inactive" {{ old('status', $client->status) === 'inactive' ? 'selected' : '' }}>Inativo</option>
                         <option value="blocked" {{ old('status', $client->status) === 'blocked' ? 'selected' : '' }}>Bloqueado</option>
@@ -56,7 +56,7 @@
 
                 <div class="sm:col-span-2">
                     <label class="block text-sm font-medium text-gray-700">Endereço</label>
-                    <textarea name="address" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('address', $client->address) }}</textarea>
+                    <textarea name="address" rows="3" class="block w-full p-5 mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('address', $client->address) }}</textarea>
                 </div>
             </div>
         </div>
