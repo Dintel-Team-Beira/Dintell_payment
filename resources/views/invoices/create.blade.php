@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Nova Fatura')
+{{-- @section('title', 'Nova Fatura') --}}
 
 @section('content')
-<div class="px-4 py-8 sm:px-6 lg:px-8">
+<div class="" sm:px-6 lg:px-8">
     <!-- Header -->
-    <div class="mb-8">
+    {{-- <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
                 <h1 class="text-3xl font-bold text-gray-900">Nova Fatura</h1>
@@ -21,7 +21,7 @@
                 </a>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <form action="{{ route('invoices.store') }}" method="POST" id="invoiceForm">
         @csrf
