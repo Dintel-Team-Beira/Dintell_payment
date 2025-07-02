@@ -1,10 +1,9 @@
-```blade
 @extends('layouts.app')
 
 @section('title', 'Editar Cotação #' . $quote->quote_number)
 
 @section('content')
-<div class="px-4 py-8 sm:px-6 lg:px-8">
+<div class="sm:px-6 lg:px-8">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -1074,4 +1073,3 @@ label:has(+ select[required])::after {
 </style>
 @endpush
 @endsection
-```
