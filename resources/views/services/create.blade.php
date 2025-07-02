@@ -3,13 +3,13 @@
 @section('title', 'Novo Serviço')
 
 @section('content')
-<div class="px-4 py-8 mx-auto sm:px-6 lg:px-8">
+<div class="sm:px-6 lg:px-8">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-3xl font-bold text-gray-900">Novo Serviço</h1>
-                <p class="mt-2 text-gray-600">Cadastre um novo serviço para a software house</p>
+                {{-- <h1 class="text-3xl font-bold text-gray-900">Novo Serviço</h1>
+                <p class="mt-2 text-gray-600">Cadastre um novo serviço para a software house</p> --}}
             </div>
             <div class="flex gap-3">
                 <a href="/servicos/dintell"
@@ -435,7 +435,7 @@
     </div>
 </div>
 
-{{-- @push('scripts') --}}
+@push('scripts')
 <script>
 // Auto-generate code based on name
 document.getElementById('service_name').addEventListener('input', function() {
@@ -958,5 +958,5 @@ button:hover, a:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 </style>
-{{-- @endpush --}}
+@endpush
 @endsection
