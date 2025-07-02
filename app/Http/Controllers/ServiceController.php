@@ -463,4 +463,55 @@ class ServiceController extends Controller
 
         return $code;
     }
+
+    /**
+ * Duplicar serviço
+ */
+
+/**
+ * Exportar dados do serviço específico
+ */
+public function exportSingle(Service $service)
+{
+    $fileName = 'servico_' . $service->code . '_' . now()->format('Y_m_d_H_i_s') . '.csv';
+
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+    ];
+
+    $callback = function() use ($service) {
+        $file = fopen('php://output', 'w');
+
+        // Header
+        fputcsv($file, [
+            'Campo', 'Valor'
+        ]);
+
+        // Data
+        $data = [
+            ['Código', $service->code],
+            ['Nome', $service->name],
+            ['Descrição', $service->description],
+            ['Categoria', $service->category],
+            ['Preço por Hora', $service->hourly_rate ? 'MT ' . number_format($service->hourly_rate, 2) : '-'],
+            ['Preço Fixo', $service->fixed_price ? 'MT ' . number_format($service->fixed_price, 2) : '-'],
+            ['Horas Estimadas', $service->estimated_hours ?: '-'],
+            ['Complexidade', ucfirst($service->complexity_level)],
+            ['Status', $service->is_active ? 'Ativo' : 'Inativo'],
+            ['Requisitos', $service->requirements ?: '-'],
+            ['Tags', $service->tags ?: '-'],
+            ['Criado em', $service->created_at->format('d/m/Y H:i')],
+            ['Atualizado em', $service->updated_at->format('d/m/Y H:i')],
+        ];
+
+        foreach ($data as $row) {
+            fputcsv($file, $row);
+        }
+
+        fclose($file);
+    };
+
+    return response()->stream($callback, 200, $headers);
+}
 }
