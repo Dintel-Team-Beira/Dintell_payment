@@ -257,12 +257,13 @@ Route::prefix('produtos')->name('products.')->group(function () {
 // Serviços
 Route::get('servicos/dintell',[ServiceController::class, 'index'])->name('novo');
 Route::get('servicos/dintell',[ServiceController::class, 'index'])->name('servicos');
+Route::get('servicos/{servicos}',[ServiceController::class, 'edit'])->name('services.edit');
 Route::resource('servicos', ServiceController::class)->names([
     'index' => 'services.index',
     'create' => 'services.create',
     'store' => 'services.store',
     'show' => 'services.show',
-    'edit' => 'services.edit',
+    // 'edit' => 'services.edit',
     'update' => 'services.update',
     'destroy' => 'services.destroy'
 ]);
