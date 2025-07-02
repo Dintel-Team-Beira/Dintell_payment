@@ -196,3 +196,36 @@ Route::get('/top-clients', [BillingController::class, 'getTopClients'])->name('a
 Route::get('/expired-quotes', [BillingController::class, 'getExpiredQuotes'])->name('api.expired-quotes');
 Route::get('/quote-stats', [BillingController::class, 'getQuoteStats'])->name('api.quote-stats');
 Route::post('/mark-expired-quotes', [BillingController::class, 'markExpiredQuotes'])->name('api.mark-expired-quotes');
+
+// Rota para serviços ativos (para usar em cotações/faturas)
+
+Route::get('services/search', [ServiceController::class, 'search'])->name('api.services.search');
+Route::get('services/stats', [ServiceController::class, 'stats'])->name('api.services.stats');
+Route::get('services/{service}/calculate-price', [ServiceController::class, 'calculatePrice'])->name('api.services.calculate-price');
+Route::get('services/templates', [ServiceController::class, 'getTemplates'])->name('api.services.templates');
+Route::post('services/{service}/toggle-status', [ServiceController::class, 'toggleStatus'])->name('api.services.toggle-status');
+Route::get('/services/active', function() {
+    return App\Models\Service::active()
+        ->select('id', 'name', 'code', 'hourly_rate', 'fixed_price', 'estimated_hours', 'complexity_level', 'description')
+        ->orderBy('name')
+        ->get()
+        ->map(function ($service) {
+            return [
+                'id' => $service->id,
+                'type' => 'service',
+                'name' => $service->name,
+                'code' => $service->code,
+                'hourly_rate' => $service->hourly_rate,
+                'fixed_price' => $service->fixed_price,
+                'estimated_cost' => $service->estimated_cost,
+                'description' => $service->description,
+                'estimated_hours' => $service->estimated_hours,
+                'complexity_level' => $service->complexity_level
+            ];
+        });
+})->name('api.services.active');
+
+// Se você quiser uma rota para o index que funcione tanto com /servicos quanto /servicos/dintell:
+Route::get('servicos/{any?}', [ServiceController::class, 'index'])
+    ->where('any', '.*')
+    ->name('services.index.fallback');
