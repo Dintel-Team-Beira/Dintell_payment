@@ -514,7 +514,7 @@
                             </a>
 
                             <!-- Enviar por email -->
-                            @if($quote->status === 'draft')
+                            @if($quote->status === 'accepted')
                                 <button onclick="sendQuoteEmail({{ $quote->id }})"
                                         class="p-2 text-purple-600 transition-colors rounded-lg bg-purple-50 hover:bg-purple-100 hover:text-purple-700"
                                         title="Enviar por email">
