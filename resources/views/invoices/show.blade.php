@@ -311,7 +311,7 @@
                             <span class="text-gray-900">{{ number_format($invoice->tax_amount, 2) }} MT</span>
                         </div>
                         @if($invoice->paid_amount > 0)
-                        <div class="flex justify-between text-sm border-t pt-2">
+                        <div class="flex justify-between pt-2 text-sm border-t">
                             <span class="font-medium text-gray-700">Valor Pago:</span>
                             <span class="text-green-600">{{ number_format($invoice->paid_amount, 2) }} MT</span>
                         </div>
@@ -387,7 +387,7 @@
                                         @endif
                                     </div>
                                     <div class="text-sm text-right text-gray-500 whitespace-nowrap">
-                                        {{ $invoice->created_at->format('d/m/Y H:i') }}
+                                        {{ $invoice->created_at ? $invoice->created_at->format('d/m/Y H:i') : 'Data não disponível' }}
                                     </div>
                                 </div>
                             </div>
@@ -548,7 +548,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
                         </div>
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <div class="w-full mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                             <h3 class="text-lg font-medium leading-6 text-gray-900">Enviar Fatura por Email</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500">
@@ -559,19 +559,19 @@
                                 <div>
                                     <label for="email_address" class="block text-sm font-medium text-gray-700">Email</label>
                                     <input type="email" name="email" id="email_address"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                                            value="{{ $invoice->client->email }}" required>
                                 </div>
                                 <div>
                                     <label for="email_subject" class="block text-sm font-medium text-gray-700">Assunto</label>
                                     <input type="text" name="subject" id="email_subject"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                           class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                                            value="Fatura {{ $invoice->invoice_number }}" required>
                                 </div>
                                 <div>
                                     <label for="email_message" class="block text-sm font-medium text-gray-700">Mensagem (opcional)</label>
                                     <textarea name="message" id="email_message" rows="3"
-                                              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                              class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                                               placeholder="Mensagem adicional para o cliente..."></textarea>
                                 </div>
                             </div>
