@@ -45,9 +45,12 @@ class BillingController extends Controller
 
         // Dados para gráficos melhorados
         $chartData = $this->getEnhancedChartData();
+        $statss = $this->getInvoiceStats();
+        // $stats = $this->getInvoiceStats();
 
         return view('billing.dashboard', compact(
             'stats',
+            'statss',
             'overdueInvoices',
             'recentQuotes',
             'topClients',
@@ -56,6 +59,97 @@ class BillingController extends Controller
             'startDate',
             'endDate'
         ));
+    }
+
+    private function getInvoiceStats()
+    {
+        $currentMonth = Carbon::now();
+        $lastMonth = Carbon::now()->subMonth();
+        $today = Carbon::today();
+
+        $stats = [
+            // Total de faturas
+            'total_invoices' => Invoice::count(),
+
+            // Faturas pendentes (status = 'draft' ou due_date ainda não passou)
+            'total_pending' => Invoice::whereIn('status', ['draft', 'sent'])
+                ->where('due_date', '>=', $today)
+                ->sum('total'),
+            'pending_count' => Invoice::whereIn('status', ['draft', 'sent'])
+                ->where('due_date', '>=', $today)
+                ->count(),
+
+            // Faturas vencidas (due_date passou e não foram pagas)
+            'total_overdue' => Invoice::whereIn('status', ['draft', 'sent'])
+                ->where('due_date', '<', $today)
+                ->sum('total'),
+            'count_overdue' => Invoice::whereIn('status', ['draft', 'sent'])
+                ->where('due_date', '<', $today)
+                ->count(),
+
+            // Faturas pagas este mês
+            'total_paid_this_month' => Invoice::where('status', 'paid')
+                ->whereMonth('updated_at', $currentMonth->month) // ou use paid_at se existir
+                ->whereYear('updated_at', $currentMonth->year)
+                ->sum('total'),
+            'paid_count_this_month' => Invoice::where('status', 'paid')
+                ->whereMonth('updated_at', $currentMonth->month)
+                ->whereYear('updated_at', $currentMonth->year)
+                ->count(),
+        ];
+
+        // Calcular média de dias para pagamento
+        $paidInvoices = Invoice::where('status', 'paid')
+            ->whereNotNull('updated_at') // ou paid_at se tiver essa coluna
+            ->get();
+
+        $totalDays = 0;
+        $count = 0;
+
+        foreach ($paidInvoices as $invoice) {
+            if ($invoice->updated_at && $invoice->invoice_date) {
+                // Se tiver paid_at, use: $invoice->paid_at
+                $days = Carbon::parse($invoice->invoice_date)->diffInDays($invoice->updated_at);
+                $totalDays += $days;
+                $count++;
+            }
+        }
+
+        $stats['avg_payment_days'] = $count > 0 ? round($totalDays / $count) : 0;
+
+        // Calcular crescimento comparado ao mês anterior
+        $lastMonthStats = [
+            'total_invoices' => Invoice::whereMonth('created_at', $lastMonth->month)
+                                 ->whereYear('created_at', $lastMonth->year)
+                                 ->count(),
+            'total_amount' => Invoice::whereMonth('created_at', $lastMonth->month)
+                                 ->whereYear('created_at', $lastMonth->year)
+                                 ->sum('total')
+        ];
+
+        $currentMonthStats = [
+            'total_invoices' => Invoice::whereMonth('created_at', $currentMonth->month)
+                                 ->whereYear('created_at', $currentMonth->year)
+                                 ->count(),
+            'total_amount' => Invoice::whereMonth('created_at', $currentMonth->month)
+                                 ->whereYear('created_at', $currentMonth->year)
+                                 ->sum('total')
+        ];
+
+        // Calcular percentual de crescimento
+        if ($lastMonthStats['total_invoices'] > 0) {
+            $stats['invoices_growth'] = (($currentMonthStats['total_invoices'] - $lastMonthStats['total_invoices']) / $lastMonthStats['total_invoices']) * 100;
+        } else {
+            $stats['invoices_growth'] = $currentMonthStats['total_invoices'] > 0 ? 100 : 0;
+        }
+
+        if ($lastMonthStats['total_amount'] > 0) {
+            $stats['amount_growth'] = (($currentMonthStats['total_amount'] - $lastMonthStats['total_amount']) / $lastMonthStats['total_amount']) * 100;
+        } else {
+            $stats['amount_growth'] = $currentMonthStats['total_amount'] > 0 ? 100 : 0;
+        }
+
+        return $stats;
     }
 
     private function getEnhancedStats($startDate, $endDate)
