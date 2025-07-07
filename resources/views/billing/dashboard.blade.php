@@ -60,19 +60,13 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-blue-100">Receita Total</p>
-                        <p class="text-3xl font-bold">{{ number_format($stats['total_revenue'], 2) }} MT</p>
+                        <p class="text-3xl font-bold">{{ number_format($statss['total_invoices'], 2) }} MT</p>
                         <div class="flex items-center mt-2">
-                            @if($stats['revenue_growth'] >= 0)
-                                <svg class="w-4 h-4 mr-1 text-green-300" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-sm text-green-300">+{{ number_format($stats['revenue_growth'], 1) }}%</span>
-                            @else
-                                <svg class="w-4 h-4 mr-1 text-red-300" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-sm text-red-300">{{ number_format($stats['revenue_growth'], 1) }}%</span>
-                            @endif
+                            @if(isset($statss['invoices_growth']))
+                            <p class="text-xs text-{{ $statss['invoices_growth'] >= 0 ? 'white' : 'white' }}-600">
+                                {{ $statss['invoices_growth'] >= 0 ? '+' : '' }}{{ number_format($statss['invoices_growth'], 1) }}% vs mês anterior
+                            </p>
+                        @endif
                         </div>
                     </div>
                     <div class="p-3 bg-white rounded-lg bg-opacity-20">
@@ -133,8 +127,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-green-100">Recebido Este Mês</p>
-                        <p class="text-3xl font-bold">{{ number_format($stats['total_paid_this_month'], 2) }} MT</p>
-                        <p class="mt-2 text-sm text-green-200">{{ $stats['paid_count_this_month'] }} faturas pagas</p>
+                        <p class="text-3xl font-bold">{{ number_format($statss['total_paid_this_month'], 2) }} MT</p>
+                        <p class="mt-2 text-sm text-green-200">{{ $statss['paid_count_this_month'] }} faturas pagas</p>
                     </div>
                     <div class="p-3 bg-white rounded-lg bg-opacity-20">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
