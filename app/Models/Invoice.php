@@ -23,7 +23,8 @@ class Invoice extends Model
         'paid_amount',
         'notes',
         'terms_conditions',
-        'payment_terms_days'
+        'payment_terms_days',
+        'sent_at'
     ];
 
     protected $casts = [
