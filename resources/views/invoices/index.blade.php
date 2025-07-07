@@ -518,7 +518,7 @@
 
                             <!-- Marcar como paga -->
                             @if($invoice->status !== 'paid')
-                                <button onclick="markAsPaid({{ $invoice->id }})"
+                                <button onclick="showPaymentModal({{ $invoice->id }})"
                                         class="p-2 text-purple-600 transition-colors rounded-lg bg-purple-50 hover:bg-purple-100 hover:text-purple-700"
                                         title="Marcar como paga">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -529,7 +529,7 @@
 
                             <!-- Enviar por email -->
                             @if($invoice->status === 'draft')
-                                <button onclick="sendInvoiceEmail({{ $invoice->id }})"
+                                <button onclick="showEmailModal({{ $invoice->id }})"
                                         class="p-2 text-indigo-600 transition-colors rounded-lg bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700"
                                         title="Enviar por email">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -644,6 +644,119 @@
     @endif
 </div>
 
+<!-- Modal de Email -->
+<div id="emailModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>
+
+        <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <form id="emailForm" action="{{ route('invoices.send-email', $invoice) }}" method="POST">
+                @csrf
+                <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+
+                        <div class="w-full mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg font-medium leading-6 text-gray-900">Enviar Fatura por Email</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Envie a fatura para o cliente por email.
+                                </p>
+                            </div>
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <label for="email_address" class="block text-sm font-medium text-gray-700">Email</label>
+                                    <input type="email" name="email" id="email_address"
+                                           class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                           value="{{ $invoice->client->email }}" required>
+                                </div>
+                                <div>
+                                    <label for="email_subject" class="block text-sm font-medium text-gray-700">Assunto</label>
+                                    <input type="text" name="subject" id="email_subject"
+                                           class="block w-full p-2 mt-1 border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                           value="Fatura {{ $invoice->invoice_number }}" required>
+                                </div>
+                                <div>
+                                    <label for="email_message" class="block text-sm font-medium text-gray-700">Mensagem (opcional)</label>
+                                    <textarea name="message" id="email_message" rows="3"
+                                              class="block w-full p-5 mt-1 border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                              placeholder="Mensagem adicional para o cliente..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit"
+                            class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Enviar Email
+                    </button>
+                    <button type="button" onclick="closeEmailModal()"
+                            class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pagamento -->
+<div id="paymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>
+
+        <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <form id="paymentForm" action="{{ route('invoices.mark-as-paid', $invoice) }}" method="POST">
+                @csrf
+                <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-green-100 rounded-full sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg font-medium leading-6 text-gray-900">Registrar Pagamento</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    Confirme o recebimento do pagamento desta fatura.
+                                </p>
+                            </div>
+                            <div class="mt-4">
+                                <label for="payment_amount" class="block text-sm font-medium text-gray-700">Valor Pago</label>
+                                <div class="mt-1">
+                                    <input type="number" name="amount" id="payment_amount"
+                                           class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                           value="{{ number_format($invoice->remaining_amount, 2, '.', '') }}"
+                                           max="{{ number_format($invoice->remaining_amount, 2, '.', '') }}"
+                                           min="0" step="0.01">
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Valor restante: {{ number_format($invoice->remaining_amount, 2) }} MT
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit"
+                            class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Confirmar Pagamento
+                    </button>
+                    <button type="button" onclick="closePaymentModal()"
+                            class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Modais e Scripts -->
 @push('scripts')
 <script>
@@ -735,15 +848,29 @@ function deleteInvoice(invoiceId) {
 // Função para duplicar fatura
 function duplicateInvoice(invoiceId) {
     if (confirm('Deseja criar uma cópia desta fatura?')) {
+        // Mostrar loading
+        showNotification('Duplicando fatura...', 'info');
+
         fetch(`/invoices/${invoiceId}/duplicate`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
+
             if (data.success) {
                 showNotification('Fatura duplicada com sucesso!', 'success');
                 if (data.redirect_url) {
@@ -752,12 +879,12 @@ function duplicateInvoice(invoiceId) {
                     setTimeout(() => location.reload(), 1500);
                 }
             } else {
-                showNotification('Erro ao duplicar fatura: ' + data.message, 'error');
+                showNotification('Erro ao duplicar fatura: ' + (data.message || 'Erro desconhecido'), 'error');
             }
         })
         .catch(error => {
-            showNotification('Erro ao duplicar fatura', 'error');
             console.error('Error:', error);
+            showNotification('Erro ao duplicar fatura: ' + error.message, 'error');
         });
     }
 }
@@ -866,6 +993,46 @@ function bulkDownloadPDF() {
 
     window.open(`/invoices/bulk-download-pdf?invoice_ids=${selectedInvoices.join(',')}`);
 }
+</script>
+@endpush
+
+@push('scripts')
+<script>
+function showPaymentModal() {
+    document.getElementById('paymentModal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+}
+
+function closePaymentModal() {
+    document.getElementById('paymentModal').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+}
+
+function showEmailModal() {
+    document.getElementById('emailModal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+}
+
+function closeEmailModal() {
+    document.getElementById('emailModal').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+}
+
+// Fechar modais ao clicar fora
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('bg-gray-500')) {
+        closePaymentModal();
+        closeEmailModal();
+    }
+});
+
+// Fechar modais com ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePaymentModal();
+        closeEmailModal();
+    }
+});
 </script>
 @endpush
 @endsection
