@@ -225,6 +225,67 @@ class InvoiceController extends Controller
         return view('invoices.edit', compact('invoice', 'clients', 'settings'));
     }
 
+    // public function update(Request $request, Invoice $invoice)
+    // {
+    //     if ($invoice->status === 'paid') {
+    //         return redirect()->route('invoices.show', $invoice)
+    //             ->with('error', 'Faturas pagas não podem ser editadas.');
+    //     }
+
+    //     $validated = $request->validate([
+    //         'client_id' => 'required|exists:clients,id',
+    //         'invoice_date' => 'required|date',
+    //         'payment_terms_days' => 'required|numeric|min:0|max:365',
+    //         'items' => 'required|array|min:1',
+    //         'items.*.description' => 'required|string|max:255',
+    //         'items.*.quantity' => 'required|numeric|min:0.01',
+    //         'items.*.unit_price' => 'required|numeric|min:0',
+    //         'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
+    //         'notes' => 'nullable|string',
+    //         'terms_conditions' => 'nullable|string'
+    //     ]);
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // Calcular novos totais
+    //         $totals = $this->calculateInvoiceTotals($validated['items']);
+    //         $dueDate = Carbon::parse($validated['invoice_date'])
+    //             ->addDays($validated['payment_terms_days']);
+
+    //         // Atualizar fatura
+    //         $invoice->update([
+    //             'client_id' => $validated['client_id'],
+    //             'invoice_date' => $validated['invoice_date'],
+    //             'due_date' => $dueDate,
+    //             'payment_terms_days' => $validated['payment_terms_days'],
+    //             'subtotal' => $totals['subtotal'],
+    //             'tax_amount' => $totals['tax_amount'],
+    //             'total' => $totals['total'],
+    //             'notes' => $validated['notes'],
+    //             'terms_conditions' => $validated['terms_conditions']
+    //         ]);
+
+    //         // Remover itens existentes
+    //         $invoice->items()->delete();
+
+    //         // Criar novos itens
+    //         foreach ($validated['items'] as $itemData) {
+    //             $this->createInvoiceItem($invoice, $itemData);
+    //         }
+
+    //         DB::commit();
+
+    //         return redirect()->route('invoices.show', $invoice)
+    //             ->with('success', 'Fatura atualizada com sucesso!');
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+
+    //         return back()->withInput()
+    //             ->with('error', 'Erro ao atualizar fatura: ' . $e->getMessage());
+    //     }
+    // }
     public function update(Request $request, Invoice $invoice)
     {
         if ($invoice->status === 'paid') {
@@ -250,21 +311,25 @@ class InvoiceController extends Controller
 
             // Calcular novos totais
             $totals = $this->calculateInvoiceTotals($validated['items']);
-            $dueDate = Carbon::parse($validated['invoice_date'])
-                ->addDays($validated['payment_terms_days']);
 
-            // Atualizar fatura
-            $invoice->update([
-                'client_id' => $validated['client_id'],
-                'invoice_date' => $validated['invoice_date'],
-                'due_date' => $dueDate,
-                'payment_terms_days' => $validated['payment_terms_days'],
-                'subtotal' => $totals['subtotal'],
-                'tax_amount' => $totals['tax_amount'],
-                'total' => $totals['total'],
-                'notes' => $validated['notes'],
-                'terms_conditions' => $validated['terms_conditions']
-            ]);
+            // Garantir que payment_terms_days é inteiro
+            $paymentTerms = (int)$validated['payment_terms_days'];
+
+            $dueDate = Carbon::parse($validated['invoice_date'])
+                ->addDays($paymentTerms);
+
+            // Atualizar campos individualmente para evitar problemas
+            $invoice->client_id = $validated['client_id'];
+            $invoice->invoice_date = $validated['invoice_date'];
+            $invoice->due_date = $dueDate;
+            $invoice->payment_terms_days = $paymentTerms;
+            $invoice->subtotal = $totals['subtotal'];
+            $invoice->tax_amount = $totals['tax_amount'];
+            $invoice->total = $totals['total'];
+            $invoice->notes = $validated['notes'];
+            $invoice->terms_conditions = $validated['terms_conditions'];
+
+            $invoice->save();
 
             // Remover itens existentes
             $invoice->items()->delete();
@@ -282,11 +347,18 @@ class InvoiceController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
+            // Log detalhado do erro
+            \Log::error('Erro ao atualizar fatura', [
+                'invoice_id' => $invoice->id,
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+
             return back()->withInput()
                 ->with('error', 'Erro ao atualizar fatura: ' . $e->getMessage());
         }
     }
-
     public function destroy(Invoice $invoice)
     {
         if ($invoice->status === 'paid') {
@@ -379,54 +451,74 @@ class InvoiceController extends Controller
     }
 
     public function duplicate(Invoice $invoice)
-    {
-        try {
-            DB::beginTransaction();
+{
+    try {
+        DB::beginTransaction();
 
-            $newInvoice = $invoice->replicate();
-            $newInvoice->invoice_number = null; // Será gerado automaticamente
-            $newInvoice->status = 'draft';
-            $newInvoice->invoice_date = Carbon::today();
-            $newInvoice->due_date = Carbon::today()->addDays($invoice->payment_terms_days);
-            $newInvoice->paid_amount = 0;
-            $newInvoice->paid_at = null;
-            $newInvoice->sent_at = null;
-            $newInvoice->save();
+        // Duplicar a fatura usando apenas campos que sabemos que existem
+        $newInvoice = $invoice->replicate([
+            'invoice_number', // será gerado automaticamente
+            'paid_amount',
+            'paid_at'
+        ]);
 
-            // Duplicar itens
+        // Tratar payment_terms_days como número
+        $paymentTerms = is_numeric($invoice->payment_terms_days)
+            ? (int)$invoice->payment_terms_days
+            : 30;
+
+        // Definir apenas campos que temos certeza que existem
+        $newInvoice->status = 'draft';
+        $newInvoice->invoice_date = Carbon::today();
+        $newInvoice->due_date = Carbon::today()->addDays($paymentTerms);
+        $newInvoice->paid_amount = 0;
+        $newInvoice->paid_at = null;
+
+        $newInvoice->save();
+
+        // Duplicar itens da fatura
+        if ($invoice->items && $invoice->items->count() > 0) {
             foreach ($invoice->items as $item) {
                 $newItem = $item->replicate();
                 $newItem->invoice_id = $newInvoice->id;
                 $newItem->save();
             }
-
-            DB::commit();
-
-            if (request()->expectsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Fatura duplicada com sucesso!',
-                    'invoice_id' => $newInvoice->id,
-                    'redirect_url' => route('invoices.edit', $newInvoice)
-                ]);
-            }
-
-            return redirect()->route('invoices.edit', $newInvoice)
-                ->with('success', 'Fatura duplicada com sucesso!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            if (request()->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Erro ao duplicar fatura: ' . $e->getMessage()
-                ], 500);
-            }
-
-            return back()->with('error', 'Erro ao duplicar fatura: ' . $e->getMessage());
         }
+
+        DB::commit();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Fatura duplicada com sucesso!',
+                'invoice_id' => $newInvoice->id,
+                'redirect_url' => route('invoices.edit', $newInvoice)
+            ]);
+        }
+
+        return redirect()->route('invoices.edit', $newInvoice)
+            ->with('success', 'Fatura duplicada com sucesso!');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        \Log::error('Erro ao duplicar fatura', [
+            'invoice_id' => $invoice->id,
+            'error' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile()
+        ]);
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao duplicar fatura: ' . $e->getMessage()
+            ], 500);
+        }
+
+        return back()->with('error', 'Erro ao duplicar fatura: ' . $e->getMessage());
     }
+}
 
     public function downloadPdf(Invoice $invoice)
     {
