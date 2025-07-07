@@ -3,7 +3,7 @@
 {{-- @section('title', 'Nova Fatura') --}}
 
 @section('content')
-<div class="" sm:px-6 lg:px-8">
+<div class=" sm:px-6 lg:px-8">
     <!-- Header -->
     {{-- <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
