@@ -210,7 +210,7 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
                     <div>
                         <label for="status" class="block mb-2 text-sm font-medium text-gray-700">Status</label>
-                        <select name="status" id="status" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <select name="status" id="status" class="w-full p-2 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Todos</option>
                             <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Rascunho</option>
                             <option value="sent" {{ request('status') == 'sent' ? 'selected' : '' }}>Enviada</option>
@@ -222,7 +222,7 @@
 
                     <div>
                         <label for="client_id" class="block mb-2 text-sm font-medium text-gray-700">Cliente</label>
-                        <select name="client_id" id="client_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <select name="client_id" id="client_id" class="w-full p-2 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Todos os clientes</option>
                             @foreach($clients as $client)
                                 <option value="{{ $client->id }}" {{ request('client_id') == $client->id ? 'selected' : '' }}>
