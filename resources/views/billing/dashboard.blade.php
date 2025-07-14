@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard de Faturação')
+@section('title', 'Dashboard de Facturação')
 
 @section('header-actions')
 <div class="flex items-center gap-x-4">
@@ -44,7 +44,7 @@
         <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
         </svg>
-        Nova Fatura
+        Nova Factura
     </a>
 </div>
 @endsection
@@ -79,7 +79,7 @@
             </div>
         </div>
 
-        <!-- Faturas Pendentes -->
+        <!-- Facturas Pendentes -->
         <div class="relative p-6 overflow-hidden text-white shadow-sm bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl">
             <div class="absolute top-0 right-0 w-24 h-24 -mt-4 -mr-4 bg-white rounded-full bg-opacity-10"></div>
             <div class="relative">
@@ -87,7 +87,7 @@
                     <div>
                         <p class="text-sm font-medium text-amber-100">Valor Pendente</p>
                         <p class="text-3xl font-bold">{{ number_format($stats['total_pending'], 2) }} MT</p>
-                        <p class="mt-2 text-sm text-amber-200">{{ $stats['count_pending'] }} faturas</p>
+                        <p class="mt-2 text-sm text-amber-200">{{ $stats['count_pending'] }} facturas</p>
                     </div>
                     <div class="p-3 bg-white rounded-lg bg-opacity-20">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -128,7 +128,7 @@
                     <div>
                         <p class="text-sm font-medium text-green-100">Recebido Este Mês</p>
                         <p class="text-3xl font-bold">{{ number_format($statss['total_paid_this_month'], 2) }} MT</p>
-                        <p class="mt-2 text-sm text-green-200">{{ $statss['paid_count_this_month'] }} faturas pagas</p>
+                        <p class="mt-2 text-sm text-green-200">{{ $statss['paid_count_this_month'] }} facturas pagas</p>
                     </div>
                     <div class="p-3 bg-white rounded-lg bg-opacity-20">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -157,7 +157,7 @@
         <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Distribuição por Status</h3>
-                <p class="text-sm text-gray-500">Faturas e cotações por status</p>
+                <p class="text-sm text-gray-500">Facturas e cotações por status</p>
             </div>
             <div class="p-6">
                 <canvas id="statusChart" width="400" height="200"></canvas>
@@ -242,8 +242,8 @@
         <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Faturas Vencidas</h3>
-                    <p class="text-sm text-gray-500">{{ $stats['count_overdue'] }} faturas pendentes</p>
+                    <h3 class="text-lg font-semibold text-gray-900">Facturas Vencidas</h3>
+                    <p class="text-sm text-gray-500">{{ $stats['count_overdue'] }} facturas pendentes</p>
                 </div>
                 <a href="{{ route('invoices.index', ['status' => 'overdue']) }}"
                    class="text-sm font-medium text-blue-600 hover:text-blue-800">
@@ -281,8 +281,8 @@
                                     {{ number_format($invoice->total, 2) }} MT
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses[$quote->status] }}">
-                                        {{ $statusLabels[$quote->status] }}
+                                    {{-- <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses[$quote->status] }}"> --}}
+                                        {{-- {{ $statusLabels[$quote->status] }} --}}
                                     </span>
                                 </td>
                             </tr>
@@ -330,12 +330,12 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-semibold text-gray-900">{{ $client->name }}</p>
-                        <p class="text-xs text-gray-500">{{ $client->invoices_count }} faturas</p>
+                        <p class="text-xs text-gray-500">{{ $client->invoices_count }} facturas</p>
                     </div>
                 </div>
                 <div class="text-right">
                     <p class="text-sm font-semibold text-gray-900">{{ number_format($client->total_invoiced, 2) }} MT</p>
-                    <p class="text-xs text-gray-500">Total faturado</p>
+                    <p class="text-xs text-gray-500">Total facturado</p>
                 </div>
             </div>
             @endforeach
@@ -574,12 +574,12 @@ function filterTable(searchTerm, container) {
 }
 
 function setupNotifications() {
-    // Verificar faturas vencidas e mostrar notificações
+    // Verificar facturas vencidas e mostrar notificações
     const overdueCount = parseInt(document.querySelector('[data-stat="count_overdue"]')?.textContent || '0');
 
     if (overdueCount > 0) {
         showNotification(
-            `Você tem ${overdueCount} fatura${overdueCount > 1 ? 's' : ''} vencida${overdueCount > 1 ? 's' : ''}`,
+            `Você tem ${overdueCount} factura${overdueCount > 1 ? 's' : ''} vencida${overdueCount > 1 ? 's' : ''}`,
             'warning',
             5000
         );
