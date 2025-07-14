@@ -95,7 +95,7 @@
                 <div class="lg:col-span-2">
                     <label class="block mb-2 text-sm font-medium text-gray-700">Descrição</label>
                     <textarea name="description" rows="4"
-                              class="block w-full transition-colors border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              class="block w-full p-2 transition-colors border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
                               placeholder="Descreva os benefícios e características deste plano...">{{ old('description', $plan->description) }}</textarea>
                     @error('description')<p class="mt-1 text-sm text-red-500">{{ $message }}</p>@enderror
                 </div>
@@ -141,7 +141,7 @@
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-700">Ciclo de Cobrança *</label>
                     <select name="billing_cycle" required
-                            class="block w-full transition-colors border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            class="block w-full p-2 transition-colors border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="monthly" {{ old('billing_cycle', $plan->billing_cycle) === 'monthly' ? 'selected' : '' }}>Mensal</option>
                         <option value="quarterly" {{ old('billing_cycle', $plan->billing_cycle) === 'quarterly' ? 'selected' : '' }}>Trimestral</option>
                         <option value="yearly" {{ old('billing_cycle', $plan->billing_cycle) === 'yearly' ? 'selected' : '' }}>Anual</option>
