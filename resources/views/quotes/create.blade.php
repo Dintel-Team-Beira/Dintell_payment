@@ -2,11 +2,11 @@
 
 @extends('layouts.app')
 
-@section('title', 'Nova Cotação')
+@section('title', 'Nova')
 
 @section('content')
 <div class="sm:px-6 lg:px-8">
-    {{-- <!-- Header -->
+    <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
@@ -23,7 +23,7 @@
                 </a>
             </div>
         </div>
-    </div> --}}
+    </div>
 
     <form action="{{ route('quotes.store') }}" method="POST" id="quoteForm">
         @csrf
@@ -48,20 +48,27 @@
                     </div>
                     <div class="p-6 space-y-6">
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            <div>
-                                <label for="client_id" class="block mb-2 text-sm font-medium text-gray-700">Cliente *</label>
-                                <select name="client_id" id="client_id"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('client_id') border-red-300 @enderror"
-                                        required>
+                           <div>
+                                  <label for="client_id" class="block mb-2 text-sm font-medium text-gray-700">
+                            Cliente *
+                        </label>
+                        <select name="client_id" id="client_id"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg select2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
                                     <option value="">Selecione um cliente</option>
                                     @foreach($clients as $client)
-                                        <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                                            {{ $client->name }}
-                                        </option>
+                                    <option value="{{ $client->id }}" {{ old('client_id')==$client->id ? 'selected' : ''
+                                        }}>
+                                        {{ $client->name }}
+                                    </option>
                                     @endforeach
                                 </select>
+
                                 @error('client_id')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <div class="mt-2 text-sm text-red-600">
+                                    <i class="mr-1 fas fa-exclamation-circle"></i>
+                                    {{ $message }}
+                                </div>
                                 @enderror
                             </div>
 
@@ -887,6 +894,49 @@ setTimeout(() => {
 // Expor funções globais
 window.closeProductModal = closeProductModal;
 window.closeServiceModal = closeServiceModal;
+
+
+// selecionar o cliente
+
+  // Inicializar Select2
+    $('.select2').select2({
+        placeholder: 'Digite para buscar...',
+        allowClear: true,
+        width: '100%',
+        minimumInputLength: 0,
+        language: {
+            noResults: function() {
+                return "Nenhum resultado encontrado";
+            },
+            searching: function() {
+                return "Procurando...";
+            },
+            inputTooShort: function() {
+                return "Digite para buscar";
+            },
+            loadingMore: function() {
+                return "Carregando mais...";
+            }
+        }
+    });
+
+    // Manter seleção após erro de validação Laravel
+    @if(old('client_id'))
+        $('#client_id').val('{{ old('client_id') }}').trigger('change');
+    @endif
+
+    // Aplicar estilo de erro se houver erro do Laravel
+    @error('client_id')
+        $('#client_id').next('.select2-container').addClass('select2-container--error');
+    @enderror
+
+    // Remover erro ao selecionar
+    $('#client_id').on('change', function() {
+        if ($(this).val()) {
+            $(this).next('.select2-container').removeClass('select2-container--error');
+        }
+    });
+
 });
 </script>
 @endpush
