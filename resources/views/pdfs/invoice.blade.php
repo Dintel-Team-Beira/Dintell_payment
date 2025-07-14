@@ -71,7 +71,7 @@
         }
 
         .invoice-header {
-            text-align: center;
+            text-align: left;
             margin: 15px 0;
         }
 
@@ -357,7 +357,7 @@
         <div class="original-label">Original</div>
         <div class="invoice-title">
             Fatura Nº {{ $invoice->invoice_number }}
-            @php
+            <!-- @php
                 $statusLabels = [
                     'draft' => 'RASCUNHO',
                     'sent' => 'ENVIADA',
@@ -365,8 +365,8 @@
                     'overdue' => 'VENCIDA',
                     'cancelled' => 'CANCELADA'
                 ];
-            @endphp
-            <span class="status-badge status-{{ $invoice->status }}">{{ $statusLabels[$invoice->status] ?? strtoupper($invoice->status) }}</span>
+            @endphp -->
+            <!-- <span class="status-badge status-{{ $invoice->status }}">{{ $statusLabels[$invoice->status] ?? strtoupper($invoice->status) }}</span> -->
         </div>
     </div>
 
@@ -381,12 +381,12 @@
 
     @if($invoice->isOverdue() && $invoice->status !== 'paid')
         <div class="due-warning due-urgent">
-            <strong>⚠️ FATURA VENCIDA:</strong> Esta fatura venceu em {{ $invoice->due_date->format('d/m/Y') }}
+            <strong>FATURA VENCIDA:</strong> Esta fatura venceu em {{ $invoice->due_date->format('d/m/Y') }}
             ({{ $invoice->due_date->diffForHumans() }}). Por favor, regularize o pagamento o mais breve possível.
         </div>
     @elseif($invoice->due_date->diffInDays() <= 7 && $invoice->status !== 'paid')
         <div class="due-warning">
-            <strong>📅 VENCIMENTO PRÓXIMO:</strong> Esta fatura vence em {{ $invoice->due_date->format('d/m/Y') }}
+            <strong>VENCIMENTO PRÓXIMO:</strong> Esta fatura vence em {{ $invoice->due_date->format('d/m/Y') }}
             ({{ $invoice->due_date->diffForHumans() }}).
         </div>
     @endif
@@ -468,7 +468,7 @@
         </tbody>
     </table>
 
-    <div class="summary-row clearfix no-break">
+    <div class="clearfix summary-row no-break">
         <div class="iva-summary">
             <div class="section-title">QUADRO RESUMO DO IVA</div>
             <table class="iva-table">
@@ -533,7 +533,7 @@
                 @endif
                 @endif
                 <tr class="total-final">
-                    <td class="label">TOTAL GERAL:</td>
+                    <td style="color: #000000;" class="label">TOTAL GERAL:</td>
                     <td class="text-right">{{ number_format($invoice->total, 2) }} MT</td>
                 </tr>
             </table>
@@ -546,12 +546,12 @@
     </div>
     @endif
 
-    <div class="payment-section clearfix">
+    <div class="clearfix payment-section">
         <div class="section-title">DADOS PARA PAGAMENTO</div>
 
         @if(config('company.bank_accounts'))
             @foreach(config('company.bank_accounts') as $bank)
-            <div class="payment-method clearfix">
+            <div class="clearfix payment-method">
                 <div class="bank-logo {{ strtolower($bank['name']) }}-logo">{{ strtoupper($bank['name']) }}</div>
                 <div class="payment-details">
                     <strong>{{ $bank['bank_name'] ?? $bank['name'] }}</strong><br>
@@ -564,18 +564,20 @@
             </div>
             @endforeach
         @else
-        <div class="payment-method clearfix">
-            <div class="bank-logo millennium-logo">MILLENNIUM</div>
-            <div class="payment-details">
-                <strong>Millennium BIM</strong><br>
-                Nº Conta: {{ config('company.bank_account', '222 038 724 100 01') }}<br>
-                NIB: {{ config('company.bank_nib', '0008 0000 2203 8724 101 13') }}
-            </div>
+       <div class="clearfix payment-section">
+        <div class="bank-logo">
+            <img src="{{ public_path('bci.svg') }}"style="width: 20px;" alt="Logo">
         </div>
+        <div class="payment-details">
+            O pagamento pode ser efectuado em numerário, cheque, depósito ou transferência<br>
+            <strong>Conta:</strong> {{ $company['bank_account'] ?? '222 038 724 100 01' }} |
+            <strong>NIB:</strong> {{ $company['bank_nib'] ?? '0008 0000 2203 8724 101 13' }}
+        </div>
+    </div>
         @endif
-
-        @if(config('company.mpesa_number'))
-        <div class="payment-method clearfix">
+<!-- Usar depois Quand eu estiver inspirado -->
+        <!-- @if(config('company.mpesa_number'))
+        <div class="clearfix payment-method">
             <div class="bank-logo" style="background-color: #e11d48;">MPESA</div>
             <div class="payment-details">
                 <strong>M-Pesa</strong><br>
@@ -583,7 +585,7 @@
                 Nome: {{ config('company.name') }}
             </div>
         </div>
-        @endif
+        @endif -->
     </div>
 
     <div class="footer">
