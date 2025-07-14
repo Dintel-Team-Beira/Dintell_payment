@@ -43,7 +43,7 @@
                                    {{ old('send_invoice_emails', $settings->send_invoice_emails) ? 'checked' : '' }}
                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                             <label for="send_invoice_emails" class="block ml-3 text-sm text-gray-700">
-                                Enviar faturas por e-mail automaticamente
+                                Enviar facturas por e-mail automaticamente
                             </label>
                         </div>
 
@@ -67,7 +67,7 @@
                                    {{ old('send_overdue_reminders', $settings->send_overdue_reminders) ? 'checked' : '' }}
                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                             <label for="send_overdue_reminders" class="block ml-3 text-sm text-gray-700">
-                                Enviar lembretes de faturas vencidas
+                                Enviar lembretes de facturas vencidas
                             </label>
                         </div>
                     </div>
@@ -100,7 +100,7 @@
                     <div class="space-y-6">
                         <div>
                             <label for="email_template_invoice" class="block mb-2 text-sm font-medium text-gray-700">
-                                Template para Faturas
+                                Template para Facturas
                             </label>
                             <textarea name="email_template_invoice"
                                       id="email_template_invoice"
