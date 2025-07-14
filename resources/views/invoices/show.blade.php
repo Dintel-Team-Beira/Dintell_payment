@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Fatura ' . $invoice->invoice_number)
-@section('subtitle', 'Detalhes da fatura para ' . $invoice->client->name)
+@section('title', 'Factura ' . $invoice->invoice_number)
+@section('subtitle', 'Detalhes da factura para ' . $invoice->client->name)
 
 @section('header-actions')
 <div class="flex space-x-3">
-    <!-- Status da Fatura -->
+    <!-- Status da Factura -->
     <div class="flex items-center" x-data="{ open: false }">
         <button @click="open = !open"
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -113,9 +113,9 @@
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <h3 class="text-sm font-medium text-red-800">Fatura Vencida</h3>
+                    <h3 class="text-sm font-medium text-red-800">Factura Vencida</h3>
                     <div class="mt-2 text-sm text-red-700">
-                        <p>Esta fatura venceu em {{ $invoice->due_date->format('d/m/Y') }} ({{ $invoice->due_date->diffForHumans() }}). Entre em contato com o cliente para regularizar o pagamento.</p>
+                        <p>Esta factura venceu em {{ $invoice->due_date->format('d/m/Y') }} ({{ $invoice->due_date->diffForHumans() }}). Entre em contato com o cliente para regularizar o pagamento.</p>
                     </div>
                 </div>
             </div>
@@ -131,9 +131,9 @@
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <h3 class="text-sm font-medium text-blue-800">Fatura Baseada em Cotação</h3>
+                    <h3 class="text-sm font-medium text-blue-800">Factura Baseada em Cotação</h3>
                     <div class="mt-2 text-sm text-blue-700">
-                        <p>Esta fatura foi gerada a partir da cotação {{ $invoice->quote->quote_number }}.</p>
+                        <p>Esta factura foi gerada a partir da cotação {{ $invoice->quote->quote_number }}.</p>
                         <p class="mt-1">
                             <a href="{{ route('quotes.show', $invoice->quote) }}" class="font-medium underline">
                                 Ver Cotação Original
@@ -154,9 +154,9 @@
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <h3 class="text-sm font-medium text-green-800">Fatura Paga</h3>
+                    <h3 class="text-sm font-medium text-green-800">Factura Paga</h3>
                     <div class="mt-2 text-sm text-green-700">
-                        <p>Esta fatura foi paga{{ $invoice->paid_at ? ' em ' . $invoice->paid_at->format('d/m/Y H:i') : '' }}.</p>
+                        <p>Esta factura foi paga{{ $invoice->paid_at ? ' em ' . $invoice->paid_at : '' }}.</p>
                         @if($invoice->paid_amount > 0)
                             <p>Valor pago: {{ number_format($invoice->paid_amount, 2) }} MT</p>
                         @endif
@@ -166,11 +166,11 @@
         </div>
     @endif
 
-    <!-- Informações da Fatura -->
+    <!-- Informações da Factura -->
     <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">Informações da Fatura</h3>
+                <h3 class="text-lg font-semibold text-gray-900">Informações da Factura</h3>
                 @php
                     $statusClasses = [
                         'draft' => 'bg-gray-100 text-gray-800',
@@ -195,11 +195,11 @@
         <div class="p-6">
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <div>
-                    <h4 class="mb-1 text-sm font-medium text-gray-500">Número da Fatura</h4>
+                    <h4 class="mb-1 text-sm font-medium text-gray-500">Número da Factura</h4>
                     <p class="text-lg font-semibold text-gray-900">{{ $invoice->invoice_number }}</p>
                 </div>
                 <div>
-                    <h4 class="mb-1 text-sm font-medium text-gray-500">Data da Fatura</h4>
+                    <h4 class="mb-1 text-sm font-medium text-gray-500">Data da Factura</h4>
                     <p class="text-lg font-semibold text-gray-900">{{ $invoice->invoice_date->format('d/m/Y') }}</p>
                 </div>
                 <div>
@@ -252,10 +252,10 @@
         </div>
     </div>
 
-    <!-- Itens da Fatura -->
+    <!-- Itens da Factura -->
     <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Itens da Fatura</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Itens da Factura</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full">
@@ -381,13 +381,13 @@
                                 </div>
                                 <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                     <div>
-                                        <p class="text-sm text-gray-500">Fatura criada</p>
+                                        <p class="text-sm text-gray-500">Factura criada</p>
                                         @if($invoice->quote)
                                             <p class="text-xs text-gray-400">Baseada na cotação {{ $invoice->quote->quote_number }}</p>
                                         @endif
                                     </div>
                                     <div class="text-sm text-right text-gray-500 whitespace-nowrap">
-                                        {{ $invoice->created_at ? $invoice->created_at->format('d/m/Y H:i') : 'Data não disponível' }}
+                                        {{ $invoice->created_at ? $invoice->created_at : 'Data não disponível' }}
                                     </div>
                                 </div>
                             </div>
@@ -407,10 +407,10 @@
                                 </div>
                                 <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                     <div>
-                                        <p class="text-sm text-gray-500">Fatura atualizada</p>
+                                        <p class="text-sm text-gray-500">Factura atualizada</p>
                                     </div>
                                     <div class="text-sm text-right text-gray-500 whitespace-nowrap">
-                                        {{ $invoice->updated_at->format('d/m/Y H:i') }}
+                                        {{ $invoice->updated_at }}
                                     </div>
                                 </div>
                             </div>
@@ -431,10 +431,10 @@
                                 </div>
                                 <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                     <div>
-                                        <p class="text-sm text-gray-500">Fatura enviada para o cliente</p>
+                                        <p class="text-sm text-gray-500">Factura enviada para o cliente</p>
                                     </div>
                                     <div class="text-sm text-right text-gray-500 whitespace-nowrap">
-                                        {{ $invoice->sent_at->format('d/m/Y H:i') }}
+                                        {{ $invoice->sent_at }}
                                     </div>
                                 </div>
                             </div>
@@ -463,7 +463,7 @@
                                         </p>
                                     </div>
                                     <div class="text-sm text-right text-gray-500 whitespace-nowrap">
-                                        {{ $invoice->paid_at->format('d/m/Y H:i') }}
+                                        {{ $invoice->paid_at }}
                                     </div>
                                 </div>
                             </div>
@@ -497,7 +497,7 @@
                             <h3 class="text-lg font-medium leading-6 text-gray-900">Registrar Pagamento</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500">
-                                    Confirme o recebimento do pagamento desta fatura.
+                                    Confirme o recebimento do pagamento desta factura.
                                 </p>
                             </div>
                             <div class="mt-4">
@@ -549,10 +549,10 @@
                             </svg>
                         </div>
                         <div class="w-full mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-lg font-medium leading-6 text-gray-900">Enviar Fatura por Email</h3>
+                            <h3 class="text-lg font-medium leading-6 text-gray-900">Enviar Factura por Email</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500">
-                                    Envie a fatura para o cliente por email.
+                                    Envie a factura para o cliente por email.
                                 </p>
                             </div>
                             <div class="mt-4 space-y-4">
@@ -566,7 +566,7 @@
                                     <label for="email_subject" class="block text-sm font-medium text-gray-700">Assunto</label>
                                     <input type="text" name="subject" id="email_subject"
                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                                           value="Fatura {{ $invoice->invoice_number }}" required>
+                                           value="Factura {{ $invoice->invoice_number }}" required>
                                 </div>
                                 <div>
                                     <label for="email_message" class="block text-sm font-medium text-gray-700">Mensagem (opcional)</label>
