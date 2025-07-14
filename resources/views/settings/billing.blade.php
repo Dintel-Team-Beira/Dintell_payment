@@ -34,7 +34,7 @@
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div>
                         <label for="invoice_prefix" class="block mb-2 text-sm font-medium text-gray-700">
-                            Prefixo das Faturas
+                            Prefixo das Facturas
                         </label>
                         <input type="text"
                                name="invoice_prefix"
@@ -162,7 +162,7 @@
                             @error('default_payment_terms')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-                            <p class="mt-1 text-xs text-gray-500">Prazo padrão para vencimento das faturas</p>
+                            <p class="mt-1 text-xs text-gray-500">Prazo padrão para vencimento das facturas</p>
                         </div>
 
                         <div>
@@ -180,7 +180,7 @@
                             @error('late_fee_percentage')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-                            <p class="mt-1 text-xs text-gray-500">Taxa aplicada em faturas vencidas (opcional)</p>
+                            <p class="mt-1 text-xs text-gray-500">Taxa aplicada em facturas vencidas (opcional)</p>
                         </div>
                     </div>
                 </div>
