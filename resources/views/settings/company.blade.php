@@ -239,7 +239,7 @@
                 <div class="text-center card-footer">
                     <small class="text-muted">
                         <i class="fas fa-info-circle"></i>
-                        Essas informações aparecerão nas suas faturas e orçamentos
+                        Essas informações aparecerão nas suas facturas e orçamentos
                     </small>
                 </div>
             </div>
@@ -263,7 +263,7 @@
                         </li>
                         <li class="mb-2">
                             <i class="fas fa-check text-success"></i>
-                            O NUIT é obrigatório para emissão de faturas
+                            O NUIT é obrigatório para emissão de facturas
                         </li>
                         <li class="mb-0">
                             <i class="fas fa-check text-success"></i>
