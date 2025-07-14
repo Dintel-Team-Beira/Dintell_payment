@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Faturas')
-@section('subtitle', 'Gerencie suas faturas e recebimentos')
+@section('title', 'Facturas')
+@section('subtitle', 'Gerencie suas facturas e recebimentos')
 
 @section('header-actions')
 <div class="flex space-x-3">
@@ -68,7 +68,7 @@
                 </div>
             </div>
             <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-900">Total de Faturas</h3>
+                <h3 class="text-sm font-medium text-gray-900">Total de Facturas</h3>
                 <p class="text-2xl font-bold text-gray-900">{{ $stats['total_invoices'] }}</p>
                 @if(isset($stats['invoices_growth']))
                     <p class="text-xs text-{{ $stats['invoices_growth'] >= 0 ? 'green' : 'red' }}-600">
@@ -92,7 +92,7 @@
                 <h3 class="text-sm font-medium text-gray-900">Pendentes</h3>
                 <p class="text-2xl font-bold text-yellow-600">{{ number_format($stats['total_pending'], 2) }} MT</p>
                 <p class="text-xs text-gray-500">
-                    {{ $stats['pending_count'] }} faturas em aberto
+                    {{ $stats['pending_count'] }} facturas em aberto
                 </p>
             </div>
         </div>
@@ -111,7 +111,7 @@
                 <h3 class="text-sm font-medium text-gray-900">Vencidas</h3>
                 <p class="text-2xl font-bold text-red-600">{{ number_format($stats['total_overdue'], 2) }} MT</p>
                 <p class="text-xs text-gray-500">
-                    {{ $stats['count_overdue'] }} faturas vencidas
+                    {{ $stats['count_overdue'] }} facturas vencidas
                 </p>
             </div>
         </div>
@@ -130,7 +130,7 @@
                 <h3 class="text-sm font-medium text-gray-900">Pagas Este Mês</h3>
                 <p class="text-2xl font-bold text-emerald-600">{{ number_format($stats['total_paid_this_month'], 2) }} MT</p>
                 <p class="text-xs text-gray-500">
-                    {{ $stats['paid_count_this_month'] }} faturas pagas
+                    {{ $stats['paid_count_this_month'] }} facturas pagas
                 </p>
             </div>
         </div>
@@ -260,14 +260,14 @@
     </div>
 </div>
 
-<!-- Lista de Faturas -->
+<!-- Lista de Facturas -->
 <div class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl">
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
         <div>
-            <h3 class="text-lg font-semibold text-gray-900">Faturas</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Facturas</h3>
             @if($invoices->total() > 0)
                 <p class="text-sm text-gray-500">
-                    Mostrando {{ $invoices->firstItem() }} a {{ $invoices->lastItem() }} de {{ $invoices->total() }} faturas
+                    Mostrando {{ $invoices->firstItem() }} a {{ $invoices->lastItem() }} de {{ $invoices->total() }} facturas
                 </p>
             @endif
         </div>
@@ -949,7 +949,7 @@ function bulkUpdateStatus(status) {
         'cancelled': 'canceladas'
     };
 
-    if (confirm(`Deseja marcar ${selectedInvoices.length} faturas como ${statusLabels[status]}?`)) {
+    if (confirm(`Deseja marcar ${selectedInvoices.length} facturas como ${statusLabels[status]}?`)) {
         fetch('/invoices/bulk-update-status', {
             method: 'POST',
             headers: {
@@ -964,14 +964,14 @@ function bulkUpdateStatus(status) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showNotification(`${selectedInvoices.length} faturas atualizadas com sucesso!`, 'success');
+                showNotification(`${selectedInvoices.length} facturas atualizadas com sucesso!`, 'success');
                 setTimeout(() => location.reload(), 1500);
             } else {
-                showNotification('Erro ao atualizar faturas: ' + data.message, 'error');
+                showNotification('Erro ao atualizar facturas: ' + data.message, 'error');
             }
         })
         .catch(error => {
-            showNotification('Erro ao atualizar faturas', 'error');
+            showNotification('Erro ao atualizar facturas', 'error');
             console.error('Error:', error);
         });
     }
