@@ -92,7 +92,7 @@
 
                     <!-- Título da Seção -->
                     <div class="px-3 py-2">
-                        <h3 class="text-xs font-semibold tracking-wider text-gray-500 uppercase">Faturação</h3>
+                        <h3 class="text-xs font-semibold tracking-wider text-gray-500 uppercase">Facturação</h3>
                     </div>
 
                     <!-- Dashboard de Faturação -->
@@ -100,7 +100,7 @@
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
-                        Dashboard Faturação
+                        Dashboard Facturação
                     </a>
 
                     <!-- Faturas -->
@@ -108,7 +108,7 @@
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        Faturas
+                        Facturas
                         @php
                         $overdueCount = \App\Models\Invoice::where('status', 'overdue')->count();
                         @endphp
@@ -152,7 +152,7 @@
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                Nova Fatura
+                                Nova Factura
                             </a>
 
                             <a href="{{ route('quotes.create') }}" class="flex items-center px-3 py-2 text-sm text-gray-600 rounded-lg hover:text-gray-900 hover:bg-gray-50">
@@ -947,7 +947,7 @@
                 printWindow.document.write(`
             <html>
                 <head>
-                    <title>Relatório de Faturamento</title>
+                    <title>Relatório de Facturamento</title>
                     <style>
                         body { font-family: Arial, sans-serif; }
                         table { width: 100%; border-collapse: collapse; }
@@ -957,7 +957,7 @@
                     </style>
                 </head>
                 <body>
-                    <h1>Relatório de Faturamento</h1>
+                    <h1>Relatório de Facturamento</h1>
                     ${tableHTML}
                 </body>
             </html>
@@ -1042,7 +1042,7 @@
         }
 
         function markAsPaid(id) {
-            if (confirm('Marcar esta fatura como paga?')) {
+            if (confirm('Marcar esta factura como paga?')) {
                 fetch(`/api/invoices/${id}/mark-paid`, {
                         method: 'POST'
                         , headers: {
@@ -1052,10 +1052,10 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            billing.showNotification('Fatura marcada como paga', 'success');
+                            billing.showNotification('Factura marcada como paga', 'success');
                             location.reload();
                         } else {
-                            billing.showNotification('Erro ao marcar fatura como paga', 'error');
+                            billing.showNotification('Erro ao marcar factura como paga', 'error');
                         }
                     });
             }
