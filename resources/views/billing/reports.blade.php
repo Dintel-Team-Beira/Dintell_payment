@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Relatórios de Faturamento')
+@section('title', 'Relatórios de Facturamento')
 
 @section('content')
 <div class="py-4 container-fluid">
@@ -9,7 +9,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="mb-0 text-gray-800 h3">Relatórios de Faturamento</h1>
+                    <h1 class="mb-0 text-gray-800 h3">Relatórios de Facturamento</h1>
                     <p class="text-muted">
                         Período: {{ $startDate->format('d/m/Y') }} até {{ $endDate->format('d/m/Y') }}
                     </p>
@@ -102,12 +102,12 @@
     </div>
 
     <div class="row">
-        <!-- Relatório de Faturas -->
+        <!-- Relatório de Facturas -->
         <div class="mb-4 col-lg-8">
             <div class="shadow card">
                 <div class="card-header">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-file-invoice"></i> Relatório de Faturas
+                        <i class="fas fa-file-invoice"></i> Relatório de Facturas
                     </h6>
                 </div>
                 <div class="card-body">
@@ -122,28 +122,28 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><strong>Total de Faturas</strong></td>
+                                    <td><strong>Total de Facturas</strong></td>
                                     <td class="text-center">{{ number_format($invoiceStats['total_count']) }}</td>
                                     <td class="text-right">
                                         <strong>{{ number_format($invoiceStats['total_amount'], 2, ',', '.') }} MT</strong>
                                     </td>
                                 </tr>
                                 <tr class="table-success">
-                                    <td>Faturas Pagas</td>
+                                    <td>Facturas Pagas</td>
                                     <td class="text-center">{{ number_format($invoiceStats['paid_count']) }}</td>
                                     <td class="text-right">
                                         {{ number_format($invoiceStats['paid_amount'], 2, ',', '.') }} MT
                                     </td>
                                 </tr>
                                 <tr class="table-warning">
-                                    <td>Faturas Pendentes</td>
+                                    <td>Facturas Pendentes</td>
                                     <td class="text-center">{{ number_format($invoiceStats['pending_count']) }}</td>
                                     <td class="text-right">
                                         {{ number_format($invoiceStats['pending_amount'], 2, ',', '.') }} MT
                                     </td>
                                 </tr>
                                 <tr class="table-danger">
-                                    <td>Faturas Vencidas</td>
+                                    <td>Facturas Vencidas</td>
                                     <td class="text-center">{{ number_format($invoiceStats['overdue_count']) }}</td>
                                     <td class="text-right">
                                         {{ number_format($invoiceStats['overdue_amount'], 2, ',', '.') }} MT
@@ -160,7 +160,7 @@
                         </table>
                     </div>
 
-                    <!-- Gráfico de Pizza - Status das Faturas -->
+                    <!-- Gráfico de Pizza - Status das Facturas -->
                     <div class="mt-4">
                         <h6>Distribuição por Status</h6>
                         <canvas id="invoiceStatusChart" style="max-height: 300px;"></canvas>
@@ -169,7 +169,7 @@
                     <!-- Faturamento por Mês -->
                     @if($invoiceStats['by_month']->count() > 0)
                         <div class="mt-4">
-                            <h6>Faturamento por Mês</h6>
+                            <h6>Facturamento por Mês</h6>
                             <div class="table-responsive">
                                 <table class="table table-sm">
                                     <thead>
@@ -275,7 +275,7 @@
             <div class="shadow card">
                 <div class="card-header">
                     <h6 class="m-0 font-weight-bold text-success">
-                        <i class="fas fa-users"></i> Top 10 Clientes por Faturamento
+                        <i class="fas fa-users"></i> Top 10 Clientes por Facturamento
                     </h6>
                 </div>
                 <div class="card-body">
@@ -285,7 +285,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Cliente</th>
-                                    <th class="text-right">Valor Faturado</th>
+                                    <th class="text-right">Valor Facturado</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -318,7 +318,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="3" class="py-4 text-center text-muted">
-                                            Nenhum cliente com faturamento no período
+                                            Nenhum cliente com facturamento no período
                                         </td>
                                     </tr>
                                 @endforelse
@@ -370,7 +370,7 @@
 
                     <div class="mb-4">
                         <div class="mb-2 d-flex justify-content-between align-items-center">
-                            <span>Com Faturas Vencidas</span>
+                            <span>Com Facturas Vencidas</span>
                             <span class="badge badge-danger badge-pill">
                                 {{ number_format($clientStats['clients_with_overdue']) }}
                             </span>
@@ -416,7 +416,7 @@
                                 @if($invoiceStats['paid_count'] > 0)
                                     <li class="mb-2">
                                         <i class="fas fa-check text-success me-2"></i>
-                                        {{ $invoiceStats['paid_count'] }} faturas foram pagas no período
+                                        {{ $invoiceStats['paid_count'] }} facturas foram pagas no período
                                     </li>
                                 @endif
                                 @if($quoteStats['conversion_rate'] > 50)
@@ -441,7 +441,7 @@
                                 @if($invoiceStats['overdue_count'] > 0)
                                     <li class="mb-2">
                                         <i class="fas fa-exclamation text-warning me-2"></i>
-                                        {{ $invoiceStats['overdue_count'] }} faturas estão vencidas
+                                        {{ $invoiceStats['overdue_count'] }} facturas estão vencidas
                                     </li>
                                 @endif
                                 @if($quoteStats['conversion_rate'] < 30)
@@ -453,7 +453,7 @@
                                 @if($clientStats['clients_with_overdue'] > 0)
                                     <li class="mb-2">
                                         <i class="fas fa-exclamation text-warning me-2"></i>
-                                        {{ $clientStats['clients_with_overdue'] }} clientes com faturas vencidas
+                                        {{ $clientStats['clients_with_overdue'] }} clientes com facturas vencidas
                                     </li>
                                 @endif
                             </ul>
@@ -474,7 +474,7 @@
                                             <div class="card-body">
                                                 <h6 class="card-title text-danger">Cobranças</h6>
                                                 <p class="card-text small">
-                                                    Implemente um sistema de lembrete automático para faturas vencidas
+                                                    Implemente um sistema de lembrete automático para facturas vencidas
                                                 </p>
                                             </div>
                                         </div>
@@ -515,7 +515,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Gráfico de Pizza - Status das Faturas
+    // Gráfico de Pizza - Status das Facturas
     const ctx = document.getElementById('invoiceStatusChart').getContext('2d');
 
     const invoiceStatusData = {
