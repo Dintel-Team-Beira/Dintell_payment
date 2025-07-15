@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-{{-- @section('title', 'Nova Factura') --}}
+@section('title', 'SFS – Sistema de Faturação e Subscrição')
 
 @section('content')
-<div class=" sm:px-6 lg:px-8">
+<div class="container ">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -23,7 +23,7 @@
             </div>
         </div>
     </div>
-
+    <!-- Formulário de Criação de Fatura -->
     <form action="{{ route('invoices.store') }}" method="POST" id="invoiceForm">
         @csrf
 
@@ -564,7 +564,7 @@
         document.getElementById('customItemDescription').value = '';
         document.getElementById('customItemQuantity').value = '1';
         document.getElementById('customItemPrice').value = '0';
-        document.getElementById('customItemTax').value = '17';
+        document.getElementById('customItemTax').value = '16';
     }
 
     function closeCustomItemModal() {
@@ -808,7 +808,7 @@
             description: item.description || '',
             quantity: customQuantity || (type === 'service' && item.estimated_hours ? item.estimated_hours : 1),
             unit_price: type === 'product' ? item.price : (item.fixed_price > 0 ? item.fixed_price : item.hourly_rate || item.price),
-            tax_rate: item.tax_rate || 17,
+            tax_rate: item.tax_rate || 16,
             category: item.category || '',
             complexity: item.complexity_level || ''
         };
