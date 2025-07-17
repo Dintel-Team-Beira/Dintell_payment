@@ -84,75 +84,171 @@ class InvoiceController extends Controller
         $clients = Client::orderBy('name')->get();
         $settings = BillingSetting::getSettings();
 
-        return view('invoices.create', compact('clients', 'settings'));
+
+          // Verificar se é venda à dinheiro
+        $isCashSale = request()->get('cash_sale', false);
+        return view('invoices.create', compact('clients', 'settings','isCashSale'));
     }
+
+    // public function store(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'client_id' => 'required|exists:clients,id',
+    //         'quote_id' => 'nullable|exists:quotes,id',
+    //         'invoice_date' => 'required|date',
+    //         'payment_terms_days' => 'required|numeric|min:0|max:365',
+    //         'items' => 'required|array|min:1',
+    //         'items.*.description' => 'required|string|max:255',
+    //         'items.*.quantity' => 'required|numeric|min:0.01',
+    //         'items.*.unit_price' => 'required|numeric|min:0',
+    //         'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
+    //         'notes' => 'nullable|string',
+    //         'terms_conditions' => 'nullable|string'
+    //     ]);
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // Garantir que payment_terms_days seja um número
+    //         $paymentTermsDays = (int) $validated['payment_terms_days'];
+
+    //         // Calcular totais
+    //         $totals = $this->calculateInvoiceTotals($validated['items']);
+
+    //         // Calcular data de vencimento corretamente
+    //         $dueDate = Carbon::parse($validated['invoice_date'])
+    //             ->addDays($paymentTermsDays);
+
+    //         // Criar fatura
+    //         $invoice = Invoice::create([
+    //             'client_id' => $validated['client_id'],
+    //             'quote_id' => $validated['quote_id'] ?? null,
+    //             'invoice_date' => $validated['invoice_date'],
+    //             'due_date' => $dueDate,
+    //             'payment_terms_days' => $paymentTermsDays,
+    //             'subtotal' => $totals['subtotal'],
+    //             'tax_amount' => $totals['tax_amount'],
+    //             'total' => $totals['total'],
+    //             'status' => 'draft',
+    //             'notes' => $validated['notes'],
+    //             'terms_conditions' => $validated['terms_conditions']
+    //         ]);
+
+    //         // Criar itens da fatura
+    //         foreach ($validated['items'] as $itemData) {
+    //             $this->createInvoiceItem($invoice, $itemData);
+    //         }
+
+    //         DB::commit();
+
+    //         return redirect()->route('invoices.show', $invoice)
+    //             ->with('success', 'Fatura criada com sucesso!');
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+
+    //         \Log::error('Erro ao criar fatura: ' . $e->getMessage(), [
+    //             'request_data' => $request->all(),
+    //             'exception' => $e
+    //         ]);
+
+    //         return back()->withInput()
+    //             ->with('error', 'Erro ao criar fatura: ' . $e->getMessage());
+    //     }
+    // }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'quote_id' => 'nullable|exists:quotes,id',
-            'invoice_date' => 'required|date',
-            'payment_terms_days' => 'required|numeric|min:0|max:365',
-            'items' => 'required|array|min:1',
-            'items.*.description' => 'required|string|max:255',
-            'items.*.quantity' => 'required|numeric|min:0.01',
-            'items.*.unit_price' => 'required|numeric|min:0',
-            'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
-            'notes' => 'nullable|string',
-            'terms_conditions' => 'nullable|string'
-        ]);
+{
+    $validated = $request->validate([
+        'client_id' => 'required|exists:clients,id',
+        'quote_id' => 'nullable|exists:quotes,id',
+        'invoice_date' => 'required|date',
+        'payment_terms_days' => 'required|numeric|min:0|max:365',
+        'payment_method' => 'required|in:cash,bank_transfer,check,credit_card,other',
+        'items' => 'required|array|min:1',
+        'items.*.description' => 'required|string|max:255',
+        'items.*.quantity' => 'required|numeric|min:0.01',
+        'items.*.unit_price' => 'required|numeric|min:0',
+        'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
+        'discount_percentage' => 'nullable|numeric|min:0|max:100',
+        'discount_amount' => 'nullable|numeric|min:0',
+        'notes' => 'nullable|string',
+        'terms_conditions' => 'nullable|string',
+        'is_cash_sale' => 'nullable|boolean',
+        'cash_received' => 'nullable|numeric|min:0'
+    ]);
 
-        try {
-            DB::beginTransaction();
+    try {
+        DB::beginTransaction();
 
-            // Garantir que payment_terms_days seja um número
-            $paymentTermsDays = (int) $validated['payment_terms_days'];
+        // Calcular totais
+        $totals = $this->calculateInvoiceTotals($validated['items']);
 
-            // Calcular totais
-            $totals = $this->calculateInvoiceTotals($validated['items']);
+        // Calcular desconto
+        $discountAmount = $validated['discount_amount'] ?? 0;
+        if (($validated['discount_percentage'] ?? 0) > 0) {
+            $discountAmount = ($totals['subtotal'] + $totals['tax_amount']) * ($validated['discount_percentage'] / 100);
+        }
 
-            // Calcular data de vencimento corretamente
-            $dueDate = Carbon::parse($validated['invoice_date'])
-                ->addDays($paymentTermsDays);
+        $total = $totals['subtotal'] + $totals['tax_amount'] - $discountAmount;
 
-            // Criar fatura
-            $invoice = Invoice::create([
-                'client_id' => $validated['client_id'],
-                'quote_id' => $validated['quote_id'] ?? null,
-                'invoice_date' => $validated['invoice_date'],
-                'due_date' => $dueDate,
-                'payment_terms_days' => $paymentTermsDays,
-                'subtotal' => $totals['subtotal'],
-                'tax_amount' => $totals['tax_amount'],
-                'total' => $totals['total'],
-                'status' => 'draft',
-                'notes' => $validated['notes'],
-                'terms_conditions' => $validated['terms_conditions']
-            ]);
+        // Calcular data de vencimento
+        $paymentTermsDays = (int) $validated['payment_terms_days'];
+        $dueDate = Carbon::parse($validated['invoice_date'])->addDays($paymentTermsDays);
 
-            // Criar itens da fatura
-            foreach ($validated['items'] as $itemData) {
-                $this->createInvoiceItem($invoice, $itemData);
+        // Criar fatura
+        $invoiceData = [
+            'client_id' => $validated['client_id'],
+            'quote_id' => $validated['quote_id'] ?? null,
+            'invoice_date' => $validated['invoice_date'],
+            'due_date' => $dueDate,
+            'payment_terms_days' => $paymentTermsDays,
+            // 'payment_method' => $validated['payment_method'],
+            'subtotal' => $totals['subtotal'],
+            'tax_amount' => $totals['tax_amount'],
+            'discount_percentage' => $validated['discount_percentage'] ?? 0,
+            'discount_amount' => $discountAmount,
+            'total' => $total,
+            'status' => 'draft',
+            'notes' => $validated['notes'],
+            'terms_conditions' => $validated['terms_conditions'],
+            'document_type' => Invoice::TYPE_INVOICE
+        ];
+
+        // Se é venda à dinheiro
+        if ($validated['is_cash_sale'] ?? false) {
+            $cashReceived = $validated['cash_received'] ?? $total;
+
+            if ($cashReceived < $total) {
+                throw new \Exception('Valor recebido insuficiente para venda à dinheiro');
             }
 
-            DB::commit();
-
-            return redirect()->route('invoices.show', $invoice)
-                ->with('success', 'Fatura criada com sucesso!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            \Log::error('Erro ao criar fatura: ' . $e->getMessage(), [
-                'request_data' => $request->all(),
-                'exception' => $e
-            ]);
-
-            return back()->withInput()
-                ->with('error', 'Erro ao criar fatura: ' . $e->getMessage());
+            $invoiceData['is_cash_sale'] = true;
+            $invoiceData['cash_received'] = $cashReceived;
+            $invoiceData['change_given'] = $cashReceived - $total;
+            $invoiceData['paid_amount'] = $total;
+            $invoiceData['status'] = 'paid';
+            $invoiceData['paid_at'] = now();
         }
+
+        $invoice = Invoice::create($invoiceData);
+
+        // Criar itens da fatura
+        foreach ($validated['items'] as $itemData) {
+            $this->createInvoiceItem($invoice, $itemData);
+        }
+
+        DB::commit();
+
+        return redirect()->route('invoices.show', $invoice)
+            ->with('success', 'Fatura criada com sucesso!');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->withInput()
+            ->with('error', 'Erro ao criar fatura: ' . $e->getMessage());
     }
+}
 
     private function calculateInvoiceTotals($items)
     {
