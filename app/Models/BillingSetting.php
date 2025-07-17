@@ -2,52 +2,74 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BillingSetting extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'company_name',
-        'company_address',
-        'tax_number',
         'invoice_prefix',
-        'quote_prefix',
         'next_invoice_number',
+        'quote_prefix',
         'next_quote_number',
-        'default_tax_rate'
+        'credit_note_prefix',
+        'next_credit_note_number',
+        'debit_note_prefix',
+        'next_debit_note_number',
+        'default_payment_terms',
+        'default_tax_rate',
+        'company_name',
+        'company_email',
+        'company_phone',
+        'company_address',
+        'company_nuit'
     ];
 
     protected $casts = [
+        'next_invoice_number' => 'integer',
+        'next_quote_number' => 'integer',
+        'next_credit_note_number' => 'integer',
+        'next_debit_note_number' => 'integer',
+        'default_payment_terms' => 'integer',
         'default_tax_rate' => 'decimal:2'
     ];
 
     public static function getSettings()
     {
-        return self::first() ?? self::create([
-            'company_name' => 'Sua Empresa',
-            'company_address' => 'Endereço da empresa',
-            'invoice_prefix' => 'FAT',
-            'quote_prefix' => 'COT',
-            'next_invoice_number' => 1,
-            'next_quote_number' => 1,
-            'default_tax_rate' => 17.00
-        ]);
+        return self::firstOrCreate(
+            ['id' => 1],
+            [
+                'invoice_prefix' => 'FAT',
+                'next_invoice_number' => 1,
+                'quote_prefix' => 'COT',
+                'next_quote_number' => 1,
+                'credit_note_prefix' => 'NC',
+                'next_credit_note_number' => 1,
+                'debit_note_prefix' => 'ND',
+                'next_debit_note_number' => 1,
+                'default_payment_terms' => 30,
+                'default_tax_rate' => 16
+            ]
+        );
     }
 
     public function getNextInvoiceNumber()
     {
-        $number = $this->next_invoice_number;
+        $number = $this->invoice_prefix . str_pad($this->next_invoice_number, 6, '0', STR_PAD_LEFT);
         $this->increment('next_invoice_number');
-        return $this->invoice_prefix . str_pad($number, 6, '0', STR_PAD_LEFT);
+        return $number;
     }
 
-    public function getNextQuoteNumber()
+    public function getNextCreditNoteNumber()
     {
-        $number = $this->next_quote_number;
-        $this->increment('next_quote_number');
-        return $this->quote_prefix . str_pad($number, 6, '0', STR_PAD_LEFT);
+        $number = $this->credit_note_prefix . str_pad($this->next_credit_note_number, 6, '0', STR_PAD_LEFT);
+        $this->increment('next_credit_note_number');
+        return $number;
+    }
+
+    public function getNextDebitNoteNumber()
+    {
+        $number = $this->debit_note_prefix . str_pad($this->next_debit_note_number, 6, '0', STR_PAD_LEFT);
+        $this->increment('next_debit_note_number');
+        return $number;
     }
 }
