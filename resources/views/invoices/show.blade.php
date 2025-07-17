@@ -58,7 +58,27 @@
             Marcar como Paga
         </button>
     @endif
+@if($invoice->isInvoice() && $invoice->status === 'paid')
+    <!-- Criar Nota de Crédito -->
+    <a href="{{ route('credit-notes.create', ['invoice_id' => $invoice->id]) }}"
+       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-orange-600 rounded-lg hover:bg-orange-700">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m0 0l6 6m-6-6v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h7"/>
+        </svg>
+        Criar Nota de Crédito
+    </a>
+@endif
 
+@if($invoice->isInvoice())
+    <!-- Criar Nota de Débito -->
+    <a href="{{ route('debit-notes.create', ['invoice_id' => $invoice->id]) }}"
+       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-yellow-600 rounded-lg hover:bg-yellow-700">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Criar Nota de Débito
+    </a>
+@endif
     <!-- Baixar PDF -->
     <a href="{{ route('invoices.download-pdf', $invoice) }}"
        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700">
