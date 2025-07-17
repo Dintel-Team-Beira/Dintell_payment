@@ -7,6 +7,9 @@ use App\Http\Controllers\SubscriptionPlanController;
 use App\Http\Controllers\SuspensionPageController;
 use App\Http\Controllers\ApiLogController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\CashSaleController;
+use App\Http\Controllers\CreditNoteController;
+use App\Http\Controllers\DebitNoteController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
@@ -200,6 +203,10 @@ Route::prefix('quotes')->group(function () {
 
             // Exportação
             Route::get('/export/data', [InvoiceController::class, 'export'])->name('export');
+
+
+                // Relatórios por tipo de documento
+    Route::get('/by-type/{type}', [InvoiceController::class, 'indexByType'])->name('by-type');
         });
 
         // API Routes para AJAX - Faturas
@@ -275,3 +282,18 @@ Route::prefix('servicos')->name('services.')->group(function () {
     Route::get('export', [ServiceController::class, 'export'])->name('export');
     Route::post('import', [ServiceController::class, 'import'])->name('import');
 });
+
+
+// Vendas à Dinheiro
+Route::prefix('cash-sales')->name('cash-sales.')->group(function () {
+    Route::get('/create', [CashSaleController::class, 'create'])->name('create');
+    Route::post('/', [CashSaleController::class, 'store'])->name('store');
+    Route::get('/quick-sale', [CashSaleController::class, 'quickSale'])->name('quick-sale');
+});
+
+// Notas de Crédito
+Route::resource('credit-notes', CreditNoteController::class);
+
+
+// Notas de Débito
+Route::resource('debit-notes', DebitNoteController::class);
