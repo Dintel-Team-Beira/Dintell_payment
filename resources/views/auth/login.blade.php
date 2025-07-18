@@ -41,7 +41,7 @@
     <div class="w-full max-w-md p-8 bg-white rounded-lg shadow-sm login-card animate__animated animate__fadeIn">
         <!-- Logo -->
         <div class="mb-8 text-center animate__animated animate__fadeInDown">
-            <img src="{{ asset('logo.png') }}" alt="Dintell Lgo" class="">
+            <img src="{{ asset('main.webp') }}" alt="Dintell Lgo" class="">
 
         </div>
 
