@@ -76,26 +76,7 @@
                                 @enderror
                             </div>
 
-                            {{-- <div>
-                                <label for="payment_method" class="block mb-2 text-sm font-medium text-gray-700">Método
-                                    de Pagamento *</label>
-                                <select name="payment_method" id="payment_method" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                                    <option value="">Selecione um método</option>
-                                    <option value="cash" {{ old('payment_method')=='cash' ? 'selected' : '' }}>Dinheiro
-                                    </option>
-                                    <option value="bank_transfer" {{ old('payment_method')=='bank_transfer' ? 'selected'
-                                        : '' }}>Transferência Bancária</option>
-                                    <option value="check" {{ old('payment_method')=='check' ? 'selected' : '' }}>Cheque
-                                    </option>
-                                    <option value="credit_card" {{ old('payment_method')=='credit_card' ? 'selected'
-                                        : '' }}>Cartão de Crédito</option>
-                                    <option value="other" {{ old('payment_method')=='other' ? 'selected' : '' }}>Outro
-                                    </option>
-                                </select>
-                                @error('payment_method')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div> --}}
+                     
                         </div>
 
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
