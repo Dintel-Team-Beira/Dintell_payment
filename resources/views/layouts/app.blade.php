@@ -34,27 +34,21 @@
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         <div class="w-64 bg-white border-r border-gray-200 shadow-sm">
-            <div class="">
-                <div class="flex items-center">
+
+                <div class="flex items-center justify-center w-30">
                     <a href="{{ route('dashboard') }}">
 
-                        <img href="/dashboard" src="{{ asset('logo.png') }}" />
+                        <img href="/dashboard" src="{{ asset('main.webp') }}"  />
                     </a>
 
-                    {{-- <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                        </svg>
-                    </div>
-                    <h1 class="ml-3 text-xl font-bold text-gray-900">SubManager</h1> --}}
                 </div>
-            </div>
+
 
             <nav class="px-3 ">
                 <div class="space-y-1">
                     <!-- === NOVA SEÇÃO DE FATURAÇÃO === -->
                     <!-- Separador -->
-                    <div class="my-4 border-t border-gray-200"></div>
+                    {{-- <div class="my-4 border-t border-gray-200"></div> --}}
 
                     <!-- Título da Seção -->
                     <div class="px-3 py-2">
