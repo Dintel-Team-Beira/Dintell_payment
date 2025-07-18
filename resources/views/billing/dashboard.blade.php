@@ -5,7 +5,7 @@
 @section('header-actions')
 <div class="flex items-center gap-x-4">
     <!-- Period Filter -->
-    {{-- <form method="GET" class="flex items-center gap-x-2">
+    <form method="GET" class="flex items-center gap-x-2">
         <select name="period" class="rounded-md border-0 py-1.5 pl-3 pr-8 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm" onchange="this.form.submit()">
             <option value="monthly" {{ request('period') === 'monthly' ? 'selected' : '' }}>Este Mês</option>
             <option value="quarterly" {{ request('period') === 'quarterly' ? 'selected' : '' }}>Este Trimestre</option>
@@ -20,7 +20,7 @@
             Aplicar
         </button>
         @endif
-    </form> --}}
+    </form>
 
     <a href="{{ route('quotes.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,13 +30,13 @@
     </a>
 
     <!-- Export Button -->
-    {{-- <a href="{{ route('billing.export', request()->all()) }}"
+    <a href="{{ route('billing.export', request()->all()) }}"
        class="flex items-center px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
         Exportar
-    </a> --}}
+    </a>
 
     <!-- Quick Action Button -->
     <a href="{{ route('invoices.create') }}"
