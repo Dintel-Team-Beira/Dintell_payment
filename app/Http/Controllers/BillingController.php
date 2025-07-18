@@ -490,27 +490,34 @@ class BillingController extends Controller
         return $activeClients > 0 ? round($totalRevenue / $activeClients, 2) : 0;
     }
 
-    public function export(Request $request)
+  public function export(Request $request)
     {
-        // Implementar lógica de exportação em Excel/PDF
-        // Esta funcionalidade pode ser implementada usando Laravel Excel ou DomPDF
+        $request->validate([
+            'format' => 'required|in:excel,pdf',
+            'period' => 'nullable|in:daily,weekly,monthly,quarterly,yearly,custom',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
 
+        $format = $request->get('format');
         $period = $request->get('period', 'monthly');
         $startDate = $this->getStartDate($period, $request->get('start_date'));
         $endDate = $this->getEndDate($period, $request->get('end_date'));
 
-        $data = [
-            'invoices' => $this->getDetailedInvoiceStats($startDate, $endDate),
-            'quotes' => $this->getDetailedQuoteStats($startDate, $endDate),
-            'clients' => $this->getDetailedClientStats($startDate, $endDate),
-            'performance' => $this->getPerformanceMetrics($startDate, $endDate),
-        ];
+        try {
+            $data = $this->getExportData($startDate, $endDate);
 
-        // Retornar download do arquivo Excel ou PDF
-        return response()->json([
-            'message' => 'Funcionalidade de exportação será implementada',
-            'data' => $data
-        ]);
+            if ($format === 'excel') {
+                return $this->exportToExcel($data, $startDate, $endDate);
+            } else {
+                return $this->exportToPdf($data, $startDate, $endDate);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao gerar exportação: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getDashboardStats(Request $request)
