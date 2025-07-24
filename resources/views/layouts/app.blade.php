@@ -18,8 +18,59 @@
     <!-- Select2 JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="https://www.dintell.co.mz/logo.png">
+      <script type="application/ld+json">
+        {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "dintell",
+        "url": "https://www.dintell.co.mz",
+        "logo": "https://www.dintell.co.mz/logo.png",
+        "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "137 Maguiguana Ave.",
+                "addressLocality": "Maputo",
+                "addressCountry": "MZ"
+                },
+        "sameAs": [
+                "https://mz.linkedin.com/company/dintell"
+        ],
+        "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+258-86-671-3743",
+                "contactType": "Customer Service"
+        },
+        "department": [
+                {
+                "@type": "Organization",
+                "name": "Contacts & Locations",
+                "url": "https://www.dintell.co.mz/contact"
+                },
+                {
+                "@type": "Organization",
+                "name": "About Dintell",
+                "url": "https://www.dintell.co.mz/about"
+                },
+                {
+                "@type": "Organization",
+                "name": "Services",
+                "url": "https://www.dintell.co.mz/services"
+                },
+                {
+                "@type": "Organization",
+                "name": "Our Portfolio",
+                "url": "https://www.dintell.co.mz/portfolio"
+                }
+        ]
+        }
+        </script>
 
+        <!-- favicon icon -->
+        <link rel="shortcut icon" href="https://dintell.co.mz/img/favicon.png?v=1753101974">
+        <link rel="apple-touch-icon" href="https://dintell.co.mz/images/apple-touch-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="72x72" href="https://dintell.co.mz/../images/apple-touch-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="https://dintell.co.mz/../images/apple-touch-icon-114x114.png">
+        <!-- google fonts preconnect -->
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -163,7 +214,7 @@
                                 Nova Cotação
                             </a>
 
-                            <a href="{{ route('credit-notes.create') }}" class="flex items-center px-3 py-2 text-sm text-gray-600 rounded-lg hover:text-gray-900 hover:bg-gray-50">
+                            <a href="{{ route('credit-notes.index') }}" class="flex items-center px-3 py-2 text-sm text-gray-600 rounded-lg hover:text-gray-900 hover:bg-gray-50">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
