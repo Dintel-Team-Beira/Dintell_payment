@@ -73,6 +73,8 @@ class Invoice extends Model
         ];
     }
 
+
+
     public static function getPaymentMethods()
     {
         return [
