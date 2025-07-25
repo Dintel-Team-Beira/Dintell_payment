@@ -250,16 +250,40 @@ Route::middleware(['auth'])->group(function () {
      Route::post('/{creditNote}/duplicate', [CreditNoteController::class, 'duplicate'])->name('duplicate');
     });
     // Notas de Débito
-    Route::resource('debit-notes', DebitNoteController::class)->names([
-        'index' => 'debit-notes.index',
-        'create' => 'debit-notes.create',
-        'store' => 'debit-notes.store',
-        'show' => 'debit-notes.show',
-        'edit' => 'debit-notes.edit',
-        'update' => 'debit-notes.update',
-        'destroy' => 'debit-notes.destroy'
-    ]);
+    // Route::resource('debit-notes', DebitNoteController::class)->names([
+    //     'index' => 'debit-notes.index',
+    //     'create' => 'debit-notes.create',
+    //     'store' => 'debit-notes.store',
+    //     'show' => 'debit-notes.show',
+    //     'edit' => 'debit-notes.edit',
+    //     'update' => 'debit-notes.update',
+    //     'destroy' => 'debit-notes.destroy'
+    // ]);
 });
+ // Notas de Débito
+    Route::prefix('debit-notes')->name('debit-notes.')->group(function () {
+        Route::get('/', [DebitNoteController::class, 'index'])->name('index');
+        Route::get('/create', [DebitNoteController::class, 'create'])->name('create');
+        Route::post('/', [DebitNoteController::class, 'store'])->name('store');
+        Route::get('/{debitNote}', [DebitNoteController::class, 'show'])->name('show');
+        Route::get('/{debitNote}/edit', [DebitNoteController::class, 'edit'])->name('edit');
+        Route::put('/{debitNote}', [DebitNoteController::class, 'update'])->name('update');
+        Route::delete('/{debitNote}', [DebitNoteController::class, 'destroy'])->name('destroy');
+
+        // Ações específicas - TODAS as rotas necessárias
+        Route::get('/{debitNote}/pdf', [DebitNoteController::class, 'downloadPdf'])->name('download-pdf');
+        Route::post('/{debitNote}/send-email', [DebitNoteController::class, 'sendByEmail'])->name('send-email');
+        Route::post('/{debitNote}/duplicate', [DebitNoteController::class, 'duplicate'])->name('duplicate');
+        Route::post('/{debitNote}/mark-as-paid', [DebitNoteController::class, 'markAsPaid'])->name('mark-as-paid');
+        Route::patch('/{debitNote}/status', [DebitNoteController::class, 'updateStatus'])->name('update-status');
+
+        // API para AJAX
+        Route::get('/api/debit-type-details', [DebitNoteController::class, 'getDebitTypeDetails'])->name('api.debit-type-details');
+        Route::post('/api/calculate-preview', [DebitNoteController::class, 'calculatePreview'])->name('api.calculate-preview');
+
+        // Exportação
+        Route::get('/export/data', [DebitNoteController::class, 'export'])->name('export');
+    });
 
 // Utilitários
 Route::get('/limpar-cache', function () {
