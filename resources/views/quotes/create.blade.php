@@ -2,10 +2,11 @@
 
 @extends('layouts.app')
 
-@section('title', 'Nova')
+@section('title', 'Cotação')
+@section('subtitle', 'Gerencie suas Cotações com facilidade')
 
 @section('content')
-<div class="sm:px-6 lg:px-8">
+<div class="">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
