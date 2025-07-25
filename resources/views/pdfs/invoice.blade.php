@@ -415,9 +415,9 @@
                 @if($invoice->due_date->isToday())
                     VENCE HOJE
                 @elseif($invoice->due_date->isFuture())
-                    {{ $invoice->due_date->diffInDays() }} DIAS PARA VENCIMENTO
+                    {{ $invoice->due_date }} DIAS PARA VENCIMENTO
                 @else
-                    VENCIDA HÁ {{ $invoice->due_date->diffInDays() }} DIAS
+                    VENCIDA HÁ {{ $invoice->due_date }} DIAS
                 @endif
             </td>
         </tr>
