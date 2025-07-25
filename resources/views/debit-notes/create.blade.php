@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Nova Nota de Débito')
+@section('title', 'Nota de Débito')
+@section('subtitle', 'Crie uma nota de débito para ajustar valores de faturas')
 
 @section('content')
 <div class="container">
