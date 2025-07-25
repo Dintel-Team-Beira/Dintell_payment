@@ -1,28 +1,27 @@
 @extends('layouts.app')
 
-@section('title', 'SFS – Sistema de Faturação e Subscrição')
+@section('title', 'Nova Nota de Débito')
 
 @section('content')
-<div class="container ">
+<div class="container">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
                 <h1 class="text-3xl font-bold text-gray-900">Nova Nota de Débito</h1>
-                <p class="mt-2 text-gray-600">Crie uma nota de débito para cobranças adicionais</p>
+                <p class="mt-2 text-gray-600">Crie uma nota de débito de forma rápida e automatizada</p>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('debit-notes.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <a href="{{ route('debit-notes.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Voltar
                 </a>
                 @if($invoice)
-                <a href="{{ route('invoices.show', $invoice) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <a href="{{ route('invoices.show', $invoice) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                     Ver Fatura Original
                 </a>
@@ -31,7 +30,7 @@
         </div>
     </div>
 
-    <!-- Formulário de Criação de Nota de Débito -->
+    <!-- Formulário -->
     <form action="{{ route('debit-notes.store') }}" method="POST" id="debitNoteForm">
         @csrf
 
@@ -44,22 +43,20 @@
                         <div class="flex items-center">
                             <div class="p-2 mr-3 bg-yellow-100 rounded-lg">
                                 <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Informações da Nota de Débito</h3>
-                                <p class="text-sm text-gray-600">Dados básicos da cobrança adicional</p>
+                                <h3 class="text-lg font-semibold text-gray-900">Informações Básicas</h3>
+                                <p class="text-sm text-gray-600">Dados da nota de débito</p>
                             </div>
                         </div>
                     </div>
                     <div class="p-6 space-y-6">
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
-                                <label for="client_id" class="block mb-2 text-sm font-medium text-gray-700">
-                                    Cliente *
-                                </label>
-                                <select name="client_id" id="client_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg select2 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent" required>
+                                <label for="client_id" class="block mb-2 text-sm font-medium text-gray-700">Cliente *</label>
+                                <select name="client_id" id="client_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg select2" required>
                                     <option value="">Selecione um cliente</option>
                                     @foreach($clients as $client)
                                     <option value="{{ $client->id }}" {{ (($invoice && $invoice->client_id == $client->id) || old('client_id') == $client->id) ? 'selected' : '' }}>
@@ -68,16 +65,13 @@
                                     @endforeach
                                 </select>
                                 @error('client_id')
-                                <div class="mt-2 text-sm text-red-600">
-                                    <i class="mr-1 fas fa-exclamation-circle"></i>
-                                    {{ $message }}
-                                </div>
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
                                 <label for="invoice_date" class="block mb-2 text-sm font-medium text-gray-700">Data da Nota *</label>
-                                <input type="date" name="invoice_date" id="invoice_date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent @error('invoice_date') border-red-300 @enderror" value="{{ old('invoice_date', date('Y-m-d')) }}" required>
+                                <input type="date" name="invoice_date" id="invoice_date" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="{{ old('invoice_date', date('Y-m-d')) }}" required>
                                 @error('invoice_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -87,7 +81,7 @@
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label for="due_date" class="block mb-2 text-sm font-medium text-gray-700">Data de Vencimento *</label>
-                                <input type="date" name="due_date" id="due_date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent @error('due_date') border-red-300 @enderror" value="{{ old('due_date', date('Y-m-d', strtotime('+30 days'))) }}" required>
+                                <input type="date" name="due_date" id="due_date" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="{{ old('due_date', date('Y-m-d', strtotime('+30 days'))) }}" required>
                                 @error('due_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -96,83 +90,163 @@
                             @if($invoice)
                             <div>
                                 <input type="hidden" name="related_invoice_id" value="{{ $invoice->id }}">
-                                <label for="related_invoice" class="block mb-2 text-sm font-medium text-gray-700">Fatura Relacionada</label>
+                                <label class="block mb-2 text-sm font-medium text-gray-700">Fatura Relacionada</label>
                                 <div class="flex items-center px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
                                     <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
-                                    <span class="text-gray-700">{{ $invoice->invoice_number }}</span>
+                                    <span class="text-gray-700">{{ $invoice->invoice_number }} - {{ number_format($invoice->total, 2) }} MT</span>
                                 </div>
+                                <input type="hidden" name="base_amount" value="{{ $invoice->total }}" id="baseAmount">
+                            </div>
+                            @else
+                            <div>
+                                <label for="base_amount" class="block mb-2 text-sm font-medium text-gray-700">Valor Base para Cálculo *</label>
+                                <input type="number" name="base_amount" id="base_amount" step="0.01" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="{{ old('base_amount', 0) }}" required>
+                                <p class="mt-1 text-xs text-gray-500">Valor sobre o qual será calculado o débito</p>
+                                @error('base_amount')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                             @endif
                         </div>
-
-                        <div>
-                            <label for="adjustment_reason" class="block mb-2 text-sm font-medium text-gray-700">Motivo do Débito *</label>
-                            <textarea name="adjustment_reason" id="adjustment_reason" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent @error('adjustment_reason') border-red-300 @enderror" placeholder="Descreva o motivo desta cobrança adicional..." required>{{ old('adjustment_reason') }}</textarea>
-                            @error('adjustment_reason')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
                     </div>
                 </div>
 
-                <!-- Itens da Nota de Débito -->
-                <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <div class="p-2 mr-3 bg-orange-100 rounded-lg">
-                                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900">Itens a Debitar</h3>
-                                    <p class="text-sm text-gray-600">Adicione os itens da cobrança adicional</p>
-                                </div>
-                            </div>
-                            <button type="button" id="addDebitItemBtn" class="inline-flex items-center px-4 py-2 text-sm font-medium text-orange-700 border border-orange-200 rounded-md bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Adicionar Item
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <!-- Lista de Itens -->
-                        <div id="debitItems" class="space-y-4">
-                            <div class="py-12 text-center text-gray-500">
-                                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                <p class="text-lg font-medium">Nenhum item adicionado</p>
-                                <p class="text-sm">Clique em "Adicionar Item" para começar</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Observações -->
+                <!-- Tipo de Débito -->
                 <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center">
-                            <div class="p-2 mr-3 bg-purple-100 rounded-lg">
-                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <div class="p-2 mr-3 bg-orange-100 rounded-lg">
+                                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Observações Adicionais</h3>
-                                <p class="text-sm text-gray-600">Informações complementares sobre a nota</p>
+                                <h3 class="text-lg font-semibold text-gray-900">Tipo de Débito</h3>
+                                <p class="text-sm text-gray-600">Selecione o tipo de cobrança adicional</p>
                             </div>
                         </div>
                     </div>
-                    <div class="p-6">
+                    <div class="p-6 space-y-6">
+                        <!-- Seleção do Tipo -->
+                        <div>
+                            <label for="debit_type" class="block mb-3 text-sm font-medium text-gray-700">Tipo de Cobrança *</label>
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                @foreach($commonDebitItems as $key => $item)
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="debit_type" value="{{ $key }}" class="sr-only debit-type-radio" data-item="{{ json_encode($item) }}" required>
+                                    <div class="p-4 transition-colors border-2 border-gray-200 rounded-lg hover:border-orange-300 debit-type-card">
+                                        <div class="flex flex-col items-center text-center">
+                                            <div class="p-2 mb-2 bg-orange-100 rounded-lg">
+                                                @switch($key)
+                                                    @case('late_payment')
+                                                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        @break
+                                                    @case('penalty_fee')
+                                                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                        </svg>
+                                                        @break
+                                                    @case('additional_services')
+                                                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                                        </svg>
+                                                        @break
+                                                    @case('material_adjustment')
+                                                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2M7 4h10M7 4l-1 16h12l-1-16M9 9v6M15 9v6" />
+                                                        </svg>
+                                                        @break
+                                                    @case('administrative_fee')
+                                                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                        </svg>
+                                                        @break
+                                                    @case('correction_adjustment')
+                                                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                                        </svg>
+                                                        @break
+                                                    @default
+                                                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                                        </svg>
+                                                @endswitch
+                                            </div>
+                                            <h4 class="text-sm font-medium text-gray-900">{{ $item['name'] }}</h4>
+                                            <p class="mt-1 text-xs text-center text-gray-500">{{ $item['description'] }}</p>
+                                        </div>
+                                    </div>
+                                </label>
+                                @endforeach
+                            </div>
+                            @error('debit_type')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Motivo Específico -->
+                        <div id="debitReasonSection" class="hidden">
+                            <label for="debit_reason" class="block mb-2 text-sm font-medium text-gray-700">Motivo Específico *</label>
+                            <select name="debit_reason" id="debit_reason" class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                                <option value="">Selecione o motivo específico</option>
+                            </select>
+                            @error('debit_reason')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Configuração de Valor -->
+                        <div id="valueConfigSection" class="hidden space-y-4">
+                            <div>
+                                <label class="block mb-3 text-sm font-medium text-gray-700">Método de Cálculo</label>
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="radio" name="calculation_method" value="percentage" class="mr-3 text-orange-600">
+                                        <div>
+                                            <div class="font-medium text-gray-900">Percentual</div>
+                                            <div class="text-sm text-gray-500">Baseado em % do valor</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="radio" name="calculation_method" value="fixed" class="mr-3 text-orange-600">
+                                        <div>
+                                            <div class="font-medium text-gray-900">Valor Fixo</div>
+                                            <div class="text-sm text-gray-500">Valor específico</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Campos de Valor -->
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div id="percentageField" class="hidden">
+                                    <label for="percentage" class="block mb-2 text-sm font-medium text-gray-700">Percentual (%)</label>
+                                    <input type="number" name="percentage" id="percentage" step="0.01" min="0" max="100" class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                                    <p class="mt-1 text-xs text-gray-500">Ex: 2.5 para 2.5%</p>
+                                </div>
+
+                                <div id="fixedAmountField" class="hidden">
+                                    <label for="fixed_amount" class="block mb-2 text-sm font-medium text-gray-700">Valor Fixo (MT)</label>
+                                    <input type="number" name="fixed_amount" id="fixed_amount" step="0.01" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                                    <p class="mt-1 text-xs text-gray-500">Valor específico em MT</p>
+                                </div>
+
+                                <div>
+                                    <label for="tax_rate" class="block mb-2 text-sm font-medium text-gray-700">IVA (%)</label>
+                                    <input type="number" name="tax_rate" id="tax_rate" step="0.01" min="0" max="100" value="16" class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                                    <p class="mt-1 text-xs text-gray-500">Taxa de IVA aplicável</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observações -->
                         <div>
                             <label for="notes" class="block mb-2 text-sm font-medium text-gray-700">Observações</label>
-                            <textarea name="notes" id="notes" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="Observações adicionais sobre a nota de débito...">{{ old('notes') }}</textarea>
+                            <textarea name="notes" id="notes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="Observações adicionais sobre esta nota de débito...">{{ old('notes') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -180,23 +254,31 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
-                <!-- Resumo Financeiro -->
+                <!-- Preview dos Cálculos -->
                 <div class="sticky bg-white border border-gray-200 shadow-sm rounded-xl top-8">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center">
-                            <div class="p-2 mr-3 bg-red-100 rounded-lg">
-                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-2 mr-3 bg-green-100 rounded-lg">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Resumo do Débito</h3>
-                                <p class="text-sm text-gray-600">Totais da cobrança</p>
+                                <h3 class="text-lg font-semibold text-gray-900">Preview do Débito</h3>
+                                <p class="text-sm text-gray-600">Cálculo automático</p>
                             </div>
                         </div>
                     </div>
                     <div class="p-6">
-                        <div class="space-y-4">
+                        <div id="calculationPreview" class="space-y-4">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-700">Valor Base:</span>
+                                <span id="baseValueDisplay" class="text-sm font-bold text-gray-900">0,00 MT</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                <span class="text-sm font-medium text-gray-700">Cálculo:</span>
+                                <span id="calculationDisplay" class="text-sm text-gray-600">-</span>
+                            </div>
                             <div class="flex items-center justify-between py-2 border-b border-gray-100">
                                 <span class="text-sm font-medium text-gray-700">Subtotal:</span>
                                 <span id="subtotalDisplay" class="text-sm font-bold text-gray-900">0,00 MT</span>
@@ -206,18 +288,16 @@
                                 <span id="taxDisplay" class="text-sm font-bold text-gray-900">0,00 MT</span>
                             </div>
                             <div class="flex items-center justify-between px-4 py-3 border-l-4 border-red-500 rounded-lg bg-gradient-to-r from-red-50 to-red-100">
-                                <span class="text-lg font-bold text-red-800">TOTAL A DEBITAR:</span>
+                                <span class="text-lg font-bold text-red-800">TOTAL:</span>
                                 <span id="totalDisplay" class="text-xl font-bold text-red-800">0,00 MT</span>
                             </div>
                         </div>
 
-                        <!-- Estatísticas Rápidas -->
+                        <!-- Descrição do Item -->
                         <div class="pt-6 mt-6 border-t border-gray-200">
-                            <div class="grid grid-cols-1 gap-4">
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-orange-600" id="itemCount">0</div>
-                                    <div class="text-xs text-gray-500">Itens</div>
-                                </div>
+                            <h4 class="mb-2 text-sm font-medium text-gray-700">Descrição do Item:</h4>
+                            <div id="itemDescription" class="p-3 text-sm text-gray-600 rounded-lg bg-gray-50">
+                                Selecione um tipo de débito para ver a descrição
                             </div>
                         </div>
                     </div>
@@ -247,7 +327,7 @@
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                Campos marcados com * são obrigatórios
+                                Todos os cálculos são feitos automaticamente
                             </div>
                         </div>
                     </div>
@@ -260,239 +340,150 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let itemIndex = 0;
-    let debitItems = [];
+    let selectedDebitType = null;
+    let commonDebitItems = @json($commonDebitItems);
+
+    // Elementos
+    const debitTypeRadios = document.querySelectorAll('.debit-type-radio');
+    const debitReasonSection = document.getElementById('debitReasonSection');
+    const debitReasonSelect = document.getElementById('debit_reason');
+    const valueConfigSection = document.getElementById('valueConfigSection');
+    const calculationMethodRadios = document.querySelectorAll('input[name="calculation_method"]');
+    const percentageField = document.getElementById('percentageField');
+    const fixedAmountField = document.getElementById('fixedAmountField');
 
     // Event Listeners
-    document.getElementById('addDebitItemBtn').addEventListener('click', addDebitItem);
-    document.getElementById('debitNoteForm').addEventListener('submit', handleFormSubmit);
+    debitTypeRadios.forEach(radio => {
+        radio.addEventListener('change', handleDebitTypeChange);
+    });
 
-    // Adicionar item de débito
-    function addDebitItem() {
-        const newItem = {
-            index: itemIndex++,
-            description: '',
-            quantity: 1,
-            unit_price: 0,
-            tax_rate: 16
-        };
+    calculationMethodRadios.forEach(radio => {
+        radio.addEventListener('change', handleCalculationMethodChange);
+    });
 
-        debitItems.push(newItem);
-        renderDebitItems();
-        calculateTotals();
-    }
+    // Campos que afetam o cálculo
+    document.getElementById('percentage')?.addEventListener('input', updateCalculation);
+    document.getElementById('fixed_amount')?.addEventListener('input', updateCalculation);
+    document.getElementById('tax_rate')?.addEventListener('input', updateCalculation);
+    document.getElementById('base_amount')?.addEventListener('input', updateCalculation);
 
-    // Renderizar itens
-    function renderDebitItems() {
-        const container = document.getElementById('debitItems');
+    debitReasonSelect.addEventListener('change', updateItemDescription);
 
-        if (debitItems.length === 0) {
-            container.innerHTML = `
-                <div class="py-12 text-center text-gray-500">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <p class="text-lg font-medium">Nenhum item adicionado</p>
-                    <p class="text-sm">Clique em "Adicionar Item" para começar</p>
-                </div>
-            `;
-            return;
+    // Manipular mudança de tipo de débito
+    function handleDebitTypeChange(e) {
+        const radio = e.target;
+        const itemData = JSON.parse(radio.dataset.item);
+        selectedDebitType = radio.value;
+
+        // Atualizar visual dos cards
+        document.querySelectorAll('.debit-type-card').forEach(card => {
+            card.classList.remove('border-orange-500', 'bg-orange-50');
+            card.classList.add('border-gray-200');
+        });
+
+        radio.closest('label').querySelector('.debit-type-card').classList.remove('border-gray-200');
+        radio.closest('label').querySelector('.debit-type-card').classList.add('border-orange-500', 'bg-orange-50');
+
+        // Mostrar seção de motivo
+        debitReasonSection.classList.remove('hidden');
+
+        // Preencher opções de motivo
+        debitReasonSelect.innerHTML = '<option value="">Selecione o motivo específico</option>';
+        Object.entries(itemData.reasons).forEach(([key, reason]) => {
+            debitReasonSelect.innerHTML += `<option value="${key}">${reason}</option>`;
+        });
+
+        // Mostrar configuração de valor
+        valueConfigSection.classList.remove('hidden');
+
+        // Pré-selecionar método de cálculo baseado nos defaults
+        if (itemData.default_percentage && itemData.default_percentage > 0) {
+            document.querySelector('input[name="calculation_method"][value="percentage"]').checked = true;
+            document.getElementById('percentage').value = itemData.default_percentage;
+            handleCalculationMethodChange({ target: { value: 'percentage' } });
+        } else if (itemData.default_fixed_amount && itemData.default_fixed_amount > 0) {
+            document.querySelector('input[name="calculation_method"][value="fixed"]').checked = true;
+            document.getElementById('fixed_amount').value = itemData.default_fixed_amount;
+            handleCalculationMethodChange({ target: { value: 'fixed' } });
         }
 
-        container.innerHTML = debitItems.map(item => `
-            <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 item-card" data-index="${item.index}">
-                <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                        <div class="flex items-center mb-2 space-x-2">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
-                                Item de Débito
-                            </span>
-                        </div>
+        // Atualizar taxa de IVA
+        if (itemData.tax_rate) {
+            document.getElementById('tax_rate').value = itemData.tax_rate;
+        }
 
-                        <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
-                            <div class="md:col-span-2">
-                                <label class="block mb-1 text-xs font-medium text-gray-700">Descrição *</label>
-                                <input type="text"
-                                       class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500 item-description"
-                                       value="${item.description}"
-                                       placeholder="Descrição do item a debitar"
-                                       data-index="${item.index}"
-                                       required>
-                            </div>
-                            <div>
-                                <label class="block mb-1 text-xs font-medium text-gray-700">Quantidade *</label>
-                                <input type="number"
-                                       class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500 item-quantity"
-                                       value="${item.quantity}"
-                                       min="0.1"
-                                       step="0.1"
-                                       data-index="${item.index}"
-                                       required>
-                            </div>
-                            <div>
-                                <label class="block mb-1 text-xs font-medium text-gray-700">Preço Unit. *</label>
-                                <input type="number"
-                                       class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500 item-price"
-                                       value="${item.unit_price}"
-                                       min="0"
-                                       step="0.01"
-                                       data-index="${item.index}"
-                                       required>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3 mt-3">
-                            <div>
-                                <label class="block mb-1 text-xs font-medium text-gray-700">IVA (%)</label>
-                                <input type="number"
-                                       class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500 item-tax"
-                                       value="${item.tax_rate}"
-                                       min="0"
-                                       max="100"
-                                       step="0.01"
-                                       data-index="${item.index}">
-                            </div>
-                            <div>
-                                <label class="block mb-1 text-xs font-medium text-gray-700">Total</label>
-                                <div class="px-2 py-1 text-sm font-medium text-red-600 rounded bg-red-50 item-total" data-index="${item.index}">
-                                    ${formatCurrency(calculateItemTotal(item))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Hidden inputs para o form -->
-                        <input type="hidden" name="items[${item.index}][description]" value="${item.description}" class="hidden-description">
-                        <input type="hidden" name="items[${item.index}][quantity]" value="${item.quantity}" class="hidden-quantity">
-                        <input type="hidden" name="items[${item.index}][unit_price]" value="${item.unit_price}" class="hidden-price">
-                        <input type="hidden" name="items[${item.index}][tax_rate]" value="${item.tax_rate}" class="hidden-tax">
-                    </div>
-                    <button type="button"
-                            class="p-1 ml-4 text-red-600 hover:text-red-800 remove-item"
-                            data-index="${item.index}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        `).join('');
-
-        // Anexar event listeners
-        attachItemEventListeners();
+        updateCalculation();
+        updateItemDescription();
     }
 
-    // Anexar event listeners aos itens
-    function attachItemEventListeners() {
-        // Remover itens
-        document.querySelectorAll('.remove-item').forEach(button => {
-            button.addEventListener('click', function() {
-                const index = parseInt(this.dataset.index);
-                debitItems = debitItems.filter(item => item.index !== index);
-                renderDebitItems();
-                calculateTotals();
-                showNotification('Item removido', 'info');
-            });
-        });
+    // Manipular mudança de método de cálculo
+    function handleCalculationMethodChange(e) {
+        const method = e.target ? e.target.value : e;
 
-        // Atualizar valores
-        document.querySelectorAll('.item-description, .item-quantity, .item-price, .item-tax').forEach(input => {
-            input.addEventListener('input', function() {
-                const index = parseInt(this.dataset.index);
-                const item = debitItems.find(item => item.index === index);
+        percentageField.classList.add('hidden');
+        fixedAmountField.classList.add('hidden');
 
-                if (item) {
-                    if (this.classList.contains('item-description')) {
-                        item.description = this.value;
-                        document.querySelector(`input[name="items[${index}][description]"]`).value = item.description;
-                    } else if (this.classList.contains('item-quantity')) {
-                        item.quantity = parseFloat(this.value) || 0;
-                        document.querySelector(`input[name="items[${index}][quantity]"]`).value = item.quantity;
-                    } else if (this.classList.contains('item-price')) {
-                        item.unit_price = parseFloat(this.value) || 0;
-                        document.querySelector(`input[name="items[${index}][unit_price]"]`).value = item.unit_price;
-                    } else if (this.classList.contains('item-tax')) {
-                        item.tax_rate = parseFloat(this.value) || 0;
-                        document.querySelector(`input[name="items[${index}][tax_rate]"]`).value = item.tax_rate;
-                    }
+        if (method === 'percentage') {
+            percentageField.classList.remove('hidden');
+            document.getElementById('percentage').required = true;
+            document.getElementById('fixed_amount').required = false;
+        } else if (method === 'fixed') {
+            fixedAmountField.classList.remove('hidden');
+            document.getElementById('fixed_amount').required = true;
+            document.getElementById('percentage').required = false;
+        }
 
-                    // Atualizar total do item
-                    const totalElement = document.querySelector(`.item-total[data-index="${index}"]`);
-                    if (totalElement) {
-                        totalElement.textContent = formatCurrency(calculateItemTotal(item));
-                    }
-
-                    calculateTotals();
-                }
-            });
-        });
+        updateCalculation();
     }
 
-    // Calcular total do item
-    function calculateItemTotal(item) {
-        const subtotal = item.quantity * item.unit_price;
-        const tax = subtotal * (item.tax_rate / 100);
-        return subtotal + tax;
-    }
+    // Atualizar cálculos
+    function updateCalculation() {
+        const baseAmount = parseFloat(document.getElementById('base_amount')?.value || document.getElementById('baseAmount')?.value || 0);
+        const percentage = parseFloat(document.getElementById('percentage')?.value || 0);
+        const fixedAmount = parseFloat(document.getElementById('fixed_amount')?.value || 0);
+        const taxRate = parseFloat(document.getElementById('tax_rate')?.value || 0);
 
-    // Calcular totais
-    function calculateTotals() {
         let subtotal = 0;
-        let totalTax = 0;
-        let totalItems = debitItems.length;
+        let calculationText = '-';
 
-        debitItems.forEach(item => {
-            const itemSubtotal = item.quantity * item.unit_price;
-            const itemTax = itemSubtotal * (item.tax_rate / 100);
-
-            subtotal += itemSubtotal;
-            totalTax += itemTax;
-        });
-
-        const total = subtotal + totalTax;
-
-        // Atualizar display
-        document.getElementById('subtotalDisplay').textContent = formatCurrency(subtotal);
-        document.getElementById('taxDisplay').textContent = formatCurrency(totalTax);
-        document.getElementById('totalDisplay').textContent = formatCurrency(total);
-        document.getElementById('itemCount').textContent = totalItems;
-    }
-
-    // Submissão do formulário
-    function handleFormSubmit(e) {
-        if (debitItems.length === 0) {
-            e.preventDefault();
-            showNotification('Adicione pelo menos um item à nota de débito', 'warning');
-            return false;
-        }
-
-        // Validar se todos os itens têm dados válidos
-        let hasInvalidItems = false;
-        debitItems.forEach(item => {
-            if (!item.description.trim() || item.quantity <= 0 || item.unit_price < 0) {
-                hasInvalidItems = true;
+        const checkedMethod = document.querySelector('input[name="calculation_method"]:checked');
+        if (checkedMethod) {
+            if (checkedMethod.value === 'percentage' && percentage > 0) {
+                subtotal = baseAmount * (percentage / 100);
+                calculationText = `${formatCurrency(baseAmount)} × ${percentage}% = ${formatCurrency(subtotal)}`;
+            } else if (checkedMethod.value === 'fixed' && fixedAmount > 0) {
+                subtotal = fixedAmount;
+                calculationText = `Valor fixo: ${formatCurrency(subtotal)}`;
             }
-        });
-
-        if (hasInvalidItems) {
-            e.preventDefault();
-            showNotification('Verifique se todos os itens têm descrição e valores válidos', 'warning');
-            return false;
         }
 
-        // Show loading state
-        const submitButton = document.getElementById('saveDebitNoteBtn');
-        const originalText = submitButton.innerHTML;
-        submitButton.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Criando...';
-        submitButton.disabled = true;
+        const taxAmount = subtotal * (taxRate / 100);
+        const total = subtotal + taxAmount;
 
-        // Restaurar botão em caso de erro
-        setTimeout(() => {
-            submitButton.innerHTML = originalText;
-            submitButton.disabled = false;
-        }, 10000);
+        // Atualizar displays
+        document.getElementById('baseValueDisplay').textContent = formatCurrency(baseAmount);
+        document.getElementById('calculationDisplay').textContent = calculationText;
+        document.getElementById('subtotalDisplay').textContent = formatCurrency(subtotal);
+        document.getElementById('taxDisplay').textContent = formatCurrency(taxAmount);
+        document.getElementById('totalDisplay').textContent = formatCurrency(total);
     }
 
-    // Utilitários
+    // Atualizar descrição do item
+    function updateItemDescription() {
+        if (!selectedDebitType) return;
+
+        const reasonKey = debitReasonSelect.value;
+        const itemData = commonDebitItems[selectedDebitType];
+
+        let description = itemData.name;
+        if (reasonKey && itemData.reasons[reasonKey]) {
+            description += ` - ${itemData.reasons[reasonKey]}`;
+        }
+
+        document.getElementById('itemDescription').textContent = description;
+    }
+
+    // Formatar moeda
     function formatCurrency(value) {
         return new Intl.NumberFormat('pt-MZ', {
             style: 'currency',
@@ -500,6 +491,67 @@ document.addEventListener('DOMContentLoaded', function() {
             minimumFractionDigits: 2
         }).format(value).replace('MTn', 'MT');
     }
+
+    // Inicializar Select2
+    $('.select2').select2({
+        placeholder: 'Digite para buscar...',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Validação do formulário
+    document.getElementById('debitNoteForm').addEventListener('submit', function(e) {
+        const checkedType = document.querySelector('input[name="debit_type"]:checked');
+        const checkedMethod = document.querySelector('input[name="calculation_method"]:checked');
+
+        if (!checkedType) {
+            e.preventDefault();
+            showNotification('Por favor, selecione um tipo de débito.', 'warning');
+            return;
+        }
+
+        if (!checkedMethod) {
+            e.preventDefault();
+            showNotification('Por favor, selecione um método de cálculo.', 'warning');
+            return;
+        }
+
+        const reasonValue = document.getElementById('debit_reason').value;
+        if (!reasonValue) {
+            e.preventDefault();
+            showNotification('Por favor, selecione um motivo específico.', 'warning');
+            return;
+        }
+
+        // Validar valores
+        if (checkedMethod.value === 'percentage') {
+            const percentage = parseFloat(document.getElementById('percentage').value || 0);
+            if (percentage <= 0) {
+                e.preventDefault();
+                showNotification('Por favor, informe um percentual válido.', 'warning');
+                return;
+            }
+        } else if (checkedMethod.value === 'fixed') {
+            const fixedAmount = parseFloat(document.getElementById('fixed_amount').value || 0);
+            if (fixedAmount <= 0) {
+                e.preventDefault();
+                showNotification('Por favor, informe um valor fixo válido.', 'warning');
+                return;
+            }
+        }
+
+        // Mostrar estado de loading
+        const submitBtn = document.getElementById('saveDebitNoteBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Criando...';
+        submitBtn.disabled = true;
+
+        // Restaurar em caso de erro
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 10000);
+    });
 
     // Sistema de notificações
     function showNotification(message, type = 'info') {
@@ -563,138 +615,128 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
-    // Inicializar Select2
-    $('.select2').select2({
-        placeholder: 'Digite para buscar...',
-        allowClear: true,
-        width: '100%',
-        minimumInputLength: 0,
-        language: {
-            noResults: function() {
-                return "Nenhum resultado encontrado";
-            },
-            searching: function() {
-                return "Procurando...";
-            },
-            inputTooShort: function() {
-                return "Digite para buscar";
-            },
-            loadingMore: function() {
-                return "Carregando mais...";
-            }
-        }
-    });
-
-    // Manter seleção após erro de validação Laravel
-    @if(old('client_id'))
-        $('#client_id').val('{{ old('client_id') }}').trigger('change');
+    // Inicializar cálculos se há valor base
+    @if($invoice)
+    updateCalculation();
     @endif
-
-    // Aplicar estilo de erro se houver erro do Laravel
-    @error('client_id')
-        $('#client_id').next('.select2-container').addClass('select2-container--error');
-    @enderror
-
-    // Remover erro ao selecionar
-    $('#client_id').on('change', function() {
-        if ($(this).val()) {
-            $(this).next('.select2-container').removeClass('select2-container--error');
-        }
-    });
-
-    // Adicionar primeiro item automaticamente
-    addDebitItem();
 });
 </script>
 @endpush
 
 @push('styles')
 <style>
-    /* Loading animation */
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+    .debit-type-card {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .debit-type-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     .animate-spin {
         animation: spin 1s linear infinite;
     }
 
-    /* Animation for notifications */
-    @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
 
+    /* Notification animations */
     .notification {
         animation: slideInRight 0.3s ease-out;
     }
 
-    /* Custom focus styles */
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 48px !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.5rem !important;
+        padding: 0 1rem !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* Required field indicators */
+    label:has(+ input[required])::after,
+    label:has(+ select[required])::after {
+        content: ' *';
+        color: #ef4444;
+    }
+
+    /* Card selection styling */
+    input[type="radio"]:checked + .debit-type-card {
+        border-color: #f97316 !important;
+        background-color: #fff7ed !important;
+    }
+
+    /* Hover effects */
+    .hover\:bg-gray-50:hover {
+        background-color: #f9fafb;
+    }
+
+    .hover\:border-orange-300:hover {
+        border-color: #fdba74;
+    }
+
+    /* Focus styles */
+    .focus\:outline-none:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+    }
+
     .focus\:ring-2:focus {
+        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.5);
+    }
+
+    /* Button styles */
+    .bg-yellow-600 {
+        background-color: #ca8a04;
+    }
+
+    .hover\:bg-yellow-700:hover {
+        background-color: #a16207;
+    }
+
+    .focus\:ring-yellow-500:focus {
         box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.5);
     }
 
-    /* Hover transitions */
-    .transition-colors {
-        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 150ms;
+    /* Card gradients */
+    .bg-gradient-to-r {
+        background-image: linear-gradient(to right, var(--tw-gradient-stops));
     }
 
-    /* Item card hover effects */
-    .item-card {
-        transition: all 0.2s ease-in-out;
+    .from-red-50 {
+        --tw-gradient-from: #fef2f2;
     }
 
-    .item-card:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    .to-red-100 {
+        --tw-gradient-to: #fee2e2;
     }
 
-    /* Sticky sidebar */
+    /* Sticky positioning */
     .sticky {
         position: sticky;
         top: 2rem;
     }
 
-    /* Enhanced form inputs */
-    input:focus, select:focus, textarea:focus {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 2px rgba(245, 158, 11, 0.5);
-    }
-
-    /* Button hover effects */
-    button:hover:not(:disabled), a:hover {
-        transform: translateY(-1px);
-    }
-
-    button:disabled {
-        transform: none;
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    /* Custom scrollbar */
-    .overflow-y-auto::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .overflow-y-auto::-webkit-scrollbar-track {
-        background: #f1f5f9;
-        border-radius: 4px;
-    }
-
-    .overflow-y-auto::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-    }
-
-    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-    }
-
-    /* Responsive improvements */
+    /* Responsive adjustments */
     @media (max-width: 768px) {
         .xl\:grid-cols-3 {
             grid-template-columns: 1fr;
@@ -707,127 +749,13 @@ document.addEventListener('DOMContentLoaded', function() {
         .sticky {
             position: static;
         }
-    }
 
-    /* Enhanced card styling */
-    .bg-white {
-        transition: all 0.2s ease-in-out;
-    }
+        .lg\:grid-cols-3 {
+            grid-template-columns: 1fr;
+        }
 
-    .bg-white:hover {
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Gradient backgrounds */
-    .bg-gradient-to-r {
-        background-image: linear-gradient(to right, var(--tw-gradient-stops));
-    }
-
-    /* Yellow/Orange theme for debit notes */
-    .bg-yellow-100 {
-        background-color: rgb(254 249 195);
-    }
-
-    .text-yellow-600 {
-        color: rgb(202 138 4);
-    }
-
-    .bg-orange-100 {
-        background-color: rgb(255 237 213);
-    }
-
-    .text-orange-600 {
-        color: rgb(234 88 12);
-    }
-
-    .text-orange-700 {
-        color: rgb(194 65 12);
-    }
-
-    .border-orange-200 {
-        border-color: rgb(254 215 170);
-    }
-
-    .bg-orange-50 {
-        background-color: rgb(255 247 237);
-    }
-
-    .hover\:bg-orange-100:hover {
-        background-color: rgb(255 237 213);
-    }
-
-    .focus\:ring-orange-500:focus {
-        box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.5);
-    }
-
-    /* Red theme for totals */
-    .bg-red-100 {
-        background-color: rgb(254 226 226);
-    }
-
-    .text-red-600 {
-        color: rgb(220 38 38);
-    }
-
-    .text-red-800 {
-        color: rgb(153 27 27);
-    }
-
-    .border-red-500 {
-        border-color: rgb(239 68 68);
-    }
-
-    .bg-red-50 {
-        background-color: rgb(254 242 242);
-    }
-
-    /* Purple theme for notes */
-    .bg-purple-100 {
-        background-color: rgb(243 232 255);
-    }
-
-    .text-purple-600 {
-        color: rgb(147 51 234);
-    }
-
-    /* Select2 custom styles */
-    .select2-container {
-        width: 100% !important;
-    }
-
-    .select2-container--default .select2-selection--single {
-        height: 48px !important;
-        border: 1px solid #d1d5db !important;
-        border-radius: 0.5rem !important;
-        padding: 0 1rem !important;
-        display: flex !important;
-        align-items: center !important;
-        background-color: #ffffff !important;
-        font-size: 0.875rem !important;
-        transition: all 0.2s ease-in-out !important;
-    }
-
-    .select2-container--default .select2-selection--single:focus {
-        border-color: #f59e0b !important;
-        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.5) !important;
-    }
-
-    .select2-container--error .select2-selection--single {
-        border-color: #ef4444 !important;
-    }
-
-    /* Enhanced visibility for required fields */
-    label:has(+ input[required])::after,
-    label:has(+ select[required])::after,
-    label:has(+ textarea[required])::after {
-        content: ' *';
-        color: #ef4444;
-    }
-
-    /* Print styles */
-    @media print {
-        .no-print {
-            display: none;
+        .sm\:grid-cols-2 {
+            grid-template-columns: 1fr;
         }
     }
 </style>
