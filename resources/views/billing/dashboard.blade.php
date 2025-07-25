@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard de Facturação')
+@section('subtitle', 'Simplifique a sua Gestão de Facturação')
 
 @section('header-actions')
 <div class="flex items-center gap-x-4">
