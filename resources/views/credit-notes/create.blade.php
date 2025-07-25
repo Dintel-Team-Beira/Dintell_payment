@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Sub360')
-@section('subtitle', '')
+@section('title', 'Nota de Crédito')
+@section('subtitle', 'Crie uma nota de crédito para ajustar valores de faturas')
 @section('content')
 <div class="container">
     <!-- Header -->
