@@ -10,7 +10,7 @@
             font-family: DejaVu Sans, Arial, sans-serif;
             font-size: 11px;
             line-height: 1.3;
-            color: #333;
+            color: #0c2572;
             margin: 20px;
         }
 
@@ -76,7 +76,7 @@
         }
 
         .original-label {
-            border: 1px solid #333;
+            border: 1px solid #0c2572;
             display: inline-block;
             padding: 4px 10px;
             font-size: 10px;
@@ -85,7 +85,7 @@
         }
 
         .invoice-title {
-            background-color: #333;
+            background-color: #0c2572;
             color: white;
             padding: 8px;
             font-size: 14px;
@@ -189,7 +189,7 @@
         }
 
         .total-final {
-            background-color: #333;
+            background-color: #0c2572;
             color: white;
             font-weight: bold;
             font-size: 11px;
@@ -297,7 +297,7 @@
             <td class="label">DESC. FIN.</td>
             <td>0.00</td>
             <td class="label">VENCIMENTO</td>
-            <td>{{ $due_date->format('d/m/Y') }}</td>
+            <td>{{ $due_date }}</td>
             <td class="label" colspan="2">PRONTO PAGAMENTO</td>
         </tr>
     </table>
