@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'SFS – Sistema de Faturação e Subscrição')
+@section('title', 'Factura')
+@section('subtitle', 'Gerencie suas facturas com facilidade')
 
 @section('content')
 <div class="container ">
@@ -8,7 +9,7 @@
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-3xl font-bold text-gray-900">Nova Fatura</h1>
+                <h1 class="text-3xl font-bold text-gray-900">Nova Factura</h1>
                 <p class="mt-2 text-gray-600">Crie uma fatura personalizada para seu cliente</p>
             </div>
             <div>
@@ -38,8 +39,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Informações da Fatura</h3>
-                                <p class="text-sm text-gray-600">Dados básicos da fatura</p>
+                                <h3 class="text-lg font-semibold text-gray-900">Informações da Factura</h3>
+                                <p class="text-sm text-gray-600">Dados básicos da factura</p>
                             </div>
                         </div>
                     </div>
@@ -69,14 +70,14 @@
 
                             <div>
                                 <label for="invoice_date" class="block mb-2 text-sm font-medium text-gray-700">Data da
-                                    Fatura *</label>
+                                    Factura *</label>
                                 <input type="date" name="invoice_date" id="invoice_date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('invoice_date') border-red-300 @enderror" value="{{ old('invoice_date', date('Y-m-d')) }}" required>
                                 @error('invoice_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
-                     
+
                         </div>
 
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -122,7 +123,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-lg font-semibold text-gray-900">Produtos & Serviços</h3>
-                                    <p class="text-sm text-gray-600">Adicione itens à sua fatura</p>
+                                    <p class="text-sm text-gray-600">Adicione itens à sua factura</p>
                                 </div>
                             </div>
                             <div class="flex space-x-3">
