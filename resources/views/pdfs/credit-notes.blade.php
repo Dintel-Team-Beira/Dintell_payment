@@ -2,79 +2,95 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nota de Crédito {{ $creditNote->invoice_number }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'DejaVu Sans', sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            color: #333;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header */
-        .header {
-            display: table;
-            width: 100%;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e74c3c;
-            padding-bottom: 20px;
-        }
-
-        .company-info {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
-        }
-
-        .document-info {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
-            text-align: right;
-        }
-
-        .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #e74c3c;
-            margin-bottom: 5px;
-        }
-
-        .company-details {
+            font-family: DejaVu Sans, Arial, sans-serif;
             font-size: 11px;
-            color: #666;
             line-height: 1.3;
+            color: #333;
+            margin: 20px;
         }
 
-        .document-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #e74c3c;
+        .header {
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .company-section {
+            float: left;
+            width: 60%;
+        }
+
+        .logo {
+            float: left;
+            margin-right: 15px;
             margin-bottom: 10px;
         }
 
-        .document-number {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .logo img {
+            max-width: 80px;
+            max-height: 60px;
         }
 
-        .document-date {
-            font-size: 11px;
+        .company-info {
+            overflow: hidden;
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 2px;
+        }
+
+        .company-slogan {
+            font-size: 10px;
             color: #666;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+
+        .company-details {
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .client-section {
+            float: right;
+            width: 35%;
+        }
+
+        .client-box {
+            border: 1px solid #e74c3c;
+            padding: 10px;
+            background-color: #fff5f5;
+            font-size: 10px;
+        }
+
+        .document-header {
+            text-align: left;
+            margin: 15px 0;
+        }
+
+        .original-label {
+            border: 1px solid #e74c3c;
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #e74c3c;
+        }
+
+        .document-title {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px;
+            font-size: 14px;
+            font-weight: bold;
         }
 
         /* Credit Note Alert */
@@ -89,45 +105,31 @@
 
         .credit-alert h3 {
             color: #856404;
-            font-size: 14px;
+            font-size: 12px;
             margin-bottom: 5px;
         }
 
         .credit-alert p {
             color: #6c5707;
-            font-size: 11px;
+            font-size: 10px;
         }
 
-        /* Client Info */
-        .client-section {
-            margin: 30px 0;
+        .document-details {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
         }
 
-        .section-title {
-            font-size: 14px;
+        .document-details td {
+            border: 1px solid #e74c3c;
+            padding: 5px;
+            font-size: 9px;
+        }
+
+        .document-details .label {
+            background-color: #fff5f5;
             font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .client-info {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-        }
-
-        .client-name {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .client-details {
-            font-size: 11px;
-            color: #666;
-            line-height: 1.3;
+            width: 15%;
         }
 
         /* Related Invoice Info */
@@ -136,17 +138,17 @@
             border-left: 4px solid #007bff;
             padding: 15px;
             margin: 20px 0;
+            font-size: 10px;
         }
 
         .related-invoice h4 {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: #004085;
             margin-bottom: 5px;
         }
 
         .related-invoice p {
-            font-size: 11px;
             color: #0056b3;
         }
 
@@ -160,48 +162,36 @@
         }
 
         .adjustment-reason h4 {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: #721c24;
             margin-bottom: 5px;
         }
 
         .adjustment-reason p {
-            font-size: 11px;
+            font-size: 10px;
             color: #a0283e;
             line-height: 1.4;
         }
 
-        /* Items Table */
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 30px 0;
+            margin: 15px 0;
+        }
+
+        .items-table th,
+        .items-table td {
+            border: 1px solid #e74c3c;
+            padding: 6px;
+            font-size: 10px;
         }
 
         .items-table th {
             background-color: #e74c3c;
             color: white;
-            padding: 12px 8px;
-            font-size: 11px;
             font-weight: bold;
-            text-align: left;
-            border: 1px solid #c0392b;
-        }
-
-        .items-table td {
-            padding: 10px 8px;
-            font-size: 11px;
-            border: 1px solid #ddd;
-            vertical-align: top;
-        }
-
-        .items-table tbody tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-
-        .items-table tbody tr:hover {
-            background-color: #ffe6e6;
+            text-align: center;
         }
 
         .text-right {
@@ -212,96 +202,142 @@
             text-align: center;
         }
 
-        .font-bold {
+        .summary-row {
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .iva-summary {
+            float: left;
+            width: 48%;
+        }
+
+        .totals-summary {
+            float: right;
+            width: 48%;
+        }
+
+        .section-title {
+            font-size: 11px;
             font-weight: bold;
+            margin-bottom: 8px;
         }
 
-        /* Totals */
-        .totals-section {
-            margin-top: 30px;
-            display: table;
+        .iva-table {
             width: 100%;
+            border-collapse: collapse;
         }
 
-        .totals-left {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
+        .iva-table th,
+        .iva-table td {
+            border: 1px solid #e74c3c;
+            padding: 4px;
+            font-size: 9px;
+            text-align: center;
         }
 
-        .totals-right {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
+        .iva-table th {
+            background-color: #fff5f5;
+            font-weight: bold;
         }
 
         .totals-table {
             width: 100%;
             border-collapse: collapse;
-            margin-left: auto;
         }
 
         .totals-table td {
-            padding: 8px 12px;
-            font-size: 12px;
-            border: 1px solid #ddd;
+            border: 1px solid #e74c3c;
+            padding: 5px;
+            font-size: 10px;
         }
 
         .totals-table .label {
-            background-color: #f8f9fa;
+            background-color: #fff5f5;
             font-weight: bold;
-            text-align: right;
-            width: 60%;
-        }
-
-        .totals-table .value {
-            text-align: right;
-            font-weight: bold;
-            width: 40%;
         }
 
         .total-final {
-            background-color: #e74c3c !important;
-            color: white !important;
-            font-size: 14px !important;
-            font-weight: bold !important;
-        }
-
-        /* Notes */
-        .notes-section {
-            margin-top: 30px;
-        }
-
-        .notes-content {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
+            background-color: #e74c3c;
+            color: white;
+            font-weight: bold;
             font-size: 11px;
-            line-height: 1.4;
-            color: #555;
         }
 
-        /* Footer */
-        .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-            text-align: center;
+        .observations {
+            background-color: #e74c3c;
+            color: white;
+            padding: 6px 10px;
+            margin: 15px 0;
             font-size: 10px;
-            color: #666;
+            font-weight: bold;
         }
 
+        .footer {
+            margin-top: 20px;
+            font-size: 9px;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+            text-align: center;
+        }
+
+        /* Limpar floats */
+        .clearfix:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        /* Otimizações para dompdf */
+        table {
+            border-spacing: 0;
+        }
+
+        .no-break {
+            page-break-inside: avoid;
+        }
+
+        /* Status da nota */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 9px;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+
+        .status-processed {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-pending {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .status-cancelled {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        /* Signature section */
         .signature-section {
             margin-top: 50px;
-            display: table;
-            width: 100%;
+            overflow: hidden;
         }
 
         .signature-box {
-            display: table-cell;
-            width: 50%;
+            float: left;
+            width: 48%;
             text-align: center;
-            vertical-align: top;
+            margin-right: 4%;
+        }
+
+        .signature-box:last-child {
+            margin-right: 0;
         }
 
         .signature-line {
@@ -311,202 +347,226 @@
             font-size: 10px;
             color: #666;
         }
-
-        /* Print styles */
-        @media print {
-            body {
-                font-size: 11px;
-            }
-
-            .container {
-                padding: 0;
-            }
-
-            .no-print {
-                display: none;
-            }
-        }
-
-        /* Currency formatting */
-        .currency {
-            font-family: 'Courier New', monospace;
-        }
-
-        /* Status indicators */
-        .status-processed {
-            background-color: #28a745;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
+    <div class="clearfix header">
+        <div class="company-section">
             <div class="company-info">
+                @if(file_exists(public_path('logo.png')))
+                <img src="{{ public_path('logo.png') }}" style="width: 200px;" alt="Logo">
+                @else
                 <div class="company-name">{{ $settings->company_name ?? 'Minha Empresa' }}</div>
-                <div class="company-details">
-                    @if($settings->company_address)
-                        {{ $settings->company_address }}<br>
-                    @endif
-                    @if($settings->company_phone)
-                        Tel: {{ $settings->company_phone }}<br>
-                    @endif
-                    @if($settings->company_email)
-                        Email: {{ $settings->company_email }}<br>
-                    @endif
-                    @if($settings->company_nuit)
-                        NUIT: {{ $settings->company_nuit }}
-                    @endif
-                </div>
-            </div>
-            <div class="document-info">
-                <div class="document-title">NOTA DE CRÉDITO</div>
-                <div class="document-number">{{ $creditNote->invoice_number }}</div>
-                <div class="document-date">
-                    Data: {{ $creditNote->invoice_date->format('d/m/Y') }}
-                </div>
-                <div class="status-processed">PROCESSADA</div>
-            </div>
-        </div>
-
-        <!-- Credit Note Alert -->
-        <div class="credit-alert">
-            <h3>📋 DOCUMENTO DE CRÉDITO</h3>
-            <p>Este documento representa um crédito a favor do cliente no valor abaixo especificado.</p>
-        </div>
-
-        <!-- Client Information -->
-        <div class="client-section">
-            <div class="section-title">DADOS DO CLIENTE</div>
-            <div class="client-info">
-                <div class="client-name">{{ $creditNote->client->name }}</div>
-                <div class="client-details">
-                    @if($creditNote->client->email)
-                        Email: {{ $creditNote->client->email }}<br>
-                    @endif
-                    @if($creditNote->client->phone)
-                        Telefone: {{ $creditNote->client->phone }}<br>
-                    @endif
-                    @if($creditNote->client->address)
-                        Endereço: {{ $creditNote->client->address }}<br>
-                    @endif
-                    @if($creditNote->client->nuit)
-                        NUIT: {{ $creditNote->client->nuit }}
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- Related Invoice (if exists) -->
-        @if($creditNote->relatedInvoice)
-        <div class="related-invoice">
-            <h4>📄 FATURA RELACIONADA</h4>
-            <p>
-                <strong>Número:</strong> {{ $creditNote->relatedInvoice->invoice_number }} |
-                <strong>Data:</strong> {{ $creditNote->relatedInvoice->invoice_date->format('d/m/Y') }} |
-                <strong>Valor Original:</strong> <span class="currency">{{ number_format($creditNote->relatedInvoice->total, 2, ',', '.') }} MT</span>
-            </p>
-        </div>
-        @endif
-
-        <!-- Adjustment Reason -->
-        <div class="adjustment-reason">
-            <h4>MOTIVO DO AJUSTE</h4>
-            <p>{{ $creditNote->adjustment_reason }}</p>
-        </div>
-
-        <!-- Items Table -->
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th style="width: 5%;">#</th>
-                    <th style="width: 45%;">DESCRIÇÃO</th>
-                    <th style="width: 10%;" class="text-center">QTDE</th>
-                    <th style="width: 15%;" class="text-right">PREÇO UNIT.</th>
-                    <th style="width: 10%;" class="text-center">IVA %</th>
-                    <th style="width: 15%;" class="text-right">TOTAL</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($creditNote->items as $index => $item)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $item->description }}</td>
-                    <td class="text-center">{{ number_format($item->quantity, 2, ',', '.') }}</td>
-                    <td class="text-right currency">{{ number_format($item->unit_price, 2, ',', '.') }} MT</td>
-                    <td class="text-center">{{ number_format($item->tax_rate, 1, ',', '.') }}%</td>
-                    <td class="font-bold text-right currency">
-                        {{ number_format($item->quantity * $item->unit_price * (1 + $item->tax_rate/100), 2, ',', '.') }} MT
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <!-- Totals -->
-        <div class="totals-section">
-            <div class="totals-left">
-                @if($creditNote->notes)
-                <div class="notes-section">
-                    <div class="section-title">OBSERVAÇÕES</div>
-                    <div class="notes-content">
-                        {{ $creditNote->notes }}
-                    </div>
-                </div>
+                <div class="company-slogan">beyond technology, intelligence.</div>
                 @endif
-            </div>
-            <div class="totals-right">
-                <table class="totals-table">
-                    <tr>
-                        <td class="label">Subtotal:</td>
-                        <td class="value currency">{{ number_format($creditNote->subtotal, 2, ',', '.') }} MT</td>
-                    </tr>
-                    <tr>
-                        <td class="label">IVA:</td>
-                        <td class="value currency">{{ number_format($creditNote->tax_amount, 2, ',', '.') }} MT</td>
-                    </tr>
-                    @if($creditNote->discount_amount > 0)
-                    <tr>
-                        <td class="label">Desconto:</td>
-                        <td class="value currency">-{{ number_format($creditNote->discount_amount, 2, ',', '.') }} MT</td>
-                    </tr>
-                    @endif
-                    <tr>
-                        <td class="label total-final">TOTAL A CREDITAR:</td>
-                        <td class="value total-final currency">{{ number_format($creditNote->total, 2, ',', '.') }} MT</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-
-        <!-- Signature Section -->
-        <div class="signature-section">
-            <div class="signature-box">
-                <div class="signature-line">
-                    Emitido por<br>
-                    {{ $settings->company_name ?? 'Empresa' }}
-                </div>
-            </div>
-            <div class="signature-box">
-                <div class="signature-line">
-                    Recebido por<br>
-                    {{ $creditNote->client->name }}
+                <div class="company-details">
+                    <strong>Contribuinte Nº:</strong> {{ $settings->company_nuit ?? '123456789' }}<br>
+                    {{ $settings->company_address ?? 'Av. Principal nº 123, R/C' }}<br>
+                    {{ $settings->company_address_maputo ?? 'Maputo, Moçambique' }}<br>
+                    {{ $settings->company_phone ?? '+258 84 123 4567' }} | {{ $settings->company_email ?? 'geral@empresa.co.mz' }}
                 </div>
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>
-                Este documento foi gerado eletronicamente em {{ now()->format('d/m/Y H:i:s') }}<br>
-                Nota de Crédito {{ $creditNote->invoice_number }} - {{ $settings->company_name ?? 'Sistema de Faturação' }}
-            </p>
+        <div class="client-section">
+            <div class="client-box">
+                <strong>Exmo.(s) Sr.(s)</strong><br>
+                <strong>{{ $creditNote->client->name }}</strong><br>
+                <strong>Nº CLIENTE:</strong> {{ str_pad($creditNote->client->id, 10, '0', STR_PAD_LEFT) }}<br>
+                {{ $creditNote->client->phone ?? 'N/A' }}<br>
+                {{ $creditNote->client->address ?? $creditNote->client->city ?? 'Moçambique' }}
+            </div>
         </div>
+    </div>
+
+    <div class="document-header">
+        <div class="original-label">Original</div>
+        <div class="document-title">
+            Nota de Crédito Nº {{ $creditNote->invoice_number }}
+            {{-- <span class="status-badge status-processed">PROCESSADA</span> --}}
+        </div>
+    </div>
+
+    <!-- Credit Note Alert -->
+    {{-- <div class="credit-alert">
+        <h3>📋 DOCUMENTO DE CRÉDITO</h3>
+        <p>Este documento representa um crédito a favor do cliente no valor abaixo especificado.</p>
+    </div> --}}
+
+    <!-- Related Invoice (if exists) -->
+    @if($creditNote->relatedInvoice)
+    <div class="related-invoice">
+        <h4>📄 FATURA RELACIONADA</h4>
+        <p>
+            <strong>Número:</strong> {{ $creditNote->relatedInvoice->invoice_number }} |
+            <strong>Data:</strong> {{ $creditNote->relatedInvoice->invoice_date->format('d/m/Y') }} |
+            <strong>Valor Original:</strong> {{ number_format($creditNote->relatedInvoice->total, 2, ',', '.') }} MT
+        </p>
+    </div>
+    @endif
+
+    <!-- Adjustment Reason -->
+    <div class="adjustment-reason">
+        <h4>MOTIVO DO AJUSTE</h4>
+        <p>{{ $creditNote->adjustment_reason }}</p>
+    </div>
+
+    <table class="document-details no-break">
+        <tr>
+            <td class="label">V/Nº CONTRIB.</td>
+            <td>{{ $creditNote->client->nuit ?? 'N/A' }}</td>
+            <td class="label">FATURA ORIG.</td>
+            <td>{{ $creditNote->relatedInvoice->invoice_number ?? '-' }}</td>
+            <td class="label">MOEDA</td>
+            <td>MT</td>
+            <td class="label">CÂMBIO</td>
+            <td>1,00</td>
+            <td class="label">DATA</td>
+            <td>{{ $creditNote->invoice_date->format('d/m/Y') }}</td>
+        </tr>
+        <tr>
+            <td class="label">TIPO</td>
+            <td>CRÉDITO</td>
+            <td class="label">VALOR ORIG.</td>
+            <td>{{ $creditNote->relatedInvoice ? number_format($creditNote->relatedInvoice->total, 2, ',', '.') : '0,00' }} MT</td>
+            <td class="label">PROCESSADO</td>
+            <td>{{ now()->format('d/m/Y') }}</td>
+            <td class="label" colspan="4">
+                CRÉDITO APLICADO AO CLIENTE
+            </td>
+        </tr>
+    </table>
+
+    <table class="items-table no-break">
+        <thead>
+            <tr>
+                <th style="width: 10%;">ITEM</th>
+                <th style="width: 45%;">DESCRIÇÃO</th>
+                <th style="width: 10%;">QUANT.</th>
+                <th style="width: 15%;">PR. UNITÁRIO</th>
+                <th style="width: 10%;">IVA</th>
+                <th style="width: 10%;">VALOR CRÉDITO</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+                $subtotalGeral = 0;
+                $totalTax = 0;
+            @endphp
+            @foreach($creditNote->items as $index => $item)
+            @php
+                $itemSubtotal = $item->quantity * $item->unit_price;
+                $itemTax = $itemSubtotal * (($item->tax_rate ?? 0) / 100);
+                $itemTotal = $itemSubtotal;
+
+                $subtotalGeral += $itemSubtotal;
+                $totalTax += $itemTax;
+            @endphp
+            <tr>
+                <td class="text-center">{{ $index + 1 }}</td>
+                <td>
+                    <strong>{{ $item->description }}</strong>
+                </td>
+                <td class="text-right">{{ number_format($item->quantity, 2) }}</td>
+                <td class="text-right">{{ number_format($item->unit_price, 2) }} MT</td>
+                <td class="text-right">{{ number_format($itemTax, 2) }} MT</td>
+                <td class="text-right">{{ number_format($itemTotal, 2) }} MT</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="clearfix summary-row no-break">
+        <div class="iva-summary">
+            <div class="section-title">QUADRO RESUMO DO IVA</div>
+            <table class="iva-table">
+                <thead>
+                    <tr>
+                        <th>TAXA</th>
+                        <th>INCIDÊNCIA</th>
+                        <th>TOTAL IVA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        $taxGroups = $creditNote->items->groupBy('tax_rate');
+                    @endphp
+                    @foreach($taxGroups as $taxRate => $items)
+                    @php
+                        $taxIncidencia = $items->sum(function($item) {
+                            return $item->quantity * $item->unit_price;
+                        });
+                        $taxAmount = $taxIncidencia * (($taxRate ?? 0) / 100);
+                    @endphp
+                    <tr>
+                        <td>{{ number_format($taxRate ?? 0, 0) }}.00</td>
+                        <td>{{ number_format($taxIncidencia, 2) }}</td>
+                        <td>{{ number_format($taxAmount, 2) }}</td>
+                    </tr>
+                    @endforeach
+                    <tr style="font-weight: bold;">
+                        <td>TOTAL</td>
+                        <td>{{ number_format($subtotalGeral, 2) }}</td>
+                        <td>{{ number_format($totalTax, 2) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="totals-summary">
+            <div class="section-title">TOTAIS</div>
+            <table class="totals-table">
+                <tr>
+                    <td class="label">SUBTOTAL:</td>
+                    <td class="text-right">{{ number_format($creditNote->subtotal, 2) }} MT</td>
+                </tr>
+                <tr>
+                    <td class="label">TOTAL IVA:</td>
+                    <td class="text-right">{{ number_format($creditNote->tax_amount, 2) }} MT</td>
+                </tr>
+                @if($creditNote->discount_amount > 0)
+                <tr>
+                    <td class="label">DESCONTO:</td>
+                    <td class="text-right">-{{ number_format($creditNote->discount_amount, 2) }} MT</td>
+                </tr>
+                @endif
+                <tr class="total-final">
+                    <td style="color: #000000" class="label">TOTAL A CREDITAR:</td>
+                    <td class="text-right">{{ number_format($creditNote->total, 2) }} MT</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    @if($creditNote->notes)
+    <div class="observations">
+        OBSERVAÇÕES: {{ $creditNote->notes }}
+    </div>
+    @endif
+
+    <!-- Signature Section -->
+    <div class="clearfix signature-section">
+        <div class="signature-box">
+            <div class="signature-line">
+                Emitido por<br>
+                {{ $settings->company_name ?? 'Empresa' }}
+            </div>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line">
+                Recebido por<br>
+                {{ $creditNote->client->name }}
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Este documento foi processado por computador e é válido sem assinatura e carimbo.</p>
+        <p>Gerado em {{ now()->format('d/m/Y H:i:s') }} |
+           sub360 v{{ config('app.version', '1.0') }} |  {{ $settings->company_name ?? config('app.name') }}</p>
+        <p style="font-size: 8px; margin-top: 5px; color: #e74c3c;">
+            <strong>NOTA DE CRÉDITO:</strong> Este documento representa um crédito a favor do cliente.
+        </p>
     </div>
 </body>
 </html>
