@@ -27,7 +27,8 @@ class Quote extends Model
         'sent_at',
         'status_updated_at',
         'converted_to_invoice_at',
-        'invoice_id'
+        'invoice_id',
+        'company_id', // Adicionar para multi-tenancy
     ];
 
     protected $casts = [
@@ -58,6 +59,12 @@ class Quote extends Model
             self::STATUS_REJECTED => 'Rejeitada',
             self::STATUS_EXPIRED => 'Expirada'
         ];
+    }
+
+       // Relacionamento com empresa
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 
     // Relacionamentos
@@ -91,6 +98,16 @@ class Quote extends Model
         return $this->hasMany(QuoteNote::class);
     }
 
+
+     // Scope para filtrar por empresa atual
+    public function scopeForCurrentCompany($query)
+    {
+        $company = session('current_company');
+        if ($company) {
+            return $query->where('company_id', $company->id);
+        }
+        return $query;
+    }
     // Scopes
     public function scopeActive($query)
     {
@@ -542,6 +559,12 @@ private function generateInvoiceNumber()
         parent::boot();
 
         static::creating(function ($quote) {
+
+             $company = session('current_company');
+            if ($company && !$quote->company_id) {
+                $quote->company_id = $company->id;
+            }
+
             if (!$quote->quote_number) {
                 $quote->quote_number = self::generateQuoteNumber();
             }
