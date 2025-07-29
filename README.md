@@ -1,4 +1,4 @@
-# SUBN360 - Sistema Integrado de Gestão Empresarial
+# SUB360 - Sistema Integrado de Gestão Empresarial
 
 <p align="center">
   <img src="https://img.shields.io/badge/Laravel-10.x-red?style=for-the-badge&logo=laravel" alt="Laravel">
@@ -425,8 +425,7 @@ Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](LICEN
 ### Contato
 - 📧 **Email**: suporte@dintell.co.mz
 - 🌐 **Website**: [https://dintell.co.mz](https://dintell.co.mz)
-- 📱 **WhatsApp**: +258 84 123 4567
-- 🏢 **Endereço**: Maputo, Moçambique
+
 
 ---
 
