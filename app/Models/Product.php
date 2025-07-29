@@ -25,8 +25,17 @@ class Product extends Model
         'is_active',
         'image',
         'weight',
-        'dimensions'
+        'dimensions',
+        'company_id', // Adicionar para multi-tenancy
     ];
+
+
+       // Relacionamento com empresa
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
 
     protected $casts = [
         'price' => 'decimal:2',
@@ -41,10 +50,25 @@ class Product extends Model
         parent::boot();
 
         static::creating(function ($product) {
+             $company = session('current_company');
+            if ($company && !$product->company_id) {
+                $product->company_id = $company->id;
+            }
             if (empty($product->code)) {
                 $product->code = 'PROD' . str_pad(static::count() + 1, 6, '0', STR_PAD_LEFT);
             }
         });
+    }
+
+
+       // Scope para filtrar por empresa atual
+    public function scopeForCurrentCompany($query)
+    {
+        $company = session('current_company');
+        if ($company) {
+            return $query->where('company_id', $company->id);
+        }
+        return $query;
     }
 
     // Relacionamentos
