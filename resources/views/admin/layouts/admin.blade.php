@@ -38,10 +38,10 @@
 
                     <!-- Sidebar component -->
                     <div class="flex flex-col px-6 pb-2 overflow-y-auto bg-white shadow-xl grow gap-y-5 ring-1 ring-gray-900/10">
-                        <div class="flex items-center h-16 shrink-0">
+                        {{-- <div class="flex items-center h-16 shrink-0">
                             <img class="w-auto h-8" src="{{ asset('logo.png') }}" alt="{{ config('app.name') }}">
                             <span class="ml-3 text-xl font-bold text-gray-900">SFS Admin</span>
-                        </div>
+                        </div> --}}
                         <nav class="flex flex-col flex-1">
                             @include('admin.partials.navigation')
                         </nav>
@@ -53,10 +53,10 @@
         <!-- Static sidebar for desktop -->
         <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
             <div class="flex flex-col px-6 overflow-y-auto bg-white border-r border-gray-200 grow gap-y-5">
-                <div class="flex items-center h-16 shrink-0">
+                {{-- <div class="flex items-center h-16 shrink-0">
                     <img class="w-auto h-8" src="{{ asset('logo.png') }}" alt="{{ config('app.name') }}">
                     <span class="ml-3 text-xl font-bold text-gray-900">SFS Admin</span>
-                </div>
+                </div> --}}
                 <nav class="flex flex-col flex-1">
                     @include('admin.partials.navigation')
                 </nav>
