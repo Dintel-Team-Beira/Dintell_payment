@@ -33,7 +33,9 @@ class Invoice extends Model
         'adjustment_reason',
         'is_cash_sale',
         'cash_received',
-        'change_given'
+        'change_given',
+        'company_id', // Adicionar para multi-tenancy
+
     ];
 
     protected $casts = [
@@ -72,6 +74,26 @@ class Invoice extends Model
             self::TYPE_DEBIT_NOTE => 'Nota de Débito'
         ];
     }
+
+
+ // Relacionamento com empresa
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+
+       // Scope para filtrar por empresa atual
+    public function scopeForCurrentCompany($query)
+    {
+        $company = session('current_company');
+        if ($company) {
+            return $query->where('company_id', $company->id);
+        }
+        return $query;
+    }
+
+
 
 
 
@@ -251,6 +273,14 @@ class Invoice extends Model
         parent::boot();
 
         static::creating(function ($invoice) {
+
+
+            // Definir company_id automaticamente
+             $company = session('current_company');
+            if ($company && !$invoice->company_id) {
+                $invoice->company_id = $company->id;
+            }
+            // Gerar número de fatura se não existir
             if (!$invoice->invoice_number) {
                 $settings = BillingSetting::getSettings();
                 $invoice->invoice_number = $settings->getNextInvoiceNumber();
