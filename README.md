@@ -425,8 +425,7 @@ Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](LICEN
 ### Contato
 - 📧 **Email**: suporte@dintell.co.mz
 - 🌐 **Website**: [https://dintell.co.mz](https://dintell.co.mz)
-- 📱 **WhatsApp**: +258 84 123 4567
-- 🏢 **Endereço**: Maputo, Moçambique
+
 
 ---
 
