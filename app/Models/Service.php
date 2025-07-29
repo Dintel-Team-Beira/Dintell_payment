@@ -23,7 +23,8 @@ class Service extends Model
         'estimated_hours',
         'complexity_level',
         'requirements',
-        'deliverables'
+        'deliverables',
+        'company_id', // Adicionar para multi-tenancy
     ];
 
     protected $casts = [
@@ -36,11 +37,32 @@ class Service extends Model
         'deliverables' => 'array'
     ];
 
+     // Relacionamento com empresa
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+
+        // Scope para filtrar por empresa atual
+    public function scopeForCurrentCompany($query)
+    {
+        $company = session('current_company');
+        if ($company) {
+            return $query->where('company_id', $company->id);
+        }
+        return $query;
+    }
+
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($service) {
+               $company = session('current_company');
+            if ($company && !$service->company_id) {
+                $service->company_id = $company->id;
+            }
             if (empty($service->code)) {
                 $service->code = 'SERV' . str_pad(static::count() + 1, 6, '0', STR_PAD_LEFT);
             }
@@ -58,10 +80,10 @@ class Service extends Model
         return $this->hasMany(QuoteItem::class);
     }
 
-    public function projects()
-    {
-        return $this->belongsToMany(Project::class);
-    }
+    // public function projects()
+    // {
+    //     return $this->belongsToMany(Project::class);
+    // }
 
     // Scopes
     public function scopeActive($query)
