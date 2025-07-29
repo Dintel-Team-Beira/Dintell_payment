@@ -13,7 +13,7 @@ class Client extends Model
 
     protected $fillable = [
         'name', 'email', 'phone', 'company', 'address',
-        'tax_number', 'status', 'contact_preferences', 'last_login'
+        'tax_number', 'status', 'contact_preferences', 'last_login','company_id',
     ];
 
     protected $casts = [
@@ -137,4 +137,32 @@ class Client extends Model
               ->limit($limit)
               ->get();
       }
+
+
+         // Relacionamento com empresa
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+        public function scopeForCurrentCompany($query)
+    {
+        $company = session('current_company');
+        if ($company) {
+            return $query->where('company_id', $company->id);
+        }
+        return $query;
+    }
+   // Boot method para definir company_id automaticamente
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($client) {
+            $company = session('current_company');
+            if ($company && !$client->company_id) {
+                $client->company_id = $company->id;
+            }
+        });
+    }
 }
