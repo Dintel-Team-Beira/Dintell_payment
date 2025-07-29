@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CheckFeatureMiddleware;
 use App\Http\Middleware\CheckSubscriptionMiddleware;
 use App\Http\Middleware\SubscriptionMiddleware;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         // $middleware->append(SubscriptionMiddleware::class);
+
         // $middleware->append(AdminMiddleware::class);
         // $middleware->append(TenantMiddleware::class);
         // $middleware->append(CheckSubscriptionMiddleware::class);
