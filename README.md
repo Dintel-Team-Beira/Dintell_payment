@@ -1,4 +1,4 @@
-# SUBN360 - Sistema Integrado de Gestão Empresarial
+# SUB360 - Sistema Integrado de Gestão Empresarial
 
 <p align="center">
   <img src="https://img.shields.io/badge/Laravel-10.x-red?style=for-the-badge&logo=laravel" alt="Laravel">
