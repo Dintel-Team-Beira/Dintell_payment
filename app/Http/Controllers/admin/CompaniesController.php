@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
+use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,8 @@ use Illuminate\Validation\Rule;
 
 class CompaniesController extends Controller
 {
+    use LogsActivity;
+
     public function index(Request $request)
     {
         $query = Company::with(['creator', 'users'])
@@ -57,6 +60,12 @@ class CompaniesController extends Controller
                 ->sum('monthly_fee'),
         ];
 
+        // Log da visualização
+        $this->logAdminActivity('Visualizou lista de empresas', [
+            'total_companies' => $stats['total'],
+            'filters' => $request->only(['status', 'subscription_plan', 'search', 'trial_expiring'])
+        ]);
+
         return view('admin.companies.index', compact('companies', 'stats'));
     }
 
@@ -94,6 +103,13 @@ class CompaniesController extends Controller
             ->orderBy('month', 'desc')
             ->get();
 
+        // Log da visualização
+        $this->logAdminActivity('Visualizou detalhes da empresa', [
+            'company_id' => $company->id,
+            'company_name' => $company->name,
+            'company_status' => $company->status
+        ]);
+
         return view('admin.companies.show', compact('company', 'stats', 'monthlyActivity'));
     }
 
@@ -125,6 +141,9 @@ class CompaniesController extends Controller
                 'features' => ['Ilimitado', 'Domínio personalizado', 'Integração avançada', 'Suporte dedicado']
             ]
         ];
+
+        // Log da ação
+        $this->logAdminActivity('Acessou formulário de criação de empresa');
 
         return view('admin.companies.create', compact('subscriptionPlans'));
     }
@@ -171,6 +190,15 @@ class CompaniesController extends Controller
 
             DB::commit();
 
+            // Log da criação
+            $this->logAdminActivity('Criou nova empresa', [
+                'company_id' => $company->id,
+                'company_name' => $company->name,
+                'company_email' => $company->email,
+                'subscription_plan' => $company->subscription_plan,
+                'status' => $company->status
+            ]);
+
             return redirect()
                 ->route('admin.companies.show', $company)
                 ->with('success', 'Empresa criada com sucesso!');
@@ -183,126 +211,15 @@ class CompaniesController extends Controller
                 Storage::disk('public')->delete($validated['logo']);
             }
 
+            // Log do erro
+            $this->logAdminActivity('Erro ao criar empresa', [
+                'error' => $e->getMessage(),
+                'data' => $validated
+            ]);
+
             return back()
                 ->withErrors(['error' => 'Erro ao criar empresa: ' . $e->getMessage()])
                 ->withInput();
-        }
-    }
-
-    public function edit(Company $company)
-    {
-        $subscriptionPlans = [
-            'basic' => [
-                'name' => 'Básico',
-                'price' => 500,
-                'max_users' => 1,
-                'max_invoices_per_month' => 50,
-                'max_clients' => 100,
-            ],
-            'premium' => [
-                'name' => 'Premium',
-                'price' => 1500,
-                'max_users' => 5,
-                'max_invoices_per_month' => 200,
-                'max_clients' => 500,
-            ],
-            'enterprise' => [
-                'name' => 'Empresarial',
-                'price' => 3000,
-                'max_users' => 999,
-                'max_invoices_per_month' => 999999,
-                'max_clients' => 999999,
-            ]
-        ];
-
-        return view('admin.companies.edit', compact('company', 'subscriptionPlans'));
-    }
-
-    public function update(Request $request, Company $company)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => ['nullable', 'string', 'max:255', Rule::unique('companies')->ignore($company->id)],
-            'email' => ['required', 'email', Rule::unique('companies')->ignore($company->id)],
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'city' => 'nullable|string|max:100',
-            'tax_number' => 'nullable|string|max:50',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'subscription_plan' => 'required|in:basic,premium,enterprise',
-            'status' => 'required|in:active,trial,suspended,inactive',
-            'custom_domain_enabled' => 'boolean',
-            'api_access_enabled' => 'boolean',
-            'domain' => 'nullable|string|max:255',
-        ]);
-
-        DB::beginTransaction();
-
-        try {
-            $oldLogo = $company->logo;
-
-            // Upload do novo logo se fornecido
-            if ($request->hasFile('logo')) {
-                $validated['logo'] = $request->file('logo')->store('companies/logos', 'public');
-
-                // Remover logo antigo
-                if ($oldLogo) {
-                    Storage::disk('public')->delete($oldLogo);
-                }
-            }
-
-            // Atualizar configurações do plano se mudou
-            if ($company->subscription_plan !== $validated['subscription_plan']) {
-                $planConfig = $this->getPlanConfiguration($validated['subscription_plan']);
-                $validated = array_merge($validated, $planConfig);
-            }
-
-            $company->update($validated);
-            $company->updateUsageStats();
-
-            DB::commit();
-
-            return redirect()
-                ->route('admin.companies.show', $company)
-                ->with('success', 'Empresa atualizada com sucesso!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return back()
-                ->withErrors(['error' => 'Erro ao atualizar empresa: ' . $e->getMessage()])
-                ->withInput();
-        }
-    }
-
-    public function destroy(Company $company)
-    {
-        DB::beginTransaction();
-
-        try {
-            // Verificar se a empresa pode ser deletada
-            if ($company->invoices()->count() > 0) {
-                return back()->withErrors(['error' => 'Não é possível deletar uma empresa com faturas.']);
-            }
-
-            // Remover logo se existir
-            if ($company->logo) {
-                Storage::disk('public')->delete($company->logo);
-            }
-
-            // Soft delete
-            $company->delete();
-
-            DB::commit();
-
-            return redirect()
-                ->route('admin.companies.index')
-                ->with('success', 'Empresa removida com sucesso!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return back()->withErrors(['error' => 'Erro ao remover empresa: ' . $e->getMessage()]);
         }
     }
 
@@ -314,12 +231,25 @@ class CompaniesController extends Controller
 
         $company->suspend($request->reason);
 
+        // Log da suspensão
+        $this->logAdminActivity('Suspendeu empresa', [
+            'company_id' => $company->id,
+            'company_name' => $company->name,
+            'reason' => $request->reason
+        ]);
+
         return back()->with('success', 'Empresa suspensa com sucesso!');
     }
 
     public function activate(Company $company)
     {
         $company->activate();
+
+        // Log da ativação
+        $this->logAdminActivity('Ativou empresa', [
+            'company_id' => $company->id,
+            'company_name' => $company->name
+        ]);
 
         return back()->with('success', 'Empresa ativada com sucesso!');
     }
@@ -330,9 +260,19 @@ class CompaniesController extends Controller
             'days' => 'required|integer|min:1|max:90'
         ]);
 
+        $oldTrialEnd = $company->trial_ends_at;
         $company->extendTrial($request->days);
 
-        return back()->with('success', "Trial extendido por {$request->days} dias!");
+        // Log da extensão
+        $this->logAdminActivity('Estendeu trial da empresa', [
+            'company_id' => $company->id,
+            'company_name' => $company->name,
+            'days_added' => $request->days,
+            'old_trial_end' => $oldTrialEnd?->toISOString(),
+            'new_trial_end' => $company->fresh()->trial_ends_at?->toISOString()
+        ]);
+
+        return back()->with('success', "Trial estendido por {$request->days} dias!");
     }
 
     public function impersonate(Company $company)
@@ -346,20 +286,36 @@ class CompaniesController extends Controller
 
         // Salvar admin atual na sessão
         session(['impersonate_admin' => auth()->id()]);
+        session(['impersonate_company_id' => $company->id]);
+
+        // Log da impersonificação
+        $this->logAdminActivity('Iniciou impersonificação', [
+            'company_id' => $company->id,
+            'company_name' => $company->name,
+            'target_user_id' => $user->id,
+            'target_user_name' => $user->name
+        ]);
 
         // Login como usuário da empresa
         auth()->login($user);
 
-        return redirect()->route('billing.dashboard')
+        return redirect()->route('dashboard')
             ->with('info', "Você está logado como {$user->name} da empresa {$company->name}");
     }
 
     public function stopImpersonation()
     {
         $adminId = session('impersonate_admin');
+        $companyId = session('impersonate_company_id');
 
         if ($adminId) {
-            session()->forget('impersonate_admin');
+            // Log do fim da impersonificação
+            $this->logAdminActivity('Finalizou impersonificação', [
+                'company_id' => $companyId,
+                'returning_admin_id' => $adminId
+            ]);
+
+            session()->forget(['impersonate_admin', 'impersonate_company_id']);
             auth()->loginUsingId($adminId);
 
             return redirect()->route('admin.companies.index')
@@ -367,19 +323,6 @@ class CompaniesController extends Controller
         }
 
         return redirect()->route('admin.dashboard');
-    }
-
-    public function analytics(Company $company)
-    {
-        // Dados para gráficos e analytics avançados
-        $analytics = [
-            'revenue_trend' => $this->getRevenueTrend($company),
-            'invoice_status_distribution' => $this->getInvoiceStatusDistribution($company),
-            'client_growth' => $this->getClientGrowth($company),
-            'usage_metrics' => $company->usage_percentage,
-        ];
-
-        return view('admin.companies.analytics', compact('company', 'analytics'));
     }
 
     private function getPlanConfiguration(string $plan): array
@@ -431,45 +374,5 @@ class CompaniesController extends Controller
         ];
 
         return $configs[$plan] ?? $configs['basic'];
-    }
-
-    private function getRevenueTrend(Company $company): array
-    {
-        return DB::table('invoices')
-            ->where('company_id', $company->id)
-            ->where('status', 'paid')
-            ->where('created_at', '>=', now()->subMonths(12))
-            ->select(
-                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
-                DB::raw('SUM(total_amount) as revenue')
-            )
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('revenue', 'month')
-            ->toArray();
-    }
-
-    private function getInvoiceStatusDistribution(Company $company): array
-    {
-        return $company->invoices()
-            ->select('status', DB::raw('COUNT(*) as count'))
-            ->groupBy('status')
-            ->pluck('count', 'status')
-            ->toArray();
-    }
-
-    private function getClientGrowth(Company $company): array
-    {
-        return DB::table('clients')
-            ->where('company_id', $company->id)
-            ->where('created_at', '>=', now()->subMonths(12))
-            ->select(
-                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
-                DB::raw('COUNT(*) as new_clients')
-            )
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('new_clients', 'month')
-            ->toArray();
     }
 }
