@@ -11,6 +11,7 @@ return [
     'website' => env('COMPANY_WEBSITE', 'www.dintell.co.mz'),
     'logo_url' => env('COMPANY_LOGO_URL', ''),
     'tagline' => env('COMPANY_TAGLINE', 'beyond technology, intelligence.'),
+    'slug' => env('COMPANY_SLUG', 'dintell'),
 
     // Informações bancárias
     'bank' => env('COMPANY_BANK', 'BCI'),
