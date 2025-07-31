@@ -3,6 +3,8 @@
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CheckFeatureMiddleware;
 use App\Http\Middleware\CheckSubscriptionMiddleware;
+use App\Http\Middleware\CompanyPrefixMiddleware;
+use App\Http\Middleware\DynamicPrefixMiddleware;
 use App\Http\Middleware\SubscriptionMiddleware;
 use App\Http\Middleware\TenantMiddleware;
 use Illuminate\Foundation\Application;
@@ -23,6 +25,18 @@ return Application::configure(basePath: dirname(__DIR__))
         // $middleware->append(TenantMiddleware::class);
         // $middleware->append(CheckSubscriptionMiddleware::class);
         // $middleware->append(CheckFeatureMiddleware::class);
+
+        //     $middleware->alias([
+        //     'tenant' => TenantMiddleware::class,
+        // ]);
+
+//         $middleware->alias([
+//     'dynamic_prefix' => DynamicPrefixMiddleware::class,
+// ]);
+
+// $middleware->alias([
+//     'company_prefix' => CompanyPrefixMiddleware::class,
+// ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
