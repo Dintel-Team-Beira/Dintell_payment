@@ -13,14 +13,14 @@
                 <p class="mt-2 text-gray-600">Crie uma nota de débito de forma rápida e automatizada</p>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('debit-notes.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                <a href="{{ company_route('debit-notes.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Voltar
                 </a>
                 @if($invoice)
-                <a href="{{ route('invoices.show', $invoice) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100">
+                <a href="{{ company_route('invoices.show', $invoice) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -32,7 +32,7 @@
     </div>
 
     <!-- Formulário -->
-    <form action="{{ route('debit-notes.store') }}" method="POST" id="debitNoteForm">
+    <form action="{{ company_route('debit-notes.store') }}" method="POST" id="debitNoteForm">
         @csrf
 
         <div class="grid grid-cols-1 gap-8 xl:grid-cols-3">
@@ -315,7 +315,7 @@
                                 Criar Nota de Débito
                             </button>
 
-                            <a href="{{ route('debit-notes.index') }}" class="inline-flex items-center justify-center w-full px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            <a href="{{ company_route('debit-notes.index') }}" class="inline-flex items-center justify-center w-full px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
