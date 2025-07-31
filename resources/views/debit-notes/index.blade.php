@@ -5,7 +5,7 @@
 
 @section('header-actions')
 <div class="flex space-x-3">
-    <a href="{{ route('debit-notes.create') }}"
+    <a href="{{ company_route('debit-notes.create') }}"
        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-yellow-600 rounded-lg hover:bg-yellow-700">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -97,7 +97,7 @@
         <h3 class="text-lg font-semibold text-gray-900">Filtros</h3>
     </div>
     <div class="p-6">
-        <form method="GET" action="{{ route('debit-notes.index') }}" class="flex gap-4">
+        <form method="GET" action="{{ company_route('debit-notes.index') }}" class="flex gap-4">
             <div class="flex-1">
                 <input type="text" name="search" placeholder="Pesquisar por número ou cliente..."
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
@@ -122,7 +122,7 @@
             <button type="submit" class="px-6 py-2 text-white bg-yellow-600 rounded-lg hover:bg-yellow-700">
                 Filtrar
             </button>
-            <a href="{{ route('debit-notes.index') }}" class="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
+            <a href="{{ company_route('debit-notes.index') }}" class="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">
                 Limpar
             </a>
         </form>
@@ -170,7 +170,7 @@
                 @foreach($debitNotes as $debitNote)
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <a href="{{ route('debit-notes.show', $debitNote) }}"
+                        <a href="{{ company_route('debit-notes.show', $debitNote) }}"
                            class="text-sm font-medium text-yellow-600 hover:text-yellow-900">
                             {{ $debitNote->invoice_number }}
                         </a>
@@ -181,7 +181,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         @if($debitNote->relatedInvoice)
-                            <a href="{{ route('invoices.show', $debitNote->relatedInvoice) }}"
+                            <a href="{{ company_route('invoices.show', $debitNote->relatedInvoice) }}"
                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 {{ $debitNote->relatedInvoice->invoice_number }}
                             </a>
@@ -224,7 +224,7 @@
                     </td>
                     <td class="px-6 py-4 text-center whitespace-nowrap">
                         <div class="flex items-center justify-center space-x-2">
-                            <a href="{{ route('debit-notes.show', $debitNote) }}"
+                            <a href="{{ company_route('debit-notes.show', $debitNote) }}"
                                class="p-2 text-blue-600 transition-colors rounded-lg bg-blue-50 hover:bg-blue-100">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -262,7 +262,7 @@
         <h3 class="mt-4 text-lg font-medium text-gray-900">Nenhuma nota de débito encontrada</h3>
         <p class="mt-2 text-sm text-gray-500">Comece criando sua primeira nota de débito.</p>
         <div class="mt-6">
-            <a href="{{ route('debit-notes.create') }}"
+            <a href="{{ company_route('debit-notes.create') }}"
                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
