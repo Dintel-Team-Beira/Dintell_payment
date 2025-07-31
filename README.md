@@ -16,7 +16,7 @@
 
 ## 📋 Sobre o Projeto
 
-O **SUBN360** é um sistema de gestão empresarial robusto e completo, desenvolvido em Laravel, que integra funcionalidades de faturação, gestão de clientes, controle de subscrições e muito mais. Projetado para empresas que precisam de uma solução escalável e personalizável.
+O **SUB360** é um sistema de gestão empresarial robusto e completo, desenvolvido em Laravel, que integra funcionalidades de faturação, gestão de clientes, controle de subscrições e muito mais. Projetado para empresas que precisam de uma solução escalável e personalizável.
 
 ### 🎯 Objetivo
 
