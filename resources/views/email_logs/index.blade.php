@@ -47,7 +47,7 @@
         </button>
 
         @if(request()->hasAny(['search', 'status', 'type', 'date_from', 'date_to']))
-        <a href="{{ route('email-logs.index') }}" class="inline-flex items-center px-3 py-2 text-sm text-gray-600 transition-all rounded-lg hover:text-gray-900 hover:bg-gray-100">
+        <a href="{{ route('settings.email-logs.index') }}" class="inline-flex items-center px-3 py-2 text-sm text-gray-600 transition-all rounded-lg hover:text-gray-900 hover:bg-gray-100">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
