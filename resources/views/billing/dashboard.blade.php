@@ -61,11 +61,11 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-blue-100">Receita Total</p>
-                        <p class="text-3xl font-bold">{{ number_format($statss['total_invoices'], 2) }} MT</p>
+                        <p class="text-3xl font-bold">{{ number_format($stats['total_invoices'], 2) }} MT</p>
                         <div class="flex items-center mt-2">
-                            @if(isset($statss['invoices_growth']))
-                            <p class="text-xs text-{{ $statss['invoices_growth'] >= 0 ? 'white' : 'white' }}-600">
-                                {{ $statss['invoices_growth'] >= 0 ? '+' : '' }}{{ number_format($statss['invoices_growth'], 1) }}% vs mês anterior
+                            @if(isset($stats['invoices_growth']))
+                            <p class="text-xs text-{{ $stats['invoices_growth'] >= 0 ? 'white' : 'white' }}-600">
+                                {{ $stats['invoices_growth'] >= 0 ? '+' : '' }}{{ number_format($stats['invoices_growth'], 1) }}% vs mês anterior
                             </p>
                         @endif
                         </div>
@@ -128,8 +128,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-green-100">Recebido Este Mês</p>
-                        <p class="text-3xl font-bold">{{ number_format($statss['total_paid_this_month'], 2) }} MT</p>
-                        <p class="mt-2 text-sm text-green-200">{{ $statss['paid_count_this_month'] }} facturas pagas</p>
+                        <p class="text-3xl font-bold">{{ number_format($stats['total_paid_this_month'], 2) }} MT</p>
+                        <p class="mt-2 text-sm text-green-200">{{ $stats['paid_count_this_month'] }} facturas pagas</p>
                     </div>
                     <div class="p-3 bg-white rounded-lg bg-opacity-20">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
