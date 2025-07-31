@@ -292,4 +292,20 @@ class User extends Authenticatable implements MustVerifyEmail
             }
         });
     }
+
+     // Relationships
+    public function companies()
+    {
+        return $this->hasMany(Company::class, 'admin_id');
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(AdminActivity::class, 'admin_id');
+    }
+
+    public function invoices()
+    {
+        return $this->belongsToMany(Invoice::class);
+    }
 }
