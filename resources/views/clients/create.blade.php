@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="mx-auto max-w-8xl">
-    <form action="{{ route('clients.store') }}" method="POST" class="space-y-6">
+    <form action="{{ company_route('clients.store') }}" method="POST" class="space-y-6">
         @csrf
 
         <div class="p-6 bg-white rounded-lg shadow-sm ring-1 ring-gray-900/5">
@@ -55,7 +55,7 @@
         </div>
 
         <div class="flex justify-end space-x-3">
-            <a href="{{ route('clients.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            <a href="{{ company_route('clients.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                 Cancelar
             </a>
             <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
