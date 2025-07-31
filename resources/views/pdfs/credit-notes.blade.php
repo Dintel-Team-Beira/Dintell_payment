@@ -42,7 +42,7 @@
         .company-name {
             font-size: 16px;
             font-weight: bold;
-            color: #e74c3c;
+            color: #0c2572;
             margin-bottom: 2px;
         }
 
@@ -64,9 +64,9 @@
         }
 
         .client-box {
-            border: 1px solid #e74c3c;
+            border: 1px solid #0c2572;
             padding: 10px;
-            background-color: #fff5f5;
+            /* background-color: #fff5f5; */
             font-size: 10px;
         }
 
@@ -76,17 +76,17 @@
         }
 
         .original-label {
-            border: 1px solid #e74c3c;
+            border: 1px solid #0c2572;
             display: inline-block;
             padding: 4px 10px;
             font-size: 10px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #e74c3c;
+            color: #0c2572;
         }
 
         .document-title {
-            background-color: #e74c3c;
+            background-color: #0c2572;
             color: white;
             padding: 8px;
             font-size: 14px;
@@ -121,13 +121,13 @@
         }
 
         .document-details td {
-            border: 1px solid #e74c3c;
+            border: 1px solid #0c2572;
             padding: 5px;
             font-size: 9px;
         }
 
         .document-details .label {
-            background-color: #fff5f5;
+            /* background-color: #fff5f5; */
             font-weight: bold;
             width: 15%;
         }
@@ -156,21 +156,21 @@
         .adjustment-reason {
             margin: 20px 0;
             padding: 15px;
-            background-color: #fff5f5;
-            border-left: 4px solid #e74c3c;
+           background-color: #e7f3ff;
+            border-left: 4px solid #0c2572;
             border-radius: 0 4px 4px 0;
         }
 
         .adjustment-reason h4 {
             font-size: 11px;
             font-weight: bold;
-            color: #721c24;
+            color: #0c2572;
             margin-bottom: 5px;
         }
 
         .adjustment-reason p {
             font-size: 10px;
-            color: #a0283e;
+            color: #0c2572;
             line-height: 1.4;
         }
 
@@ -182,13 +182,13 @@
 
         .items-table th,
         .items-table td {
-            border: 1px solid #e74c3c;
+            border: 1px solid #0c2572;
             padding: 6px;
             font-size: 10px;
         }
 
         .items-table th {
-            background-color: #e74c3c;
+            background-color: #0c2572;
             color: white;
             font-weight: bold;
             text-align: center;
@@ -230,14 +230,14 @@
 
         .iva-table th,
         .iva-table td {
-            border: 1px solid #e74c3c;
+            border: 1px solid #0c2572;
             padding: 4px;
             font-size: 9px;
             text-align: center;
         }
 
         .iva-table th {
-            background-color: #fff5f5;
+            /* background-color: #fff5f5; */
             font-weight: bold;
         }
 
@@ -247,25 +247,25 @@
         }
 
         .totals-table td {
-            border: 1px solid #e74c3c;
+            border: 1px solid #0c2572;
             padding: 5px;
             font-size: 10px;
         }
 
         .totals-table .label {
-            background-color: #fff5f5;
+            /* background-color: #fff5f5; */
             font-weight: bold;
         }
 
         .total-final {
-            background-color: #e74c3c;
+            background-color: #0c2572;
             color: white;
             font-weight: bold;
             font-size: 11px;
         }
 
         .observations {
-            background-color: #e74c3c;
+            background-color: #0c2572;
             color: white;
             padding: 6px 10px;
             margin: 15px 0;
@@ -531,7 +531,7 @@
                 </tr>
                 @endif
                 <tr class="total-final">
-                    <td style="color: #000000" class="label">TOTAL A CREDITAR:</td>
+                    <td style="color: #ffffff" class="label">TOTAL A CREDITAR:</td>
                     <td class="text-right">{{ number_format($creditNote->total, 2) }} MT</td>
                 </tr>
             </table>
@@ -564,7 +564,7 @@
         <p>Este documento foi processado por computador e é válido sem assinatura e carimbo.</p>
         <p>Gerado em {{ now()->format('d/m/Y H:i:s') }} |
            sub360 v{{ config('app.version', '1.0') }} |  {{ $settings->company_name ?? config('app.name') }}</p>
-        <p style="font-size: 8px; margin-top: 5px; color: #e74c3c;">
+        <p style="font-size: 8px; margin-top: 5px; color: #0c2572;">
             <strong>NOTA DE CRÉDITO:</strong> Este documento representa um crédito a favor do cliente.
         </p>
     </div>
