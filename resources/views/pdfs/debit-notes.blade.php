@@ -42,7 +42,7 @@
         .company-name {
             font-size: 16px;
             font-weight: bold;
-            color: #f59e0b;
+            color: #0c2572;
             margin-bottom: 2px;
         }
 
@@ -64,9 +64,9 @@
         }
 
         .client-box {
-            border: 1px solid #f59e0b;
+            border: 1px solid #0c2572;
             padding: 10px;
-            background-color: #fff8e1;
+            /* background-color: #fff8e1; */
             font-size: 10px;
         }
 
@@ -76,17 +76,17 @@
         }
 
         .original-label {
-            border: 1px solid #f59e0b;
+            border: 1px solid #0c2572;
             display: inline-block;
             padding: 4px 10px;
             font-size: 10px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #f59e0b;
+            color: #0c2572;
         }
 
         .document-title {
-            background-color: #f59e0b;
+            background-color: #0c2572;
             color: white;
             padding: 8px;
             font-size: 14px;
@@ -96,7 +96,7 @@
         /* Debit Note Alert */
         .debit-alert {
             background-color: #fef3c7;
-            border: 1px solid #fbbf24;
+            border: 1px solid #0c2572;
             border-radius: 4px;
             padding: 15px;
             margin: 20px 0;
@@ -121,13 +121,13 @@
         }
 
         .document-details td {
-            border: 1px solid #f59e0b;
+            border: 1px solid #0c2572;
             padding: 5px;
             font-size: 9px;
         }
 
         .document-details .label {
-            background-color: #fff8e1;
+            /* background-color: #fff8e1; */
             font-weight: bold;
             width: 15%;
         }
@@ -155,7 +155,7 @@
         /* Due Date Section */
         .due-date-section {
             background-color: #fef3c7;
-            border: 1px solid #fbbf24;
+            border: 1px solid #0c2572;
             border-radius: 4px;
             padding: 15px;
             margin: 20px 0;
@@ -163,13 +163,13 @@
         }
 
         .due-date-section h4 {
-            color: #92400e;
+            color: #0e4192;
             font-size: 12px;
             margin-bottom: 5px;
         }
 
         .due-date-section .due-date {
-            color: #78350f;
+            color: #0f1678;
             font-size: 14px;
             font-weight: bold;
         }
@@ -189,21 +189,21 @@
         .adjustment-reason {
             margin: 20px 0;
             padding: 15px;
-            background-color: #fff8e1;
-            border-left: 4px solid #f59e0b;
+            background-color: #e1efff;
+            border-left: 4px solid #0c2572;
             border-radius: 0 4px 4px 0;
         }
 
         .adjustment-reason h4 {
             font-size: 11px;
             font-weight: bold;
-            color: #92400e;
+            color: #0e2292;
             margin-bottom: 5px;
         }
 
         .adjustment-reason p {
             font-size: 10px;
-            color: #78350f;
+            color: #1b0f78;
             line-height: 1.4;
         }
 
@@ -215,13 +215,13 @@
 
         .items-table th,
         .items-table td {
-            border: 1px solid #f59e0b;
+            border: 1px solid #0c2572;
             padding: 6px;
             font-size: 10px;
         }
 
         .items-table th {
-            background-color: #f59e0b;
+            background-color: #0c2572;
             color: white;
             font-weight: bold;
             text-align: center;
@@ -263,14 +263,14 @@
 
         .iva-table th,
         .iva-table td {
-            border: 1px solid #f59e0b;
+            border: 1px solid #0c2572;
             padding: 4px;
             font-size: 9px;
             text-align: center;
         }
 
         .iva-table th {
-            background-color: #fff8e1;
+            /* background-color: #fff8e1; */
             font-weight: bold;
         }
 
@@ -280,25 +280,25 @@
         }
 
         .totals-table td {
-            border: 1px solid #f59e0b;
+            border: 1px solid #0c2572;
             padding: 5px;
             font-size: 10px;
         }
 
         .totals-table .label {
-            background-color: #fff8e1;
+            /* background-color: #fff8e1; */
             font-weight: bold;
         }
 
         .total-final {
-            background-color: #f59e0b;
+            background-color: #0c2572;
             color: white;
             font-weight: bold;
             font-size: 11px;
         }
 
         .observations {
-            background-color: #f59e0b;
+            background-color: #0c2572;
             color: white;
             padding: 6px 10px;
             margin: 15px 0;
@@ -323,7 +323,7 @@
 
         .status-pending {
             background-color: #fef3c7;
-            border: 1px solid #fbbf24;
+            border: 1px solid #0c2572;
             color: #92400e;
         }
 
@@ -633,7 +633,7 @@
                 </tr>
                 @endif
                 <tr class="total-final">
-                    <td style="color: #333" class="label">TOTAL A COBRAR:</td>
+                    <td style="color: #ffffff" class="label">TOTAL A COBRAR:</td>
                     <td class="text-right">{{ number_format($debitNote->total, 2) }} MT</td>
                 </tr>
             </table>
@@ -695,7 +695,7 @@
         <p>Gerado em {{ now()->format('d/m/Y H:i:s') }} |
            sub360 v{{ config('app.version', '1.0') }} |
            {{ $settings->company_name ?? config('app.name') }}</p>
-        <p style="font-size: 8px; margin-top: 5px; color: #f59e0b;">
+        <p style="font-size: 8px; margin-top: 5px; color: #0c2572;">
             <strong>NOTA DE DÉBITO:</strong> Este documento representa uma cobrança adicional ao cliente.
         </p>
         <p style="font-size: 8px; margin-top: 5px; color: #999;">
