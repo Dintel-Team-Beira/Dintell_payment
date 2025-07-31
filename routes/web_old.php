@@ -260,6 +260,8 @@ Route::middleware(['auth'])->group(function () {
     //     'destroy' => 'debit-notes.destroy'
     // ]);
 });
+
+
  // Notas de Débito
     Route::prefix('debit-notes')->name('debit-notes.')->group(function () {
         Route::get('/', [DebitNoteController::class, 'index'])->name('index');
