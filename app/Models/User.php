@@ -308,4 +308,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(Invoice::class);
     }
+
+    public function getCompanySlugAttribute()
+    {
+        return $this->company ? $this->company->slug : 'default';
+    }
+
+    public function hasCompany()
+    {
+        return !is_null($this->company_id) && $this->company !== null;
+    }
 }
