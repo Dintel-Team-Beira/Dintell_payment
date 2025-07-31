@@ -29,14 +29,14 @@
         </button>
 
         @if(request()->hasAny(['search', 'status']))
-        <a href="{{ route('clients.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
+        <a href="{{ company_route('clients.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
             Limpar
         </a>
         @endif
     </form>
 
     <!-- Add Client Button -->
-    <a href="{{ route('clients.create') }}"
+    <a href="{{ company_route('clients.create') }}"
        class="flex px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
         <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
@@ -193,7 +193,7 @@
                                      class="absolute right-0 z-10 w-56 mt-2 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
                                     <div class="py-1">
                                         <!-- Ver Cliente -->
-                                        <a href="{{ route('clients.show', $client) }}"
+                                        <a href="{{ company_route('clients.show', $client) }}"
                                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                                             <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -203,7 +203,7 @@
                                         </a>
 
                                         <!-- Editar Cliente -->
-                                        <a href="{{ route('clients.edit', $client) }}"
+                                        <a href="{{ company_route('clients.edit', $client) }}"
                                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                                             <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -212,7 +212,7 @@
                                         </a>
 
                                         <!-- Subscrições -->
-                                        <a href="{{ route('subscriptions.index', ['client_id' => $client->id]) }}"
+                                        <a href="{{ company_route('subscriptions.index', ['client_id' => $client->id]) }}"
                                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                                             <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -226,7 +226,7 @@
                                         </a>
 
                                         <!-- Nova Subscrição -->
-                                        <a href="{{ route('subscriptions.create', ['client_id' => $client->id]) }}"
+                                        <a href="{{ company_route('subscriptions.create', ['client_id' => $client->id]) }}"
                                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                                             <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -238,7 +238,7 @@
                                         <div class="border-t border-gray-100"></div>
 
                                         <!-- Toggle Status -->
-                                        <form method="POST" action="{{ route('clients.toggle-status', $client) }}" class="inline w-full">
+                                        <form method="POST" action="{{ company_route('clients.toggle-status', $client) }}" class="inline w-full">
                                             @csrf
                                             <button type="submit"
                                                     class="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100
@@ -262,7 +262,7 @@
                                         <!-- Deletar Cliente (apenas se não tiver subscrições ativas) -->
                                         @if(($client->active_subscriptions_count ?? 0) === 0)
                                         <div class="border-t border-gray-100"></div>
-                                        <form method="POST" action="{{ route('clients.destroy', $client) }}" class="inline w-full">
+                                        <form method="POST" action="{{ company_route('clients.destroy', $client) }}" class="inline w-full">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -282,7 +282,7 @@
                             <!-- Botões de Ação Rápida (alternativos) -->
                             <div class="flex items-center justify-end ml-4 space-x-1">
                                 <!-- Quick View -->
-                                <a href="{{ route('clients.show', $client) }}"
+                                <a href="{{ company_route('clients.show', $client) }}"
                                    class="inline-flex items-center p-1.5 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50"
                                    title="Ver detalhes">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -292,7 +292,7 @@
                                 </a>
 
                                 <!-- Quick Edit -->
-                                <a href="{{ route('clients.edit', $client) }}"
+                                <a href="{{ company_route('clients.edit', $client) }}"
                                    class="inline-flex items-center p-1.5 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-indigo-50"
                                    title="Editar cliente">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +301,7 @@
                                 </a>
 
                                 <!-- Status Badge Clicável -->
-                                <form method="POST" action="{{ route('clients.toggle-status', $client) }}" class="inline">
+                                <form method="POST" action="{{ company_route('clients.toggle-status', $client) }}" class="inline">
                                     @csrf
                                     <button type="submit"
                                             class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border-2 border-transparent hover:border-gray-200 transition-colors duration-200
@@ -333,7 +333,7 @@
                             <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum cliente encontrado</h3>
                             <p class="mt-1 text-sm text-gray-500">Comece criando seu primeiro cliente.</p>
                             <div class="mt-6">
-                                <a href="{{ route('clients.create') }}"
+                                <a href="{{ company_route('clients.create') }}"
                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700">
                                     <svg class="w-5 h-5 mr-2 -ml-1" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
