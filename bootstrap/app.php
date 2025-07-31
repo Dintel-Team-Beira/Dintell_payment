@@ -34,9 +34,9 @@ return Application::configure(basePath: dirname(__DIR__))
 //     'dynamic_prefix' => DynamicPrefixMiddleware::class,
 // ]);
 
-// $middleware->alias([
-//     'company_prefix' => CompanyPrefixMiddleware::class,
-// ]);
+$middleware->alias([
+    'company_prefix' => CompanyPrefixMiddleware::class,
+]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
