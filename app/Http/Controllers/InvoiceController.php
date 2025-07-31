@@ -295,12 +295,25 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function show(Invoice $invoice)
+
+    /**
+     * Display the specified resource.
+     * ⭐ SEM TYPE HINT - aceita tanto Invoice quanto string/int
+     */
+    public function show($invoice)
     {
-        $invoice->load(['client', 'items', 'quote']);
+        // Se for string/int, buscar o objeto
+        if (!$invoice instanceof Invoice) {
+            $invoice = Invoice::with(['client', 'items', 'quote'])->findOrFail($invoice);
+        }
+
+        // Se já for objeto, garantir que relacionamentos estão carregados
+        if (!$invoice->relationLoaded('client')) {
+            $invoice->load(['client', 'items', 'quote']);
+        }
 
         // Verificar se está vencida e atualizar status automaticamente
-        if ($invoice->status === 'sent' && $invoice->isOverdue()) {
+        if ($invoice->status === 'sent' && method_exists($invoice, 'isOverdue') && $invoice->isOverdue()) {
             $invoice->update(['status' => 'overdue']);
         }
 
