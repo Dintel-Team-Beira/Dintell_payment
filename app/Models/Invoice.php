@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 
 class Invoice extends Model
@@ -268,6 +270,9 @@ class Invoice extends Model
         return $this->change_given;
     }
 
+
+
+
     protected static function boot()
     {
         parent::boot();
@@ -324,6 +329,41 @@ class Invoice extends Model
 
 
     }
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        // Aplicar scope global para filtrar por empresa
+        static::addGlobalScope('company', function (Builder $builder) {
+            $company = Config::get('app.current_company');
 
-    // Invoice.php
+            if ($company) {
+                $builder->where('company_id', $company->id);
+            }
+        });
+
+        // Auto-definir company_id ao criar
+        static::creating(function (Invoice $invoice) {
+            $company = Config::get('app.current_company');
+
+            if ($company && !$invoice->company_id) {
+                $invoice->company_id = $company->id;
+            }
+        });
+    }
+
+    // Método para resolver route model binding com contexto da empresa
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $company = Config::get('app.current_company');
+
+        if ($company) {
+            return $this->where('company_id', $company->id)
+                       ->where($field ?? $this->getRouteKeyName(), $value)
+                       ->first();
+        }
+
+        return parent::resolveRouteBinding($value, $field);
+    }
 }
