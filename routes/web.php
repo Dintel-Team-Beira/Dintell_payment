@@ -1,40 +1,41 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\SubscriptionPlanController;
-use App\Http\Controllers\SuspensionPageController;
-use App\Http\Controllers\ApiLogController;
-use App\Http\Controllers\BillingController;
-use App\Http\Controllers\CashSaleController;
-use App\Http\Controllers\CreditNoteController;
-use App\Http\Controllers\DebitNoteController;
-use App\Http\Controllers\EmailController;
-use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\QuoteController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\ProfileController;
-
-// Controllers Admin (SaaS)
-use App\Http\Controllers\Admin\AuthController as AdminAuthController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\CompaniesController as AdminCompaniesController;
-use App\Http\Controllers\Admin\UsersController as AdminUsersController;
-use App\Http\Controllers\Admin\InvoicesController as AdminInvoicesController;
-use App\Http\Controllers\Admin\ReportsController as AdminReportsController;
-use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
-
-// Middlewares diretos
-use App\Http\Middleware\AdminMiddleware;
-use App\Http\Middleware\TenantMiddleware;
-use App\Http\Middleware\CheckSubscriptionMiddleware;
-use App\Http\Middleware\CheckFeatureMiddleware;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Controllers\EmailController;
+use App\Http\Controllers\QuoteController;
+use App\Http\Middleware\TenantMiddleware;
+use App\Http\Controllers\ApiLogController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\BillingController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\CashSaleController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\DashboardController;
+
+// Controllers Admin (SaaS)
+use App\Http\Controllers\DebitNoteController;
+use App\Http\Controllers\CreditNoteController;
+use App\Http\Middleware\CheckFeatureMiddleware;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SuspensionPageController;
+use App\Http\Controllers\SubscriptionPlanController;
+use App\Http\Middleware\CheckSubscriptionMiddleware;
+
+// Middlewares diretos
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\UsersController as AdminUsersController;
+use App\Http\Controllers\Admin\InvoicesController as AdminInvoicesController;
+
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\CompaniesController as AdminCompaniesController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ReportsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -163,10 +164,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Relatórios Administrativos
     Route::prefix('reports')->name('reports.')->group(function () {
-        Route::get('/revenue', [AdminReportsController::class, 'revenue'])->name('revenue');
-        Route::get('/clients', [AdminReportsController::class, 'clients'])->name('clients');
-        Route::get('/usage', [AdminReportsController::class, 'usage'])->name('usage');
-        Route::get('/export/{type}', [AdminReportsController::class, 'export'])->name('export');
+        Route::get('/revenue', [ReportsController::class, 'revenue'])->name('revenue');
+        Route::get('/clients', [ReportsController::class, 'clients'])->name('clients');
+        Route::get('/usage', [ReportsController::class, 'usage'])->name('usage');
+        Route::get('/export/{type}', [ReportsController::class, 'export'])->name('export');
     });
 
     // Configurações do Sistema
@@ -208,12 +209,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Logs do Sistema
     Route::prefix('logs')->name('logs.')->group(function () {
-        Route::get('/', [AdminLogsController::class, 'index'])->name('index');
-        Route::get('/{log}', [AdminLogsController::class, 'show'])->name('show');
-        Route::delete('/{log}', [AdminLogsController::class, 'destroy'])->name('destroy');
-        Route::post('/clear', [AdminLogsController::class, 'clear'])->name('clear');
-        Route::get('/download/{log}', [AdminLogsController::class, 'download'])->name('download');
+        Route::get('/', [LogsController::class, 'index'])->name('index');
+        Route::get('/{log}', [LogsController::class, 'show'])->name('show');
+        Route::delete('/{log}', [LogsController::class, 'destroy'])->name('destroy');
+        Route::post('/clear', [LogsController::class, 'clear'])->name('clear');
+        Route::get('/download/{log}', [LogsController::class, 'download'])->name('download');
     });
+
 
     // Monitoramento
     Route::prefix('monitoring')->name('monitoring.')->group(function () {
@@ -246,6 +248,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 */
 
 Route::get('/', function () {
+
     if (auth()->check()) {
         $user = auth()->user();
 
@@ -258,7 +261,7 @@ Route::get('/', function () {
         if ($user->company_id) {
             $company = \App\Models\Company::find($user->company_id);
             if ($company && $company->slug) {
-                return redirect("/dashboard");
+                return redirect("v1/dashboard");
             }
         }
 
@@ -275,8 +278,6 @@ Route::get('/', function () {
 |-------------------
 -------------------------------------------------------
 */
-
-
 
 
 Route::prefix('v1')->group(function () {
@@ -449,6 +450,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/export/data', [ServiceController::class, 'export'])->name('export');
         Route::post('/import/data', [ServiceController::class, 'import'])->name('import');
     });
+
+
+
+    // Notas de Crédito
     // Notas de Crédito
     Route::resource('credit-notes', CreditNoteController::class)->names([
         'index' => 'credit-notes.index',
@@ -459,6 +464,18 @@ Route::prefix('v1')->group(function () {
         'update' => 'credit-notes.update',
         'destroy' => 'credit-notes.destroy'
     ]);
+
+
+ Route::group(['prefix' => 'credit-notes', 'as' => 'credit-notes.'], function () {
+     Route::get('/{creditNote}/pdf', [CreditNoteController::class, 'downloadPdf'])->name('download-pdf');
+     Route::post('/{creditNote}/send-email', [CreditNoteController::class, 'sendByEmail'])->name('send-email');
+     Route::post('/{creditNote}/duplicate', [CreditNoteController::class, 'duplicate'])->name('duplicate');
+    });
+
+
+
+
+
     // Configurações da Empresa
     Route::prefix('configuracoes')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
@@ -536,7 +553,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/export/{type}', [DashboardController::class, 'exportReport'])->name('export');
     });
 
+
+
 });
+
 /*
 |--------------------------------------------------------------------------
 | ROTAS SEM SLUG (fallback para usuários sem empresa)
