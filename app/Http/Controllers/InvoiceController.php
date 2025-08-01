@@ -164,7 +164,7 @@ class InvoiceController extends Controller
         'quote_id' => 'nullable|exists:quotes,id',
         'invoice_date' => 'required|date',
         'payment_terms_days' => 'required|numeric|min:0|max:365',
-        'payment_method' => 'required|in:cash,bank_transfer,check,credit_card,other',
+        // 'payment_method' => 'required|in:cash,bank_transfer,check,credit_card,other',
         'items' => 'required|array|min:1',
         'items.*.description' => 'required|string|max:255',
         'items.*.quantity' => 'required|numeric|min:0.01',
