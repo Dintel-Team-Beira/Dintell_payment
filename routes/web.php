@@ -101,6 +101,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Exportação
             Route::get('/export', [AdminCompaniesController::class, 'export'])->name('export');
+
+
+
+
         });
 
         // Parar impersonificação
@@ -160,6 +164,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Exportação
         Route::get('/export/data', [AdminInvoicesController::class, 'export'])->name('export');
+
+                   // Rotas de PDF
+        Route::get('/{invoice}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('pdf');
+        Route::get('/{invoice}/view-pdf', [InvoiceController::class, 'viewPdf'])->name('view-pdf');
+        Route::get('/{invoice}/print', [InvoiceController::class, 'print'])->name('print');
     });
 
     // Relatórios Administrativos

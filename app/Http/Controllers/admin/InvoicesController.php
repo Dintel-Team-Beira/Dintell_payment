@@ -22,7 +22,7 @@ class InvoicesController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('number', 'like', "%{$search}%")
+                $q->where('invoice_number', 'like', "%{$search}%")
                   ->orWhere('notes', 'like', "%{$search}%")
                   ->orWhereHas('company', function ($companyQuery) use ($search) {
                       $companyQuery->where('name', 'like', "%{$search}%");
@@ -46,20 +46,20 @@ class InvoicesController extends Controller
 
         // Date range filters
         if ($request->filled('date_from')) {
-            $query->whereDate('date', '>=', $request->date_from);
+            $query->whereDate('invoice_date', '>=', $request->date_from);
         }
 
         if ($request->filled('date_to')) {
-            $query->whereDate('date', '<=', $request->date_to);
+            $query->whereDate('invoice_date', '<=', $request->date_to);
         }
 
         // Amount range filters
         if ($request->filled('amount_min')) {
-            $query->where('total_amount', '>=', $request->amount_min);
+            $query->where('total', '>=', $request->amount_min);
         }
 
         if ($request->filled('amount_max')) {
-            $query->where('total_amount', '<=', $request->amount_max);
+            $query->where('total', '<=', $request->amount_max);
         }
 
         $invoices = $query->orderBy('created_at', 'desc')->paginate(15);
@@ -67,8 +67,8 @@ class InvoicesController extends Controller
         // Add computed attributes
         $invoices->getCollection()->transform(function ($invoice) {
             $invoice->is_overdue = $invoice->due_date < now() && !in_array($invoice->status, ['paid', 'cancelled']);
-            $invoice->remaining_amount = $invoice->total_amount - ($invoice->paid_amount ?? 0);
-            $invoice->formatted_total = number_format($invoice->total_amount, 2) . ' ' . ($invoice->currency ?? 'MT');
+            $invoice->remaining_amount = $invoice->total - ($invoice->paid_amount ?? 0);
+            $invoice->formatted_total = number_format($invoice->total, 2) . ' ' . 'MT';
             return $invoice;
         });
 
@@ -80,7 +80,6 @@ class InvoicesController extends Controller
 
         return view('admin.invoices.index', compact('invoices', 'companies', 'stats'));
     }
-
 
     public function show(Invoice $invoice)
     {
@@ -104,7 +103,7 @@ class InvoicesController extends Controller
         $topCompanies = Invoice::with('company')
             ->where('status', 'paid')
             ->where('created_at', '>=', $startDate)
-            ->selectRaw('company_id, SUM(total_amount) as total_revenue, COUNT(*) as invoice_count')
+            ->selectRaw('company_id, SUM(total) as total_revenue, COUNT(*) as invoice_count')
             ->groupBy('company_id')
             ->orderBy('total_revenue', 'desc')
             ->limit(10)
@@ -114,7 +113,7 @@ class InvoicesController extends Controller
         $topUsers = Invoice::with('user')
             ->where('status', 'paid')
             ->where('created_at', '>=', $startDate)
-            ->selectRaw('user_id, SUM(total_amount) as total_revenue, COUNT(*) as invoice_count')
+            ->selectRaw('user_id, SUM(total) as total_revenue, COUNT(*) as invoice_count')
             ->groupBy('user_id')
             ->orderBy('total_revenue', 'desc')
             ->limit(10)
@@ -149,66 +148,99 @@ class InvoicesController extends Controller
 
             case 'cancelled':
                 Invoice::whereIn('id', $invoiceIds)
-                       ->whereIn('status', ['pending', 'sent', 'overdue'])
+                       ->where('status', '!=', 'paid')
                        ->update(['status' => 'cancelled']);
                 $message = 'Faturas canceladas!';
                 break;
 
             case 'overdue':
                 Invoice::whereIn('id', $invoiceIds)
-                       ->where('status', 'sent')
-                       ->where('due_date', '<', now())
+                       ->where('status', '!=', 'paid')
                        ->update(['status' => 'overdue']);
                 $message = 'Faturas marcadas como vencidas!';
                 break;
 
             case 'delete':
-                // Só permite deletar faturas não pagas
                 Invoice::whereIn('id', $invoiceIds)
                        ->where('status', '!=', 'paid')
                        ->delete();
-                $message = 'Faturas deletadas!';
+                $message = 'Faturas excluídas!';
                 break;
         }
 
-        return redirect()->route('admin.invoices.index')->with('success', $message);
+        return redirect()->back()->with('success', $message);
     }
 
     public function export(Request $request)
     {
-        $filename = 'faturas_sistema_' . now()->format('Y-m-d_H-i-s') . '.csv';
+        $query = Invoice::with(['company:id,name', 'client:id,name']);
+
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                  ->orWhere('notes', 'like', "%{$search}%")
+                  ->orWhereHas('company', function ($companyQuery) use ($search) {
+                      $companyQuery->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('client', function ($clientQuery) use ($search) {
+                      $clientQuery->where('name', 'like', "%{$search}%")
+                                  ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($request->filled('company')) {
+            $query->where('company_id', $request->company);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('invoice_date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('invoice_date', '<=', $request->date_to);
+        }
+
+        $filename = 'invoices_export_' . now()->format('Y-m-d_H-i-s') . '.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0'
         ];
 
-        $callback = function() use ($request) {
+        $callback = function() use ($query) {
             $file = fopen('php://output', 'w');
 
-            // Cabeçalhos CSV
+            // CSV Headers
             fputcsv($file, [
-                'Número', 'Empresa', 'Cliente', 'Usuário', 'Data Fatura',
-                'Data Vencimento', 'Status', 'Subtotal', 'IVA', 'Total',
-                'Pago em', 'Criado em'
+                'Número da Fatura',
+                'Empresa',
+                'Cliente',
+                'Usuário',
+                'Data da Fatura',
+                'Data de Vencimento',
+                'Status',
+                'Subtotal',
+                'Imposto',
+                'Total',
+                'Data de Pagamento',
+                'Criado em'
             ]);
 
-            // Query base
-            $query = Invoice::with(['user', 'company', 'client']);
-
-            // Aplicar filtros se existirem
-            if ($request->filled('status')) {
-                $query->where('status', $request->status);
-            }
-
-            if ($request->filled('company_id')) {
-                $query->where('company_id', $request->company_id);
-            }
-
-            $query->chunk(100, function($invoices) use ($file) {
+            // CSV Data
+            $query->chunk(100, function ($invoices) use ($file) {
                 foreach ($invoices as $invoice) {
                     fputcsv($file, [
-                        $invoice->invoice_number,
+                        $invoice->invoice_number ?? 'N/A',
                         $invoice->company?->name ?? 'N/A',
                         $invoice->client?->name ?? 'N/A',
                         $invoice->user?->name ?? 'N/A',
@@ -217,7 +249,7 @@ class InvoicesController extends Controller
                         ucfirst($invoice->status),
                         number_format($invoice->subtotal, 2, ',', '.'),
                         number_format($invoice->tax_amount, 2, ',', '.'),
-                        number_format($invoice->total_amount, 2, ',', '.'),
+                        number_format($invoice->total, 2, ',', '.'), // CORRIGIDO: era total_amount
                         $invoice->paid_at ? $invoice->paid_at->format('d/m/Y') : 'N/A',
                         $invoice->created_at->format('d/m/Y H:i')
                     ]);
@@ -242,12 +274,12 @@ class InvoicesController extends Controller
             'paid' => Invoice::where('status', 'paid')->count(),
             'overdue' => Invoice::where('status', 'overdue')->count(),
             'cancelled' => Invoice::where('status', 'cancelled')->count(),
-            'today_revenue' => Invoice::where('status', 'paid')->whereDate('paid_at', $today)->sum('total_amount'),
-            'month_revenue' => Invoice::where('status', 'paid')->where('paid_at', '>=', $thisMonth)->sum('total_amount'),
+            'today_revenue' => Invoice::where('status', 'paid')->whereDate('paid_at', $today)->sum('total'), // CORRIGIDO
+            'month_revenue' => Invoice::where('status', 'paid')->where('paid_at', '>=', $thisMonth)->sum('total'), // CORRIGIDO
             'last_month_revenue' => Invoice::where('status', 'paid')
                                           ->whereBetween('paid_at', [$lastMonth, $thisMonth])
-                                          ->sum('total_amount'),
-            'avg_invoice_value' => Invoice::where('status', 'paid')->avg('total_amount'),
+                                          ->sum('total'), // CORRIGIDO
+            'avg_invoice_value' => Invoice::where('status', 'paid')->avg('total'), // CORRIGIDO
         ];
     }
 
@@ -255,7 +287,7 @@ class InvoicesController extends Controller
     {
         return Invoice::where('status', 'paid')
                      ->where('paid_at', '>=', $startDate)
-                     ->selectRaw('DATE(paid_at) as date, SUM(total_amount) as revenue')
+                     ->selectRaw('DATE(paid_at) as date, SUM(total) as revenue') // CORRIGIDO
                      ->groupBy('date')
                      ->orderBy('date')
                      ->get();
@@ -264,7 +296,7 @@ class InvoicesController extends Controller
     private function getStatusAnalytics($startDate)
     {
         return Invoice::where('created_at', '>=', $startDate)
-                     ->selectRaw('status, COUNT(*) as count, SUM(total_amount) as total')
+                     ->selectRaw('status, COUNT(*) as count, SUM(total) as total') // CORRIGIDO
                      ->groupBy('status')
                      ->get();
     }
@@ -273,76 +305,25 @@ class InvoicesController extends Controller
     {
         return Invoice::with('company')
                      ->where('created_at', '>=', $startDate)
-                     ->selectRaw('company_id, COUNT(*) as invoice_count, SUM(total_amount) as total_revenue')
+                     ->selectRaw('company_id, COUNT(*) as invoice_count, SUM(total) as total_revenue') // CORRIGIDO
                      ->groupBy('company_id')
                      ->orderBy('total_revenue', 'desc')
-                     ->limit(10)
                      ->get();
     }
 
     private function getMonthlyAnalytics()
     {
-        return Invoice::where('created_at', '>=', Carbon::now()->subMonths(12))
-                     ->selectRaw('
-                         YEAR(created_at) as year,
-                         MONTH(created_at) as month,
-                         COUNT(*) as count,
-                         SUM(CASE WHEN status = "paid" THEN total_amount ELSE 0 END) as revenue
-                     ')
-                     ->groupBy('year', 'month')
-                     ->orderBy('year')
-                     ->orderBy('month')
-                     ->get();
-    }
-
-    public function markAsPaid(Invoice $invoice)
-    {
-        if ($invoice->status === 'paid') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Fatura já está paga!'
-            ], 400);
-        }
-
-        $invoice->update([
-            'status' => 'paid',
-            'paid_at' => now()
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Fatura marcada como paga!',
-            'paid_at' => $invoice->paid_at->format('d/m/Y H:i')
-        ]);
-    }
-
-    public function updateStatus(Request $request, Invoice $invoice)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,sent,paid,overdue,cancelled'
-        ]);
-
-        $oldStatus = $invoice->status;
-        $newStatus = $request->status;
-
-        $updateData = ['status' => $newStatus];
-
-        // Se marcando como pago, adicionar data de pagamento
-        if ($newStatus === 'paid' && $oldStatus !== 'paid') {
-            $updateData['paid_at'] = now();
-        }
-
-        // Se desmarcando como pago, remover data de pagamento
-        if ($oldStatus === 'paid' && $newStatus !== 'paid') {
-            $updateData['paid_at'] = null;
-        }
-
-        $invoice->update($updateData);
-
-        return response()->json([
-            'success' => true,
-            'message' => "Status da fatura atualizado para: " . ucfirst($newStatus),
-            'new_status' => $newStatus
-        ]);
+        return Invoice::selectRaw('
+                YEAR(created_at) as year,
+                MONTH(created_at) as month,
+                COUNT(*) as count,
+                SUM(total) as revenue, -- CORRIGIDO
+                SUM(CASE WHEN status = "paid" THEN total ELSE 0 END) as paid_revenue -- CORRIGIDO
+            ')
+            ->where('created_at', '>=', Carbon::now()->subYear())
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
     }
 }

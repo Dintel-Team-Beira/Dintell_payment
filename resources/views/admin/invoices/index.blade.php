@@ -3,7 +3,7 @@
 @section('title', 'Faturas do Sistema')
 
 @section('content')
-<div class="container px-6 py-8 mx-auto">
+<div class="container mx-auto">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -217,25 +217,27 @@
                     @forelse($invoices as $invoice)
                         <tr class="hover:bg-gray-50 {{ $invoice->is_overdue ? 'bg-red-50' : '' }}">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $invoice->number }}</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $invoice->invoice_number }}</div>
                                 <div class="text-xs text-gray-500">{{ $invoice->currency }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 w-8 h-8">
                                         <div class="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full">
-                                            @if($invoice->company->logo)
+                                            @if($invoice->company?->logo)
                                                 <img class="w-8 h-8 rounded-full" src="{{ asset('storage/'.$invoice->company->logo) }}" alt="">
                                             @else
-                                                <span class="text-xs font-medium text-gray-700">
-                                                    {{ substr($invoice->company->name, 0, 2) }}
-                                                </span>
+                                             <div class="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-lg">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                    </svg>
+                                </div>
                                             @endif
                                         </div>
                                     </div>
                                     <div class="ml-3">
-                                        <div class="text-sm font-medium text-gray-900">{{ $invoice->company->name }}</div>
-                                        <div class="text-xs text-gray-500">{{ $invoice->company->email }}</div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $invoice->company?->name }}</div>
+                                        <div class="text-xs text-gray-500">{{ $invoice->company?->email }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -244,7 +246,7 @@
                                 <div class="text-xs text-gray-500">{{ $invoice->client->email }}</div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                                <div>{{ $invoice->date->format('d/m/Y') }}</div>
+                                <div>{{ $invoice->date}}</div>
                                 <div class="text-xs {{ $invoice->is_overdue ? 'text-red-600 font-medium' : 'text-gray-500' }}">
                                     Venc: {{ $invoice->due_date->format('d/m/Y') }}
                                 </div>
@@ -270,7 +272,7 @@
                                     @elseif($invoice->status === 'draft') bg-gray-100 text-gray-800
                                     @else bg-yellow-100 text-yellow-800
                                     @endif">
-                                    {{ $invoice->status_name }}
+                                    {{ $invoice->status }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
@@ -360,7 +362,7 @@
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
         <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <form action="{{ route('admin.reports.generate') }}" method="POST" id="reportForm">
+            <form action="#"" method="POST" id="reportForm">
                 @csrf
                 <div class="px-6 pt-6 pb-4 bg-white">
                     <div class="flex items-center justify-between mb-4">
