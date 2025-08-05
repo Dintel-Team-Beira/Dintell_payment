@@ -29,11 +29,11 @@ class ReportsController extends Controller
             $revenueQuery->where('company_id', $company_id);
         }
 
-        // Métricas principais
+        // Métricas principais - CORRIGIDO: usar 'total' em vez de 'total_amount'
         $metrics = [
-            'total_revenue' => $revenueQuery->sum('total_amount'),
+            'total_revenue' => $revenueQuery->sum('total'),
             'total_invoices' => $revenueQuery->count(),
-            'avg_invoice_value' => $revenueQuery->avg('total_amount'),
+            'avg_invoice_value' => $revenueQuery->avg('total'),
             'total_tax' => $revenueQuery->sum('tax_amount'),
         ];
 
@@ -56,7 +56,7 @@ class ReportsController extends Controller
                                  ->when($company_id, function($q) use ($company_id) {
                                      return $q->where('company_id', $company_id);
                                  })
-                                 ->sum('total_amount');
+                                 ->sum('total'); // CORRIGIDO
 
         $revenueGrowth = $previousRevenue > 0
                         ? (($metrics['total_revenue'] - $previousRevenue) / $previousRevenue) * 100
@@ -292,7 +292,7 @@ class ReportsController extends Controller
         }
     }
 
-    // Métodos para dados de receita
+    // Métodos para dados de receita - CORRIGIDOS
     private function getRevenueByPeriod($dateRange, $company_id = null)
     {
         $query = Invoice::where('status', 'paid')
@@ -302,7 +302,7 @@ class ReportsController extends Controller
             $query->where('company_id', $company_id);
         }
 
-        return $query->selectRaw('DATE(paid_at) as date, SUM(total_amount) as revenue')
+        return $query->selectRaw('DATE(paid_at) as date, SUM(total) as revenue') // CORRIGIDO
                      ->groupBy('date')
                      ->orderBy('date')
                      ->get();
@@ -313,7 +313,7 @@ class ReportsController extends Controller
         return Invoice::with('company')
                      ->where('status', 'paid')
                      ->whereBetween('paid_at', [$dateRange['start'], $dateRange['end']])
-                     ->selectRaw('company_id, SUM(total_amount) as revenue, COUNT(*) as invoice_count')
+                     ->selectRaw('company_id, SUM(total) as revenue, COUNT(*) as invoice_count') // CORRIGIDO
                      ->groupBy('company_id')
                      ->orderBy('revenue', 'desc')
                      ->get();
@@ -327,7 +327,7 @@ class ReportsController extends Controller
             $query->where('company_id', $company_id);
         }
 
-        return $query->selectRaw('status, COUNT(*) as count, SUM(total_amount) as total')
+        return $query->selectRaw('status, COUNT(*) as count, SUM(total) as total') // CORRIGIDO
                      ->groupBy('status')
                      ->get();
     }
@@ -342,7 +342,7 @@ class ReportsController extends Controller
             $query->where('company_id', $company_id);
         }
 
-        return $query->selectRaw('client_id, SUM(total_amount) as revenue, COUNT(*) as invoice_count')
+        return $query->selectRaw('client_id, SUM(total) as revenue, COUNT(*) as invoice_count') // CORRIGIDO
                      ->groupBy('client_id')
                      ->orderBy('revenue', 'desc')
                      ->limit(10)
@@ -509,7 +509,7 @@ class ReportsController extends Controller
         return '99.9%';
     }
 
-    // Métodos de exportação
+    // Métodos de exportação - CORRIGIDOS
     private function exportRevenueReport($dateRange, $company_id, $filename, $format)
     {
         $headers = [
@@ -539,7 +539,7 @@ class ReportsController extends Controller
                                $invoice->client?->name ?? 'N/A',
                                number_format($invoice->subtotal, 2, ',', '.'),
                                number_format($invoice->tax_amount, 2, ',', '.'),
-                               number_format($invoice->total_amount, 2, ',', '.')
+                               number_format($invoice->total, 2, ',', '.') // CORRIGIDO
                            ]);
                        }
                    });
@@ -566,7 +566,7 @@ class ReportsController extends Controller
 
             Client::with(['company'])
                   ->withCount('invoices')
-                  ->withSum('invoices', 'total_amount')
+                  ->withSum('invoices', 'total') // CORRIGIDO
                   ->when($company_id, function($q) use ($company_id) {
                       return $q->where('company_id', $company_id);
                   })
@@ -578,7 +578,7 @@ class ReportsController extends Controller
                               $client->phone ?? 'N/A',
                               $client->company?->name ?? 'N/A',
                               $client->invoices_count,
-                              number_format($client->invoices_sum_total_amount ?? 0, 2, ',', '.'),
+                              number_format($client->invoices_sum_total ?? 0, 2, ',', '.'), // CORRIGIDO
                               $client->created_at->format('d/m/Y')
                           ]);
                       }
