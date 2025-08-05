@@ -289,7 +289,7 @@ Route::get('/', function () {
 */
 
 
-Route::prefix('v1')->group(function () {
+Route::prefix('dintell')->group(function () {
     // Dashboard da Empresa
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('dashboard.analytics');
