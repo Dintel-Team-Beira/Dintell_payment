@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\AdminHelpController;
 use App\Http\Controllers\Admin\AdminMonitoringController;
 use App\Http\Controllers\Admin\AdminSupportController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Middleware\AdminMiddleware;
@@ -17,18 +16,15 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\CashSaleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\DashboardController;
 
 // Controllers Admin (SaaS)
 use App\Http\Controllers\DebitNoteController;
 use App\Http\Controllers\CreditNoteController;
-use App\Http\Middleware\CheckFeatureMiddleware;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SuspensionPageController;
 use App\Http\Controllers\SubscriptionPlanController;
-use App\Http\Middleware\CheckSubscriptionMiddleware;
 
 // Middlewares diretos
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
@@ -105,10 +101,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Exportação
             Route::get('/export', [AdminCompaniesController::class, 'export'])->name('export');
-
-
-
-
         });
 
         // Parar impersonificação
@@ -116,151 +108,148 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Demais rotas administrativas...
         // (mantidas as mesmas do seu código original)
-    // Gestão de Usuários
-    Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', [AdminUsersController::class, 'index'])->name('index');
-        Route::get('/create', [AdminUsersController::class, 'create'])->name('create');
-        Route::post('/', [AdminUsersController::class, 'store'])->name('store');
-        Route::get('/{user}', [AdminUsersController::class, 'show'])->name('show');
-        Route::get('/{user}/edit', [AdminUsersController::class, 'edit'])->name('edit');
-        Route::put('/{user}', [AdminUsersController::class, 'update'])->name('update');
-        Route::delete('/{user}', [AdminUsersController::class, 'destroy'])->name('destroy');
+        // Gestão de Usuários
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [AdminUsersController::class, 'index'])->name('index');
+            Route::get('/create', [AdminUsersController::class, 'create'])->name('create');
+            Route::post('/', [AdminUsersController::class, 'store'])->name('store');
+            Route::get('/{user}', [AdminUsersController::class, 'show'])->name('show');
+            Route::get('/{user}/edit', [AdminUsersController::class, 'edit'])->name('edit');
+            Route::put('/{user}', [AdminUsersController::class, 'update'])->name('update');
+            Route::delete('/{user}', [AdminUsersController::class, 'destroy'])->name('destroy');
 
-        // Ações especiais
-        Route::post('/{user}/toggle-status', [AdminUsersController::class, 'toggleStatus'])->name('toggle-status');
-        Route::post('/bulk-action', [AdminUsersController::class, 'bulkAction'])->name('bulk-action');
-        Route::get('/export/data', [AdminUsersController::class, 'export'])->name('export');
-    });
+            // Ações especiais
+            Route::post('/{user}/toggle-status', [AdminUsersController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/bulk-action', [AdminUsersController::class, 'bulkAction'])->name('bulk-action');
+            Route::get('/export/data', [AdminUsersController::class, 'export'])->name('export');
+        });
 
-    // Gestão de Empresas
-    Route::prefix('companies')->name('companies.')->group(function () {
-        Route::get('/', [AdminCompaniesController::class, 'index'])->name('index');
-        Route::get('/create', [AdminCompaniesController::class, 'create'])->name('create');
-        Route::post('/', [AdminCompaniesController::class, 'store'])->name('store');
-        Route::get('/{company}', [AdminCompaniesController::class, 'show'])->name('show');
-        Route::get('/{company}/edit', [AdminCompaniesController::class, 'edit'])->name('edit');
-        Route::put('/{company}', [AdminCompaniesController::class, 'update'])->name('update');
-        Route::delete('/{company}', [AdminCompaniesController::class, 'destroy'])->name('destroy');
-        // Rota para iniciar a impersonificação
-    Route::post('{company}/impersonate', [AdminCompaniesController::class, 'impersonate'])
-        ->name('impersonate');
+        // Gestão de Empresas
+        Route::prefix('companies')->name('companies.')->group(function () {
+            Route::get('/', [AdminCompaniesController::class, 'index'])->name('index');
+            Route::get('/create', [AdminCompaniesController::class, 'create'])->name('create');
+            Route::post('/', [AdminCompaniesController::class, 'store'])->name('store');
+            Route::get('/{company}', [AdminCompaniesController::class, 'show'])->name('show');
+            Route::get('/{company}/edit', [AdminCompaniesController::class, 'edit'])->name('edit');
+            Route::put('/{company}', [AdminCompaniesController::class, 'update'])->name('update');
+            Route::delete('/{company}', [AdminCompaniesController::class, 'destroy'])->name('destroy');
+            // Rota para iniciar a impersonificação
+            Route::post('{company}/impersonate', [AdminCompaniesController::class, 'impersonate'])
+                ->name('impersonate');
 
-    // Rota para parar a impersonificação
-    Route::get('/stop-impersonation', [AdminCompaniesController::class, 'stopImpersonation'])
-        ->name('stop-impersonation');
+            // Rota para parar a impersonificação
+            Route::get('/stop-impersonation', [AdminCompaniesController::class, 'stopImpersonation'])
+                ->name('stop-impersonation');
 
-        // Ações especiais
-        Route::post('/{company}/toggle-status', [AdminCompaniesController::class, 'toggleStatus'])->name('toggle-status');
-        Route::post('/bulk-action', [AdminCompaniesController::class, 'bulkAction'])->name('bulk-action');
-        Route::get('/export/data', [AdminCompaniesController::class, 'export'])->name('export');
-    });
+            // Ações especiais
+            Route::post('/{company}/toggle-status', [AdminCompaniesController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/bulk-action', [AdminCompaniesController::class, 'bulkAction'])->name('bulk-action');
+            Route::get('/export/data', [AdminCompaniesController::class, 'export'])->name('export');
+        });
 
-    // Faturas do Sistema (Visão Global)
-    Route::prefix('invoices')->name('invoices.')->group(function () {
-        Route::get('/', [AdminInvoicesController::class, 'index'])->name('index');
-        Route::get('/{invoice}', [AdminInvoicesController::class, 'show'])->name('show');
-        Route::get('/analytics/dashboard', [AdminInvoicesController::class, 'analytics'])->name('analytics');
+        // Faturas do Sistema (Visão Global)
+        Route::prefix('invoices')->name('invoices.')->group(function () {
+            Route::get('/', [AdminInvoicesController::class, 'index'])->name('index');
+            Route::get('/{invoice}', [AdminInvoicesController::class, 'show'])->name('show');
+            Route::get('/analytics/dashboard', [AdminInvoicesController::class, 'analytics'])->name('analytics');
 
-        // Ações em massa
-        Route::post('/bulk-action', [AdminInvoicesController::class, 'bulkAction'])->name('bulk-action');
-        Route::post('/{invoice}/mark-as-paid', [AdminInvoicesController::class, 'markAsPaid'])->name('mark-as-paid');
-        Route::patch('/{invoice}/status', [AdminInvoicesController::class, 'updateStatus'])->name('update-status');
+            // Ações em massa
+            Route::post('/bulk-action', [AdminInvoicesController::class, 'bulkAction'])->name('bulk-action');
+            Route::post('/{invoice}/mark-as-paid', [AdminInvoicesController::class, 'markAsPaid'])->name('mark-as-paid');
+            Route::patch('/{invoice}/status', [AdminInvoicesController::class, 'updateStatus'])->name('update-status');
 
-        // Exportação
-        Route::get('/export/data', [AdminInvoicesController::class, 'export'])->name('export');
+            // Exportação
+            Route::get('/export/data', [AdminInvoicesController::class, 'export'])->name('export');
 
-                   // Rotas de PDF
-        Route::get('/{invoice}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('pdf');
-        Route::get('/{invoice}/view-pdf', [InvoiceController::class, 'viewPdf'])->name('view-pdf');
-        Route::get('/{invoice}/print', [InvoiceController::class, 'print'])->name('print');
-    });
+            // Rotas de PDF
+            Route::get('/{invoice}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('pdf');
+            Route::get('/{invoice}/view-pdf', [InvoiceController::class, 'viewPdf'])->name('view-pdf');
+            Route::get('/{invoice}/print', [InvoiceController::class, 'print'])->name('print');
+        });
 
-    // Relatórios Administrativos
-    Route::prefix('reports')->name('reports.')->group(function () {
-        Route::get('/revenue', [ReportsController::class, 'revenue'])->name('revenue');
-        Route::get('/clients', [ReportsController::class, 'clients'])->name('clients');
-        Route::get('/usage', [ReportsController::class, 'usage'])->name('usage');
-        Route::get('/export/{type}', [ReportsController::class, 'export'])->name('export');
-    });
+        // Relatórios Administrativos
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/revenue', [ReportsController::class, 'revenue'])->name('revenue');
+            Route::get('/clients', [ReportsController::class, 'clients'])->name('clients');
+            Route::get('/usage', [ReportsController::class, 'usage'])->name('usage');
+            Route::get('/export/{type}', [ReportsController::class, 'export'])->name('export');
+        });
 
-    // Configurações do Sistema
-    Route::prefix('settings')->name('settings.')->group(function () {
-
-          // Configurações - Dashboard principal
-    Route::get('/settings', [SettingsController::class, 'index'])->name('index');
         // Configurações do Sistema
-         // Configurações de Segurança
-    Route::get('/security', [SettingsController::class, 'security'])->name('security');
-    Route::put('/security', [SettingsController::class, 'updateSecurity'])->name('security.update');
-    Route::post('/security/report', [SettingsController::class, 'securityReport'])->name('security.report');
-        Route::get('/system', [AdminSettingsController::class, 'system'])->name('system');
-        Route::post('/system', [AdminSettingsController::class, 'updateSystem'])->name('system.update');
+        Route::prefix('settings')->name('settings.')->group(function () {
 
-        // Configurações de Faturação
-        Route::get('/billing', [AdminSettingsController::class, 'billing'])->name('billing');
-        Route::post('/billing', [AdminSettingsController::class, 'updateBilling'])->name('billing.update');
+            // Configurações - Dashboard principal
+            Route::get('/settings', [SettingsController::class, 'index'])->name('index');
+            // Configurações do Sistema
+            // Configurações de Segurança
+            Route::get('/security', [SettingsController::class, 'security'])->name('security');
+            Route::put('/security', [SettingsController::class, 'updateSecurity'])->name('security.update');
+            Route::post('/security/report', [SettingsController::class, 'securityReport'])->name('security.report');
+            Route::get('/system', [AdminSettingsController::class, 'system'])->name('system');
+            Route::post('/system', [AdminSettingsController::class, 'updateSystem'])->name('system.update');
 
-        // Configurações de Email
-        Route::get('/email', [AdminSettingsController::class, 'email'])->name('email');
-        Route::post('/email', [AdminSettingsController::class, 'updateEmail'])->name('email.update');
-        Route::post('/email/test', [AdminSettingsController::class, 'testEmail'])->name('email.test');
+            // Configurações de Faturação
+            Route::get('/billing', [AdminSettingsController::class, 'billing'])->name('billing');
+            Route::post('/billing', [AdminSettingsController::class, 'updateBilling'])->name('billing.update');
 
-        // Configurações de Backup
-        Route::get('/backups', [AdminSettingsController::class, 'backups'])->name('backups');
-        Route::post('/backups', [AdminSettingsController::class, 'updateBackups'])->name('backups.update');
-        Route::post('/backups/create', [AdminSettingsController::class, 'createBackup'])->name('backups.create');
-        Route::get('/backups/{filename}/download', [AdminSettingsController::class, 'downloadBackup'])->name('backups.download');
-        Route::delete('/backups/{filename}', [AdminSettingsController::class, 'deleteBackup'])->name('backups.delete');
-        Route::post('/backups/{filename}/restore', [AdminSettingsController::class, 'restoreBackup'])->name('backups.restore');
+            // Configurações de Email
+            Route::get('/email', [AdminSettingsController::class, 'email'])->name('email');
+            Route::post('/email', [AdminSettingsController::class, 'updateEmail'])->name('email.update');
+            Route::post('/email/test', [AdminSettingsController::class, 'testEmail'])->name('email.test');
 
-        // Ações do Sistema
-        Route::post('/cache/clear', [AdminSettingsController::class, 'clearCache'])->name('cache.clear');
-        Route::post('/system/optimize', [AdminSettingsController::class, 'optimizeSystem'])->name('system.optimize');
-        Route::post('/maintenance/toggle', [AdminSettingsController::class, 'maintenanceMode'])->name('maintenance.toggle');
+            // Configurações de Backup
+            Route::get('/backups', [AdminSettingsController::class, 'backups'])->name('backups');
+            Route::post('/backups', [AdminSettingsController::class, 'updateBackups'])->name('backups.update');
+            Route::post('/backups/create', [AdminSettingsController::class, 'createBackup'])->name('backups.create');
+            Route::get('/backups/{filename}/download', [AdminSettingsController::class, 'downloadBackup'])->name('backups.download');
+            Route::delete('/backups/{filename}', [AdminSettingsController::class, 'deleteBackup'])->name('backups.delete');
+            Route::post('/backups/{filename}/restore', [AdminSettingsController::class, 'restoreBackup'])->name('backups.restore');
 
-        // Informações do Sistema
-        Route::get('/database/info', [AdminSettingsController::class, 'getDatabaseInfo'])->name('database.info');
-        Route::get('/system/info', [AdminSettingsController::class, 'getSystemInfo'])->name('system.info');
+            // Ações do Sistema
+            Route::post('/cache/clear', [AdminSettingsController::class, 'clearCache'])->name('cache.clear');
+            Route::post('/system/optimize', [AdminSettingsController::class, 'optimizeSystem'])->name('system.optimize');
+            Route::post('/maintenance/toggle', [AdminSettingsController::class, 'maintenanceMode'])->name('maintenance.toggle');
 
-        // Importar/Exportar Configurações
-        Route::get('/export', [AdminSettingsController::class, 'exportSettings'])->name('export');
-        Route::post('/import', [AdminSettingsController::class, 'importSettings'])->name('import');
-    });
+            // Informações do Sistema
+            Route::get('/database/info', [AdminSettingsController::class, 'getDatabaseInfo'])->name('database.info');
+            Route::get('/system/info', [AdminSettingsController::class, 'getSystemInfo'])->name('system.info');
 
-    // Logs do Sistema
-    Route::prefix('logs')->name('logs.')->group(function () {
-        Route::get('/', [LogsController::class, 'index'])->name('index');
-        Route::get('/{log}', [LogsController::class, 'show'])->name('show');
-        Route::delete('/{log}', [LogsController::class, 'destroy'])->name('destroy');
-        Route::post('/clear', [LogsController::class, 'clear'])->name('clear');
-        Route::get('/download/{log}', [LogsController::class, 'download'])->name('download');
-    });
+            // Importar/Exportar Configurações
+            Route::get('/export', [AdminSettingsController::class, 'exportSettings'])->name('export');
+            Route::post('/import', [AdminSettingsController::class, 'importSettings'])->name('import');
+        });
 
-
-    // Monitoramento
-    Route::prefix('monitoring')->name('monitoring.')->group(function () {
-        Route::get('/performance', [AdminMonitoringController::class, 'performance'])->name('performance');
-        Route::get('/health', [AdminMonitoringController::class, 'health'])->name('health');
-        Route::get('/metrics', [AdminMonitoringController::class, 'metrics'])->name('metrics');
-    });
-
-    // Suporte
-    Route::prefix('support')->name('support.')->group(function () {
-        Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
-        Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
-        Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
-        Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
-    });
-
-    // Documentação e Ajuda
-    Route::prefix('help')->name('help.')->group(function () {
-        Route::get('/documentation', [AdminHelpController::class, 'documentation'])->name('documentation');
-        Route::get('/api-docs', [AdminHelpController::class, 'apiDocs'])->name('api-docs');
-        Route::get('/changelog', [AdminHelpController::class, 'changelog'])->name('changelog');
-    });
+        // Logs do Sistema
+        Route::prefix('logs')->name('logs.')->group(function () {
+            Route::get('/', [LogsController::class, 'index'])->name('index');
+            Route::get('/{log}', [LogsController::class, 'show'])->name('show');
+            Route::delete('/{log}', [LogsController::class, 'destroy'])->name('destroy');
+            Route::post('/clear', [LogsController::class, 'clear'])->name('clear');
+            Route::get('/download/{log}', [LogsController::class, 'download'])->name('download');
+        });
 
 
+        // Monitoramento
+        Route::prefix('monitoring')->name('monitoring.')->group(function () {
+            Route::get('/performance', [AdminMonitoringController::class, 'performance'])->name('performance');
+            Route::get('/health', [AdminMonitoringController::class, 'health'])->name('health');
+            Route::get('/metrics', [AdminMonitoringController::class, 'metrics'])->name('metrics');
+        });
 
+        // Suporte
+        Route::prefix('support')->name('support.')->group(function () {
+            Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
+            Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
+            Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
+            Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
+        });
+
+        // Documentação e Ajuda
+        Route::prefix('help')->name('help.')->group(function () {
+            Route::get('/documentation', [AdminHelpController::class, 'documentation'])->name('documentation');
+            Route::get('/api-docs', [AdminHelpController::class, 'apiDocs'])->name('api-docs');
+            Route::get('/changelog', [AdminHelpController::class, 'changelog'])->name('changelog');
+        });
     });
 });
 
@@ -373,7 +362,7 @@ Route::prefix('dintell')->group(function () {
     });
 
     // Faturas
-   Route::prefix('invoices')->name('invoices.')->group(function () {
+    Route::prefix('invoices')->name('invoices.')->group(function () {
         // Listar faturas
         Route::get('/', [InvoiceController::class, 'index'])->name('index');
 
@@ -489,10 +478,10 @@ Route::prefix('dintell')->group(function () {
     ]);
 
 
- Route::group(['prefix' => 'credit-notes', 'as' => 'credit-notes.'], function () {
-     Route::get('/{creditNote}/pdf', [CreditNoteController::class, 'downloadPdf'])->name('download-pdf');
-     Route::post('/{creditNote}/send-email', [CreditNoteController::class, 'sendByEmail'])->name('send-email');
-     Route::post('/{creditNote}/duplicate', [CreditNoteController::class, 'duplicate'])->name('duplicate');
+    Route::group(['prefix' => 'credit-notes', 'as' => 'credit-notes.'], function () {
+        Route::get('/{creditNote}/pdf', [CreditNoteController::class, 'downloadPdf'])->name('download-pdf');
+        Route::post('/{creditNote}/send-email', [CreditNoteController::class, 'sendByEmail'])->name('send-email');
+        Route::post('/{creditNote}/duplicate', [CreditNoteController::class, 'duplicate'])->name('duplicate');
     });
 
 
@@ -522,7 +511,7 @@ Route::prefix('dintell')->group(function () {
         Route::get('/products/active', [ProductController::class, 'activeProducts']);
         Route::get('/services/active', [ServiceController::class, 'activeServices']);
     });
- // Notas de Débito
+    // Notas de Débito
     Route::prefix('debit-notes')->name('debit-notes.')->group(function () {
         Route::get('/', [DebitNoteController::class, 'index'])->name('index');
         Route::get('/create', [DebitNoteController::class, 'create'])->name('create');
@@ -575,9 +564,6 @@ Route::prefix('dintell')->group(function () {
         Route::get('/usage', [DashboardController::class, 'usageReport'])->name('usage');
         Route::get('/export/{type}', [DashboardController::class, 'exportReport'])->name('export');
     });
-
-
-
 });
 
 /*
@@ -616,9 +602,9 @@ Route::middleware(['auth', TenantMiddleware::class])->group(function () {
 
 // Incluir rotas de autenticação do sistema
 require __DIR__ . '/auth.php';
-require __DIR__.'/admin_settings.php';
-require __DIR__.'/admin_plans.php';
-require __DIR__.'/Admin_monitoring.php';
+require __DIR__ . '/admin_settings.php';
+require __DIR__ . '/admin_plans.php';
+require __DIR__ . '/Admin_monitoring.php';
 /*
 |--------------------------------------------------------------------------
 | UTILITÁRIOS
