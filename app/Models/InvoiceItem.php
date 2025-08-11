@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\CompanyScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -110,5 +111,9 @@ class InvoiceItem extends Model
                 $item->total_price = $item->calculateTotal();
             }
         });
+    }
+    protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
     }
 }

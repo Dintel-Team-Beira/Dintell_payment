@@ -77,7 +77,7 @@ class ClientController extends Controller
             'tax_number' => 'nullable|string|max:50',
             'contact_preferences' => 'nullable|array'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         $client = Client::create($validated);
 
         return redirect()->route('clients.show', $client)
@@ -91,6 +91,7 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client)
     {
+        // dd(auth()->user()->company->id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:clients,email,' . $client->id,
@@ -100,7 +101,9 @@ class ClientController extends Controller
             'tax_number' => 'nullable|string|max:50',
             'status' => 'required|in:active,inactive,blocked',
             'contact_preferences' => 'nullable|array'
+            
         ]);
+        $validated['company_id'] = auth()->user()->company->id;
 
         $client->update($validated);
 

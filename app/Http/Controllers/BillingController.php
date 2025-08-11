@@ -14,7 +14,7 @@ class BillingController extends Controller
 {
     public function index()
     {
-        $settings = BillingSetting::getSettings();
+            $settings = BillingSetting::getSettings();
         return view('settings.index', compact('settings'));
     }
 

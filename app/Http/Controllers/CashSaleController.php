@@ -29,6 +29,7 @@ class CashSaleController extends Controller
             'cash_received' => 'required|numeric|min:0',
             'notes' => 'nullable|string'
         ]);
+        $validated['company_id'] = auth()->user()->company->id;
 
         try {
             DB::beginTransaction();

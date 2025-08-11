@@ -366,4 +366,5 @@ class Invoice extends Model
 
         return parent::resolveRouteBinding($value, $field);
     }
+    
 }

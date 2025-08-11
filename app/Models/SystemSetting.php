@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\CompanyScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -444,5 +445,9 @@ class AdminSettings extends Model
         foreach ($keys as $key) {
             Cache::forget("admin_setting_{$key}");
         }
+    }
+     protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
     }
 }
