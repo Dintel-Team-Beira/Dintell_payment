@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\BillingSetting;
+use App\Models\User;
 use App\Services\BillingCalculatorService;
 use App\Services\InvoicePdfService;
 use Illuminate\Http\Request;
@@ -27,8 +28,8 @@ class QuoteController extends Controller
 
     public function index(Request $request)
     {
+             
         $query = Quote::with(['client', 'items']);
-
         // Filtros
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -57,7 +58,7 @@ class QuoteController extends Controller
 
         $quotes = $query->orderBy('created_at', 'desc')->paginate(15);
         $clients = Client::orderBy('name')->get();
-
+        // dd($quotes->toArray());
         // Estatísticas avançadas
         $stats = [
             'total_quotes' => Quote::count(),
@@ -79,7 +80,6 @@ class QuoteController extends Controller
     {
         $clients = Client::orderBy('name')->get();
         $settings = BillingSetting::getSettings();
-
         return view('quotes.create', compact('clients', 'settings'));
     }
 
@@ -100,7 +100,8 @@ class QuoteController extends Controller
             'notes' => 'nullable|string',
             'terms_conditions' => 'nullable|string'
         ]);
-        $validated['company_id'] = auth()->user()->company->id;
+        
+        $validated['company_id'] = auth()->user()->company_id;
         try {
             DB::beginTransaction();
 
@@ -121,7 +122,8 @@ class QuoteController extends Controller
                 'total' => $totals['total'],
                 'status' => 'draft',
                 'notes' => $validated['notes'],
-                'terms_conditions' => $validated['terms_conditions']
+                'terms_conditions' => $validated['terms_conditions'],
+                'company_id' => $validated['company_id']
             ]);
 
             // Criar itens da cotação
@@ -131,7 +133,9 @@ class QuoteController extends Controller
 
             DB::commit();
 
-return redirect('/quotes/' . $quote->id)->with('success', 'Cotação criada com sucesso!');
+            // dd(route('dintell.quotes.show', $quote->id));
+            // dd($quote);
+            return redirect()->route('quotes.show',$quote)->with('success', 'Cotação criada com sucesso!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -466,9 +470,12 @@ return redirect('/quotes/' . $quote->id)->with('success', 'Cotação criada com 
     }
 
     // API Methods para AJAX
-    public function getActiveProducts(Request $request)
+    public function getActiveProducts(Request $request, $user_id)
     {
-        $query = Product::where('is_active', true);
+       
+        try {
+            $company_id = User::findOrFail($user_id)->company->id;
+        $query = Product::where('is_active', true)->where('company_id', $company_id);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -487,13 +494,21 @@ return redirect('/quotes/' . $quote->id)->with('success', 'Cotação criada com 
             'id', 'name', 'code', 'description', 'price', 'category',
             'stock_quantity', 'tax_rate', 'image'
         ])->orderBy('name')->get();
+                return response()->json($products);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['error' => 'Erro ao buscar produtos: ' . $th->getMessage().'user campany =>'.auth()->user()], 500);
+            // dd($th->getMessage());
+        }
 
-        return response()->json($products);
+
     }
 
-    public function getActiveServices(Request $request)
+    public function getActiveServices(Request $request, $user_id)
     {
-        $query = Service::where('is_active', true);
+        try {
+            $company_id = User::findOrFail($user_id)->company->id;
+            $query = Service::where('is_active', true)->where('company_id', $company_id);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -518,6 +533,9 @@ return redirect('/quotes/' . $quote->id)->with('success', 'Cotação criada com 
         ])->orderBy('name')->get();
 
         return response()->json($services);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     // Private Methods

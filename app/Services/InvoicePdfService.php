@@ -25,7 +25,9 @@ class InvoicePdfService
     public function generateQuotePdf(Quote $quote)
     {
         $quote->load(['client', 'items']);
-        $html = view('pdfs.quote', compact('quote'))->render();
+        $company = auth()->user()->company;
+
+        $html = view('pdfs.quote', compact('quote', 'company'))->render();
 
         $this->dompdf->loadHtml($html);
         $this->dompdf->setPaper('A4', 'portrait');

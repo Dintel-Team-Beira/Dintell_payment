@@ -108,7 +108,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1/billing')->group(function () {
 
 // Rotas para produtos
 Route::prefix('products')->group(function () {
-    Route::get('/active', [QuoteController::class, 'getActiveProducts']);
+    Route::get('/active/{user_id}', [QuoteController::class, 'getActiveProducts']);
     Route::get('/categories', [ProductController::class, 'getCategories']);
     Route::get('/search', [ProductController::class, 'search']);
     Route::get('/{product}', [ProductController::class, 'show']);
@@ -119,7 +119,7 @@ Route::prefix('products')->group(function () {
 
 // Rotas para serviços
 Route::prefix('services')->group(function () {
-    Route::get('/active', [QuoteController::class, 'getActiveServices']);
+    Route::get('/active/{user_id}', [QuoteController::class, 'getActiveServices']);
     Route::get('/categories', [ServiceController::class, 'getCategories']);
     Route::get('/complexity-levels', [ServiceController::class, 'getComplexityLevels']);
     Route::get('/templates', [ServiceController::class, 'getTemplates']);

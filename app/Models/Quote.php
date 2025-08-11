@@ -600,6 +600,7 @@ private function generateInvoiceNumber()
 
      protected static function booted()
     {
+        // dd('asas');
         static::addGlobalScope(new CompanyScope);
     }
 }

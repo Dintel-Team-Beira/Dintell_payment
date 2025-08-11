@@ -126,6 +126,8 @@ class PdfGeneratorService
 
     private static function getCompanyInfo()
     {
+        $company = auth()->user()->company;
+        dd($company);
         return [
             'name' => 'DINTELL, LDA',
             'nuit' => '401170839',
@@ -133,6 +135,7 @@ class PdfGeneratorService
             'address_beira' => 'Rua Correia de Brito nº 1697, 1º andar - Beira',
             'country' => 'Moçambique',
             'phone' => '866713342',
+            'logo'=>'',
             'email' => 'comercial@dintell.co.mz',
             'website' => 'www.dintell.co.mz',
             'slogan' => 'beyond technology, intelligence.',

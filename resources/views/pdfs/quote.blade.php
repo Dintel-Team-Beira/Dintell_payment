@@ -278,17 +278,17 @@
     <div class="clearfix header">
         <div class="company-section">
             <div class="company-info">
-                @if(file_exists(public_path('logo.png')))
-                <img src="{{ public_path('logo.png') }}" style="width: 200px;" alt="Logo">
+                @if(file_exists(Storage::url($company->logo)))
+                <img src="{{ Storage::url($company->logo) }}" style="width: 200px;" alt="Logo">
                 @else
-                <div class="company-name">{{ config('company.name', config('app.name')) }}</div>
-                <div class="company-slogan">beyond technology, intelligence.</div>
+                <div class="company-name">{{ $company->name }}</div>
+                {{-- <div class="company-slogan">beyond technology, intelligence.</div> --}}
                 @endif
                 <div class="company-details">
-                    <strong>Contribuinte Nº:</strong> {{ config('company.nuit', '123456789') }}<br>
-                    {{ config('company.address', 'Av. Principal nº 123, R/C') }}<br>
-                    {{ config('company.city', 'Maputo') }} - {{ config('company.country', 'Moçambique') }}<br>
-                    {{ config('company.phone', '+258 84 123 4567') }} | {{ config('company.email', 'geral@empresa.co.mz') }}
+                    <strong>Contribuinte Nº:</strong> {{ $company->tax_number }}<br>
+                    {{ $company->address }}<br>
+                    {{ $company->city }} - {{ $company->country}}<br>
+                    {{ $company->phone }} | {{ $company->email }}
                 </div>
             </div>
         </div>

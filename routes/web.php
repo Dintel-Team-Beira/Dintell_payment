@@ -235,24 +235,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Monitoramento
     Route::prefix('monitoring')->name('monitoring.')->group(function () {
-        Route::get('/performance', [AdminMonitoringController::class, 'performance'])->name('performance');
-        Route::get('/health', [AdminMonitoringController::class, 'health'])->name('health');
-        Route::get('/metrics', [AdminMonitoringController::class, 'metrics'])->name('metrics');
+        // Route::get('/performance', [AdminMonitoringController::class, 'performance'])->name('performance');
+        // Route::get('/health', [AdminMonitoringController::class, 'health'])->name('health');
+        // Route::get('/metrics', [AdminMonitoringController::class, 'metrics'])->name('metrics');
     });
 
     // Suporte
     Route::prefix('support')->name('support.')->group(function () {
-        Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
-        Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
-        Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
-        Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
+        // Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
+        // Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
+        // Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
+        // Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
     });
 
     // Documentação e Ajuda
     Route::prefix('help')->name('help.')->group(function () {
-        Route::get('/documentation', [AdminHelpController::class, 'documentation'])->name('documentation');
-        Route::get('/api-docs', [AdminHelpController::class, 'apiDocs'])->name('api-docs');
-        Route::get('/changelog', [AdminHelpController::class, 'changelog'])->name('changelog');
+        // Route::get('/documentation', [AdminHelpController::class, 'documentation'])->name('documentation');
+        // Route::get('/api-docs', [AdminHelpController::class, 'apiDocs'])->name('api-docs');
+        // Route::get('/changelog', [AdminHelpController::class, 'changelog'])->name('changelog');
     });
     });
 });
