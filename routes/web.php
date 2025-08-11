@@ -181,7 +181,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Configurações do Sistema
     Route::prefix('settings')->name('settings.')->group(function () {
+
+          // Configurações - Dashboard principal
+    Route::get('/settings', [SettingsController::class, 'index'])->name('index');
         // Configurações do Sistema
+         // Configurações de Segurança
+    Route::get('/security', [SettingsController::class, 'security'])->name('security');
+    Route::put('/security', [SettingsController::class, 'updateSecurity'])->name('security.update');
+    Route::post('/security/report', [SettingsController::class, 'securityReport'])->name('security.report');
         Route::get('/system', [AdminSettingsController::class, 'system'])->name('system');
         Route::post('/system', [AdminSettingsController::class, 'updateSystem'])->name('system.update');
 
@@ -218,7 +225,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Logs do Sistema
     Route::prefix('logs')->name('logs.')->group(function () {
-        Route::get('/', [ApiLogController::class, 'index'])->name('index');
+        Route::get('/', [LogsController::class, 'index'])->name('index');
         Route::get('/{log}', [LogsController::class, 'show'])->name('show');
         Route::delete('/{log}', [LogsController::class, 'destroy'])->name('destroy');
         Route::post('/clear', [LogsController::class, 'clear'])->name('clear');
@@ -602,7 +609,8 @@ Route::middleware(['auth', TenantMiddleware::class])->group(function () {
 
 // Incluir rotas de autenticação do sistema
 require __DIR__ . '/auth.php';
-
+require __DIR__.'/admin_settings.php';
+require __DIR__.'/admin_plans.php';
 /*
 |--------------------------------------------------------------------------
 | UTILITÁRIOS
