@@ -2,15 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\SettingsController;
-use App\Http\Controllers\Admin\PlansController;
-/*
-|--------------------------------------------------------------------------
-| Admin Settings Routes
-|--------------------------------------------------------------------------
-|
-| Aqui estão definidas todas as rotas para as configurações do admin
-|
-*/
+
+
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
 
@@ -56,6 +49,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/logs/{file}', [SettingsController::class, 'viewLog'])->name('logs.show');
     Route::delete('/logs/{file}', [SettingsController::class, 'deleteLog'])->name('logs.delete');
     Route::post('/logs/clear-all', [SettingsController::class, 'clearAllLogs'])->name('logs.clear-all');
+
+
+
 });
 
 
