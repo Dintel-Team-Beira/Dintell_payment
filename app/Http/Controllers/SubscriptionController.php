@@ -124,7 +124,7 @@ class SubscriptionController extends Controller
             'ends_at' => 'nullable|date|after:starts_at',
             'amount_paid' => 'required|numeric|min:0'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         $subscription = Subscription::create($validated + [
             'status' => 'active',
             'last_payment_date' => now()
@@ -156,7 +156,7 @@ class SubscriptionController extends Controller
             'suspension_reason' => 'nullable|string|max:500',
             'amount_paid' => 'required|numeric|min:0'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         $oldStatus = $subscription->status;
 
         // Lógica para suspensão

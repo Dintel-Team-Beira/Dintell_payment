@@ -89,7 +89,7 @@ class ServiceController extends Controller
             'deliverables' => 'nullable|array',
             'is_active' => 'boolean'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         // Validação customizada: deve ter pelo menos hourly_rate ou fixed_price
         $validator->after(function ($validator) use ($request) {
             if (!$request->filled('hourly_rate') && !$request->filled('fixed_price')) {
@@ -163,7 +163,7 @@ class ServiceController extends Controller
             'deliverables' => 'nullable|array',
             'is_active' => 'boolean'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         // Validação customizada: deve ter pelo menos hourly_rate ou fixed_price
         $validator->after(function ($validator) use ($request) {
             if (!$request->filled('hourly_rate') && !$request->filled('fixed_price')) {

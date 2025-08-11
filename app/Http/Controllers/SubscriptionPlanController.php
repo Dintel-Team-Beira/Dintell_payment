@@ -72,6 +72,7 @@ class SubscriptionPlanController extends Controller
             $validated['slug'] = Str::slug($validated['name']);
         }
 
+                $validated['company_id'] = auth()->user()->company->id;
         SubscriptionPlan::create($validated);
 
         return redirect()->route('plans.index')
@@ -137,7 +138,7 @@ class SubscriptionPlanController extends Controller
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['setup_fee'] = $validated['setup_fee'] ?? 0;
         $validated['trial_days'] = $validated['trial_days'] ?? 0;
-
+        $validated['company_id'] = auth()->user()->company->id;
         $plan->update($validated);
 
         return redirect()->route('plans.index')

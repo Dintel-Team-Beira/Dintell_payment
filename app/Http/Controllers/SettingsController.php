@@ -48,7 +48,7 @@ class SettingsController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
-
+        $validated['company_id'] = auth()->user()->company->id;
         $settings = BillingSetting::getSettings();
 
         $data = $request->only([
@@ -101,7 +101,7 @@ class SettingsController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
-
+        $validated['company_id'] = auth()->user()->company->id;
         $settings = BillingSetting::getSettings();
 
         $settings->update($request->only([

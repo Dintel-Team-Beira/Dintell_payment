@@ -50,7 +50,7 @@ class CreditNoteController extends Controller
             'adjustment_reason' => 'required|string',
             'notes' => 'nullable|string'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         try {
             DB::beginTransaction();
 
@@ -223,7 +223,7 @@ class CreditNoteController extends Controller
             'adjustment_reason' => 'required|string',
             'notes' => 'nullable|string'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         try {
             DB::beginTransaction();
 
