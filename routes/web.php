@@ -218,34 +218,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Logs do Sistema
     Route::prefix('logs')->name('logs.')->group(function () {
-        Route::get('/', [LogsController::class, 'index'])->name('index');
-        Route::get('/{log}', [LogsController::class, 'show'])->name('show');
-        Route::delete('/{log}', [LogsController::class, 'destroy'])->name('destroy');
-        Route::post('/clear', [LogsController::class, 'clear'])->name('clear');
-        Route::get('/download/{log}', [LogsController::class, 'download'])->name('download');
+        // Route::get('/', [LogsController::class, 'index'])->name('index');
+        // Route::get('/{log}', [LogsController::class, 'show'])->name('show');
+        // Route::delete('/{log}', [LogsController::class, 'destroy'])->name('destroy');
+        // Route::post('/clear', [LogsController::class, 'clear'])->name('clear');
+        // Route::get('/download/{log}', [LogsController::class, 'download'])->name('download');
     });
 
 
     // Monitoramento
     Route::prefix('monitoring')->name('monitoring.')->group(function () {
-        Route::get('/performance', [AdminMonitoringController::class, 'performance'])->name('performance');
-        Route::get('/health', [AdminMonitoringController::class, 'health'])->name('health');
-        Route::get('/metrics', [AdminMonitoringController::class, 'metrics'])->name('metrics');
+        // Route::get('/performance', [AdminMonitoringController::class, 'performance'])->name('performance');
+        // Route::get('/health', [AdminMonitoringController::class, 'health'])->name('health');
+        // Route::get('/metrics', [AdminMonitoringController::class, 'metrics'])->name('metrics');
     });
 
     // Suporte
     Route::prefix('support')->name('support.')->group(function () {
-        Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
-        Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
-        Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
-        Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
+        // Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
+        // Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
+        // Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
+        // Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
     });
 
     // Documentação e Ajuda
     Route::prefix('help')->name('help.')->group(function () {
-        Route::get('/documentation', [AdminHelpController::class, 'documentation'])->name('documentation');
-        Route::get('/api-docs', [AdminHelpController::class, 'apiDocs'])->name('api-docs');
-        Route::get('/changelog', [AdminHelpController::class, 'changelog'])->name('changelog');
+        // Route::get('/documentation', [AdminHelpController::class, 'documentation'])->name('documentation');
+        // Route::get('/api-docs', [AdminHelpController::class, 'apiDocs'])->name('api-docs');
+        // Route::get('/changelog', [AdminHelpController::class, 'changelog'])->name('changelog');
     });
     });
 });

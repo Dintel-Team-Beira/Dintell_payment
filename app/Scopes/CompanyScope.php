@@ -13,5 +13,6 @@ class CompanyScope implements Scope
         if (auth()->check()) {
             $builder->where($model->getTable() . '.company_id', auth()->user()->company_id);
         }
+        // dd('Applying CompanyScope to ' . $model->getTable(),auth()->user()->company_id);
     }
 }

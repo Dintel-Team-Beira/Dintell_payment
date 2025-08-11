@@ -1,5 +1,3 @@
-
-
 @extends('layouts.app')
 
 @section('title', 'Cotação')
@@ -15,10 +13,9 @@
                 <p class="mt-2 text-gray-600">Crie uma proposta comercial personalizada para seu cliente</p>
             </div>
             <div>
-                <a href="{{ route('quotes.index') }}"
-                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <a href="{{ route('quotes.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Voltar
                 </a>
@@ -38,7 +35,7 @@
                         <div class="flex items-center">
                             <div class="p-2 mr-3 bg-blue-100 rounded-lg">
                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
                             <div>
@@ -49,13 +46,11 @@
                     </div>
                     <div class="p-6 space-y-6">
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                           <div>
-                                  <label for="client_id" class="block mb-2 text-sm font-medium text-gray-700">
-                            Cliente *
-                        </label>
-                        <select name="client_id" id="client_id"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg select2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                required>
+                            <div>
+                                <label for="client_id" class="block mb-2 text-sm font-medium text-gray-700">
+                                    Cliente *
+                                </label>
+                                <select name="client_id" id="client_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg select2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
                                     <option value="">Selecione um cliente</option>
                                     @foreach($clients as $client)
                                     <option value="{{ $client->id }}" {{ old('client_id')==$client->id ? 'selected' : ''
@@ -75,22 +70,18 @@
 
                             <div>
                                 <label for="quote_date" class="block mb-2 text-sm font-medium text-gray-700">Data da Cotação *</label>
-                                <input type="date" name="quote_date" id="quote_date"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('quote_date') border-red-300 @enderror"
-                                       value="{{ old('quote_date', date('Y-m-d')) }}" required>
+                                <input type="date" name="quote_date" id="quote_date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('quote_date') border-red-300 @enderror" value="{{ old('quote_date', date('Y-m-d')) }}" required>
                                 @error('quote_date')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
 
                         <div>
                             <label for="valid_until" class="block mb-2 text-sm font-medium text-gray-700">Válida até *</label>
-                            <input type="date" name="valid_until" id="valid_until"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('valid_until') border-red-300 @enderror"
-                                   value="{{ old('valid_until', date('Y-m-d', strtotime('+30 days'))) }}" required>
+                            <input type="date" name="valid_until" id="valid_until" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('valid_until') border-red-300 @enderror" value="{{ old('valid_until', date('Y-m-d', strtotime('+30 days'))) }}" required>
                             @error('valid_until')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -103,7 +94,7 @@
                             <div class="flex items-center">
                                 <div class="p-2 mr-3 bg-green-100 rounded-lg">
                                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                     </svg>
                                 </div>
                                 <div>
@@ -112,18 +103,16 @@
                                 </div>
                             </div>
                             <div class="flex space-x-3">
-                                <button type="button" id="addProductBtn"
-                                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <button type="button" id="addProductBtn" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                     </svg>
                                     Adicionar Produto
                                 </button>
-                                <button type="button" id="addServiceBtn"
-                                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-700 border border-green-200 rounded-md bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <button type="button" id="addServiceBtn" class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-700 border border-green-200 rounded-md bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                     Adicionar Serviço
                                 </button>
@@ -135,7 +124,7 @@
                         <div id="selectedItems" class="space-y-4">
                             <div class="py-12 text-center text-gray-500">
                                 <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                                 <p class="text-lg font-medium">Nenhum item selecionado</p>
                                 <p class="text-sm">Adicione produtos ou serviços para começar</p>
@@ -150,7 +139,7 @@
                         <div class="flex items-center">
                             <div class="p-2 mr-3 bg-purple-100 rounded-lg">
                                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
                             <div>
@@ -162,16 +151,12 @@
                     <div class="p-6 space-y-6">
                         <div>
                             <label for="notes" class="block mb-2 text-sm font-medium text-gray-700">Observações</label>
-                            <textarea name="notes" id="notes" rows="4"
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      placeholder="Observações sobre a cotação...">{{ old('notes') }}</textarea>
+                            <textarea name="notes" id="notes" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Observações sobre a cotação...">{{ old('notes') }}</textarea>
                         </div>
 
                         <div>
                             <label for="terms_conditions" class="block mb-2 text-sm font-medium text-gray-700">Termos e Condições</label>
-                            <textarea name="terms_conditions" id="terms_conditions" rows="4"
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      placeholder="Termos e condições da cotação...">{{ old('terms_conditions') }}</textarea>
+                            <textarea name="terms_conditions" id="terms_conditions" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Termos e condições da cotação...">{{ old('terms_conditions') }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -185,7 +170,7 @@
                         <div class="flex items-center">
                             <div class="p-2 mr-3 bg-yellow-100 rounded-lg">
                                 <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                             </div>
                             <div>
@@ -230,10 +215,9 @@
                 <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
                     <div class="p-6">
                         <div class="space-y-3">
-                            <button type="submit" id="saveQuoteBtn"
-                                    class="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-medium text-white transition-colors bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <button type="submit" id="saveQuoteBtn" class="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-medium text-white transition-colors bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Salvar Cotação
                             </button>
@@ -247,10 +231,9 @@
                         Visualizar
                     </button> --}}
 
-                            <a href="{{ route('quotes.index') }}"
-                               class="inline-flex items-center justify-center w-full px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            <a href="{{ route('quotes.index') }}" class="inline-flex items-center justify-center w-full px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                                 Cancelar
                             </a>
@@ -259,7 +242,7 @@
                         <div class="pt-6 mt-6 border-t border-gray-200">
                             <div class="flex items-center justify-center text-xs text-gray-500">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Campos marcados com * são obrigatórios
                             </div>
@@ -284,21 +267,20 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="flex items-center text-lg font-medium text-gray-900">
                             <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                             Selecionar Produtos
                         </h3>
                         <button type="button" class="text-gray-400 hover:text-gray-600" onclick="closeProductModal()">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
                     <!-- Busca de Produtos -->
                     <div class="mb-4">
-                        <input type="text" id="productSearch" placeholder="Buscar produtos..."
-                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <input type="text" id="productSearch" placeholder="Buscar produtos..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
 
                     <!-- Lista de Produtos -->
@@ -308,14 +290,10 @@
                 </div>
 
                 <div class="flex justify-between px-6 py-3 bg-gray-50">
-                    <button type="button"
-                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
-                            onclick="closeProductModal()">
+                    <button type="button" class="inline-flex justify-center px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm" onclick="closeProductModal()">
                         Fechar
                     </button>
-                    <button type="button"
-                            class="inline-flex justify-center px-4 py-2 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
-                            onclick="addSelectedProducts()">
+                    <button type="button" class="inline-flex justify-center px-4 py-2 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm" onclick="addSelectedProducts()">
                         Adicionar Selecionados
                     </button>
                 </div>
@@ -337,22 +315,21 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="flex items-center text-lg font-medium text-gray-900">
                             <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             Selecionar Serviços
                         </h3>
                         <button type="button" class="text-gray-400 hover:text-gray-600" onclick="closeServiceModal()">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
                     <!-- Busca de Serviços -->
                     <div class="mb-4">
-                        <input type="text" id="serviceSearch" placeholder="Buscar serviços..."
-                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <input type="text" id="serviceSearch" placeholder="Buscar serviços..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
                     </div>
 
                     <!-- Lista de Serviços -->
@@ -362,101 +339,99 @@
                 </div>
 
                 <div class="flex justify-between px-6 py-3 bg-gray-50">
-                    <button type="button"
-                    class="inline-flex justify-center px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
-                    onclick="closeServiceModal()">
-                Fechar
-            </button>
-            <button type="button"
-                    class="inline-flex justify-center px-4 py-2 text-base font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm"
-                    onclick="addSelectedServices()">
-                Adicionar Selecionados
-            </button>
+                    <button type="button" class="inline-flex justify-center px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm" onclick="closeServiceModal()">
+                        Fechar
+                    </button>
+                    <button type="button" class="inline-flex justify-center px-4 py-2 text-base font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm" onclick="addSelectedServices()">
+                        Adicionar Selecionados
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-</div>
 </div>
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-let itemIndex = 0;
-let selectedItems = [];
-let products = [];
-let services = [];
+    document.addEventListener('DOMContentLoaded', function() {
+        let itemIndex = 0;
+        let selectedItems = [];
+        let products = [];
+        let services = [];
 
-// Carregar produtos e serviços
-loadProducts();
-loadServices();
+        // Carregar produtos e serviços
+        loadProducts();
+        loadServices();
 
-// Event Listeners
-document.getElementById('addProductBtn').addEventListener('click', openProductModal);
-document.getElementById('addServiceBtn').addEventListener('click', openServiceModal);
-document.getElementById('productSearch').addEventListener('input', filterProducts);
-document.getElementById('serviceSearch').addEventListener('input', filterServices);
-document.getElementById('quoteForm').addEventListener('submit', handleFormSubmit);
+        // Event Listeners
+        document.getElementById('addProductBtn').addEventListener('click', openProductModal);
+        document.getElementById('addServiceBtn').addEventListener('click', openServiceModal);
+        document.getElementById('productSearch').addEventListener('input', filterProducts);
+        document.getElementById('serviceSearch').addEventListener('input', filterServices);
+        document.getElementById('quoteForm').addEventListener('submit', handleFormSubmit);
 
-// Funções de Modal
-function openProductModal() {
-document.getElementById('productModal').classList.remove('hidden');
-document.body.classList.add('overflow-hidden');
-renderProducts();
-}
+        // Funções de Modal
+        function openProductModal() {
+            document.getElementById('productModal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+            renderProducts();
+        }
 
-function closeProductModal() {
-document.getElementById('productModal').classList.add('hidden');
-document.body.classList.remove('overflow-hidden');
-}
+        function closeProductModal() {
+            document.getElementById('productModal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
 
-function openServiceModal() {
-document.getElementById('serviceModal').classList.remove('hidden');
-document.body.classList.add('overflow-hidden');
-renderServices();
-}
+        function openServiceModal() {
+            document.getElementById('serviceModal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+            renderServices();
+        }
 
-function closeServiceModal() {
-document.getElementById('serviceModal').classList.add('hidden');
-document.body.classList.remove('overflow-hidden');
-}
+        function closeServiceModal() {
+            document.getElementById('serviceModal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
 
-// Carregar dados
-function loadProducts() {
-fetch('/api/products/active')
-    .then(response => response.json())
-    .then(data => {
-        products = data;
-        renderProducts();
-    })
-    .catch(error => {
-        console.error('Erro ao carregar produtos:', error);
-        showNotification('Erro ao carregar produtos', 'error');
-    });
-}
+        // Carregar dados
+        function loadProducts() {
+            fetch(`/api/products/active/{{ auth()->user()->company_id }}`)
+                .then(response => response.json())
+                .then(data => {
+                    products = data;
+                    console.log(data);
+                    
+                    renderProducts();
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar produtos:', error);
+                    showNotification('Erro ao carregar produtos'+data, 'error');
+                });
+        }
 
-function loadServices() {
-fetch('/api/services/active')
-    .then(response => response.json())
-    .then(data => {
-        services = data;
-        renderServices();
-    })
-    .catch(error => {
-        console.error('Erro ao carregar serviços:', error);
-        showNotification('Erro ao carregar serviços', 'error');
-    });
-}
+        function loadServices() {
+            fetch('/api/services/active/{{ auth()->user()->company_id }}')
+                .then(response => response.json())
+                .then(data => {
+                    services = data;
+                    renderServices();
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar serviços:', error);
+                    showNotification('Erro ao carregar serviços', 'error');
+                });
+        }
 
-// Renderizar produtos
-function renderProducts(filter = '') {
-const productList = document.getElementById('productList');
-const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(filter.toLowerCase()) ||
-    product.code.toLowerCase().includes(filter.toLowerCase())
-);
+        // Renderizar produtos
+        function renderProducts(filter = '') {
+            const productList = document.getElementById('productList');
+            const filteredProducts = products.filter(product =>
+                product.name.toLowerCase().includes(filter.toLowerCase()) ||
+                product.code.toLowerCase().includes(filter.toLowerCase())
+            );
 
-if (filteredProducts.length === 0) {
-    productList.innerHTML = `
+            if (filteredProducts.length === 0) {
+                productList.innerHTML = `
         <div class="py-8 text-center text-gray-500">
             <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
@@ -464,10 +439,10 @@ if (filteredProducts.length === 0) {
             <p>Nenhum produto encontrado</p>
         </div>
     `;
-    return;
-}
+                return;
+            }
 
-productList.innerHTML = filteredProducts.map(product => `
+            productList.innerHTML = filteredProducts.map(product => `
     <div class="flex items-center p-4 mb-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 product-item" data-id="${product.id}">
         <input type="checkbox" class="w-4 h-4 mr-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
         <div class="flex-1">
@@ -486,27 +461,27 @@ productList.innerHTML = filteredProducts.map(product => `
     </div>
 `).join('');
 
-// Adicionar event listeners aos checkboxes
-productList.querySelectorAll('.product-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-        if (e.target.type !== 'checkbox') {
-            const checkbox = this.querySelector('input[type="checkbox"]');
-            checkbox.checked = !checkbox.checked;
+            // Adicionar event listeners aos checkboxes
+            productList.querySelectorAll('.product-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                });
+            });
         }
-    });
-});
-}
 
-// Renderizar serviços
-function renderServices(filter = '') {
-const serviceList = document.getElementById('serviceList');
-const filteredServices = services.filter(service =>
-    service.name.toLowerCase().includes(filter.toLowerCase()) ||
-    service.code.toLowerCase().includes(filter.toLowerCase())
-);
+        // Renderizar serviços
+        function renderServices(filter = '') {
+            const serviceList = document.getElementById('serviceList');
+            const filteredServices = services.filter(service =>
+                service.name.toLowerCase().includes(filter.toLowerCase()) ||
+                service.code.toLowerCase().includes(filter.toLowerCase())
+            );
 
-if (filteredServices.length === 0) {
-    serviceList.innerHTML = `
+            if (filteredServices.length === 0) {
+                serviceList.innerHTML = `
         <div class="py-8 text-center text-gray-500">
             <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -515,10 +490,10 @@ if (filteredServices.length === 0) {
             <p>Nenhum serviço encontrado</p>
         </div>
     `;
-    return;
-}
+                return;
+            }
 
-serviceList.innerHTML = filteredServices.map(service => `
+            serviceList.innerHTML = filteredServices.map(service => `
     <div class="flex items-center p-4 mb-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 service-item" data-id="${service.id}">
         <input type="checkbox" class="w-4 h-4 mr-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2">
         <div class="flex-1">
@@ -550,89 +525,89 @@ serviceList.innerHTML = filteredServices.map(service => `
     </div>
 `).join('');
 
-// Adicionar event listeners aos checkboxes
-serviceList.querySelectorAll('.service-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-        if (e.target.type !== 'checkbox') {
-            const checkbox = this.querySelector('input[type="checkbox"]');
-            checkbox.checked = !checkbox.checked;
+            // Adicionar event listeners aos checkboxes
+            serviceList.querySelectorAll('.service-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                });
+            });
         }
-    });
-});
-}
 
-// Filtros
-function filterProducts(e) {
-renderProducts(e.target.value);
-}
+        // Filtros
+        function filterProducts(e) {
+            renderProducts(e.target.value);
+        }
 
-function filterServices(e) {
-renderServices(e.target.value);
-}
+        function filterServices(e) {
+            renderServices(e.target.value);
+        }
 
-// Adicionar produtos selecionados
-window.addSelectedProducts = function() {
-const checkedProducts = document.querySelectorAll('#productList input[type="checkbox"]:checked');
+        // Adicionar produtos selecionados
+        window.addSelectedProducts = function() {
+            const checkedProducts = document.querySelectorAll('#productList input[type="checkbox"]:checked');
 
-checkedProducts.forEach(checkbox => {
-    const productElement = checkbox.closest('.product-item');
-    const productId = productElement.dataset.id;
-    const product = products.find(p => p.id == productId);
+            checkedProducts.forEach(checkbox => {
+                const productElement = checkbox.closest('.product-item');
+                const productId = productElement.dataset.id;
+                const product = products.find(p => p.id == productId);
 
-    if (product && !selectedItems.find(item => item.type === 'product' && item.id == productId)) {
-        addItemToQuote(product, 'product');
-    }
-});
+                if (product && !selectedItems.find(item => item.type === 'product' && item.id == productId)) {
+                    addItemToQuote(product, 'product');
+                }
+            });
 
-closeProductModal();
-showNotification('Produtos adicionados com sucesso!', 'success');
-};
+            closeProductModal();
+            showNotification('Produtos adicionados com sucesso!', 'success');
+        };
 
-// Adicionar serviços selecionados
-window.addSelectedServices = function() {
-const checkedServices = document.querySelectorAll('#serviceList input[type="checkbox"]:checked');
+        // Adicionar serviços selecionados
+        window.addSelectedServices = function() {
+            const checkedServices = document.querySelectorAll('#serviceList input[type="checkbox"]:checked');
 
-checkedServices.forEach(checkbox => {
-    const serviceElement = checkbox.closest('.service-item');
-    const serviceId = serviceElement.dataset.id;
-    const service = services.find(s => s.id == serviceId);
+            checkedServices.forEach(checkbox => {
+                const serviceElement = checkbox.closest('.service-item');
+                const serviceId = serviceElement.dataset.id;
+                const service = services.find(s => s.id == serviceId);
 
-    if (service && !selectedItems.find(item => item.type === 'service' && item.id == serviceId)) {
-        addItemToQuote(service, 'service');
-    }
-});
+                if (service && !selectedItems.find(item => item.type === 'service' && item.id == serviceId)) {
+                    addItemToQuote(service, 'service');
+                }
+            });
 
-closeServiceModal();
-showNotification('Serviços adicionados com sucesso!', 'success');
-};
+            closeServiceModal();
+            showNotification('Serviços adicionados com sucesso!', 'success');
+        };
 
-// Adicionar item à cotação
-function addItemToQuote(item, type) {
-const newItem = {
-    index: itemIndex++,
-    id: item.id,
-    type: type,
-    name: item.name,
-    code: item.code,
-    description: item.description || '',
-    quantity: type === 'service' && item.estimated_hours ? item.estimated_hours : 1,
-    unit_price: type === 'product' ? item.price : (item.fixed_price > 0 ? item.fixed_price : item.hourly_rate),
-    tax_rate: item.tax_rate || {{ $settings->default_tax_rate }},
-    category: item.category || '',
-    complexity: item.complexity_level || ''
-};
+        // Adicionar item à cotação
+        function addItemToQuote(item, type) {
+            const newItem = {
+                index: itemIndex++
+                , id: item.id
+                , type: type
+                , name: item.name
+                , code: item.code
+                , description: item.description || ''
+                , quantity: type === 'service' && item.estimated_hours ? item.estimated_hours : 1
+                , unit_price: type === 'product' ? item.price : (item.fixed_price > 0 ? item.fixed_price : item.hourly_rate)
+                , tax_rate: item.tax_rate || {{$settings -> default_tax_rate }}
+                , category: item.category || ''
+                , complexity: item.complexity_level || ''
+            };
 
-selectedItems.push(newItem);
-renderSelectedItems();
-calculateTotals();
-}
+            selectedItems.push(newItem);
+            renderSelectedItems();
+            calculateTotals();
+        }
 
-// Renderizar itens selecionados
-function renderSelectedItems() {
-const container = document.getElementById('selectedItems');
+        // Renderizar itens selecionados
+        function renderSelectedItems() {
+            const container = document.getElementById('selectedItems');
 
-if (selectedItems.length === 0) {
-    container.innerHTML = `
+            if (selectedItems.length === 0) {
+                container.innerHTML = `
         <div class="py-12 text-center text-gray-500">
             <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
@@ -641,10 +616,10 @@ if (selectedItems.length === 0) {
             <p class="text-sm">Adicione produtos ou serviços para começar</p>
         </div>
     `;
-    return;
-}
+                return;
+            }
 
-container.innerHTML = selectedItems.map(item => `
+            container.innerHTML = selectedItems.map(item => `
     <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 item-card" data-index="${item.index}">
         <div class="flex items-start justify-between">
             <div class="flex-1">
@@ -714,148 +689,148 @@ container.innerHTML = selectedItems.map(item => `
     </div>
 `).join('');
 
-// Adicionar event listeners
-attachItemEventListeners();
-}
-
-// Anexar event listeners aos itens
-function attachItemEventListeners() {
-// Remover itens
-document.querySelectorAll('.remove-item').forEach(button => {
-    button.addEventListener('click', function() {
-        const index = parseInt(this.dataset.index);
-        selectedItems = selectedItems.filter(item => item.index !== index);
-        renderSelectedItems();
-        calculateTotals();
-        showNotification('Item removido', 'info');
-    });
-});
-
-// Atualizar valores
-document.querySelectorAll('.item-quantity, .item-price, .item-tax').forEach(input => {
-    input.addEventListener('input', function() {
-        const index = parseInt(this.dataset.index);
-        const item = selectedItems.find(item => item.index === index);
-
-        if (item) {
-            if (this.classList.contains('item-quantity')) {
-                item.quantity = parseFloat(this.value) || 0;
-                document.querySelector(`input[name="items[${index}][quantity]"]`).value = item.quantity;
-            } else if (this.classList.contains('item-price')) {
-                item.unit_price = parseFloat(this.value) || 0;
-                document.querySelector(`input[name="items[${index}][unit_price]"]`).value = item.unit_price;
-            } else if (this.classList.contains('item-tax')) {
-                item.tax_rate = parseFloat(this.value) || 0;
-                document.querySelector(`input[name="items[${index}][tax_rate]"]`).value = item.tax_rate;
-            }
-
-            // Atualizar total do item
-            const totalElement = document.querySelector(`.item-total[data-index="${index}"]`);
-            if (totalElement) {
-                totalElement.textContent = formatCurrency(calculateItemTotal(item));
-            }
-
-            calculateTotals();
+            // Adicionar event listeners
+            attachItemEventListeners();
         }
-    });
-});
-}
 
-// Calcular total do item
-function calculateItemTotal(item) {
-const subtotal = item.quantity * item.unit_price;
-const tax = subtotal * (item.tax_rate / 100);
-return subtotal + tax;
-}
+        // Anexar event listeners aos itens
+        function attachItemEventListeners() {
+            // Remover itens
+            document.querySelectorAll('.remove-item').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    selectedItems = selectedItems.filter(item => item.index !== index);
+                    renderSelectedItems();
+                    calculateTotals();
+                    showNotification('Item removido', 'info');
+                });
+            });
 
-// Calcular totais
-function calculateTotals() {
-let subtotal = 0;
-let totalTax = 0;
-let totalItems = selectedItems.length;
+            // Atualizar valores
+            document.querySelectorAll('.item-quantity, .item-price, .item-tax').forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    const item = selectedItems.find(item => item.index === index);
 
-selectedItems.forEach(item => {
-    const itemSubtotal = item.quantity * item.unit_price;
-    const itemTax = itemSubtotal * (item.tax_rate / 100);
+                    if (item) {
+                        if (this.classList.contains('item-quantity')) {
+                            item.quantity = parseFloat(this.value) || 0;
+                            document.querySelector(`input[name="items[${index}][quantity]"]`).value = item.quantity;
+                        } else if (this.classList.contains('item-price')) {
+                            item.unit_price = parseFloat(this.value) || 0;
+                            document.querySelector(`input[name="items[${index}][unit_price]"]`).value = item.unit_price;
+                        } else if (this.classList.contains('item-tax')) {
+                            item.tax_rate = parseFloat(this.value) || 0;
+                            document.querySelector(`input[name="items[${index}][tax_rate]"]`).value = item.tax_rate;
+                        }
 
-    subtotal += itemSubtotal;
-    totalTax += itemTax;
-});
+                        // Atualizar total do item
+                        const totalElement = document.querySelector(`.item-total[data-index="${index}"]`);
+                        if (totalElement) {
+                            totalElement.textContent = formatCurrency(calculateItemTotal(item));
+                        }
 
-const total = subtotal + totalTax;
-const avgPrice = totalItems > 0 ? total / totalItems : 0;
+                        calculateTotals();
+                    }
+                });
+            });
+        }
 
-// Atualizar display
-document.getElementById('subtotalDisplay').textContent = formatCurrency(subtotal);
-document.getElementById('taxDisplay').textContent = formatCurrency(totalTax);
-document.getElementById('totalDisplay').textContent = formatCurrency(total);
-document.getElementById('itemCount').textContent = totalItems;
-document.getElementById('avgPrice').textContent = formatCurrency(avgPrice);
-}
+        // Calcular total do item
+        function calculateItemTotal(item) {
+            const subtotal = item.quantity * item.unit_price;
+            const tax = subtotal * (item.tax_rate / 100);
+            return subtotal + tax;
+        }
 
-// Validar datas
-document.getElementById('quote_date').addEventListener('change', function() {
-const quoteDate = new Date(this.value);
-const validUntilField = document.getElementById('valid_until');
-const validUntilDate = new Date(validUntilField.value);
+        // Calcular totais
+        function calculateTotals() {
+            let subtotal = 0;
+            let totalTax = 0;
+            let totalItems = selectedItems.length;
 
-if (validUntilDate <= quoteDate) {
-    const newValidDate = new Date(quoteDate);
-    newValidDate.setDate(newValidDate.getDate() + 30);
-    validUntilField.value = newValidDate.toISOString().split('T')[0];
-}
-});
+            selectedItems.forEach(item => {
+                const itemSubtotal = item.quantity * item.unit_price;
+                const itemTax = itemSubtotal * (item.tax_rate / 100);
 
-// Submissão do formulário
-function handleFormSubmit(e) {
-if (selectedItems.length === 0) {
-    e.preventDefault();
-    showNotification('Adicione pelo menos um item à cotação', 'warning');
-    return false;
-}
+                subtotal += itemSubtotal;
+                totalTax += itemTax;
+            });
 
-// Show loading state
-const submitButton = document.getElementById('saveQuoteBtn');
-const originalText = submitButton.innerHTML;
-submitButton.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Salvando...';
-submitButton.disabled = true;
-}
+            const total = subtotal + totalTax;
+            const avgPrice = totalItems > 0 ? total / totalItems : 0;
 
-// Utilitários
-function formatCurrency(value) {
-return new Intl.NumberFormat('pt-MZ', {
-    style: 'currency',
-    currency: 'MZN',
-    minimumFractionDigits: 2
-}).format(value).replace('MTn', 'MT');
-}
+            // Atualizar display
+            document.getElementById('subtotalDisplay').textContent = formatCurrency(subtotal);
+            document.getElementById('taxDisplay').textContent = formatCurrency(totalTax);
+            document.getElementById('totalDisplay').textContent = formatCurrency(total);
+            document.getElementById('itemCount').textContent = totalItems;
+            document.getElementById('avgPrice').textContent = formatCurrency(avgPrice);
+        }
 
-// Sistema de notificações
-function showNotification(message, type = 'info') {
-// Remove existing notifications
-const existingNotifications = document.querySelectorAll('.notification');
-existingNotifications.forEach(notification => notification.remove());
+        // Validar datas
+        document.getElementById('quote_date').addEventListener('change', function() {
+            const quoteDate = new Date(this.value);
+            const validUntilField = document.getElementById('valid_until');
+            const validUntilDate = new Date(validUntilField.value);
 
-// Create notification element
-const notification = document.createElement('div');
-notification.className = `notification fixed top-4 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+            if (validUntilDate <= quoteDate) {
+                const newValidDate = new Date(quoteDate);
+                newValidDate.setDate(newValidDate.getDate() + 30);
+                validUntilField.value = newValidDate.toISOString().split('T')[0];
+            }
+        });
 
-const colors = {
-    success: 'bg-green-50 border border-green-200 text-green-800',
-    error: 'bg-red-50 border border-red-200 text-red-800',
-    info: 'bg-blue-50 border border-blue-200 text-blue-800',
-    warning: 'bg-yellow-50 border border-yellow-200 text-yellow-800'
-};
+        // Submissão do formulário
+        function handleFormSubmit(e) {
+            if (selectedItems.length === 0) {
+                e.preventDefault();
+                showNotification('Adicione pelo menos um item à cotação', 'warning');
+                return false;
+            }
 
-const icons = {
-    success: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>',
-    error: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>',
-    info: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>',
-    warning: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>'
-};
+            // Show loading state
+            const submitButton = document.getElementById('saveQuoteBtn');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Salvando...';
+            submitButton.disabled = true;
+        }
 
-notification.className += ` ${colors[type]}`;
-notification.innerHTML = `
+        // Utilitários
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-MZ', {
+                style: 'currency'
+                , currency: 'MZN'
+                , minimumFractionDigits: 2
+            }).format(value).replace('MTn', 'MT');
+        }
+
+        // Sistema de notificações
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notification => notification.remove());
+
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification fixed top-4 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+
+            const colors = {
+                success: 'bg-green-50 border border-green-200 text-green-800'
+                , error: 'bg-red-50 border border-red-200 text-red-800'
+                , info: 'bg-blue-50 border border-blue-200 text-blue-800'
+                , warning: 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+            };
+
+            const icons = {
+                success: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'
+                , error: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>'
+                , info: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>'
+                , warning: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>'
+            };
+
+            notification.className += ` ${colors[type]}`;
+            notification.innerHTML = `
     <div class="flex items-center">
         <div class="flex-shrink-0 mr-3">
             ${icons[type]}
@@ -873,233 +848,243 @@ notification.innerHTML = `
     </div>
 `;
 
-document.body.appendChild(notification);
+            document.body.appendChild(notification);
 
-// Animate in
-setTimeout(() => {
-    notification.classList.remove('translate-x-full');
-    notification.classList.add('translate-x-0');
-}, 100);
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+                notification.classList.add('translate-x-0');
+            }, 100);
 
-// Auto remove after 5 seconds
-setTimeout(() => {
-    notification.classList.add('translate-x-full');
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 5000);
         }
-    }, 300);
-}, 5000);
-}
 
-// Expor funções globais
-window.closeProductModal = closeProductModal;
-window.closeServiceModal = closeServiceModal;
+        // Expor funções globais
+        window.closeProductModal = closeProductModal;
+        window.closeServiceModal = closeServiceModal;
 
 
-// selecionar o cliente
+        // selecionar o cliente
 
-  // Inicializar Select2
-    $('.select2').select2({
-        placeholder: 'Digite para buscar...',
-        allowClear: true,
-        width: '100%',
-        minimumInputLength: 0,
-        language: {
-            noResults: function() {
-                return "Nenhum resultado encontrado";
-            },
-            searching: function() {
-                return "Procurando...";
-            },
-            inputTooShort: function() {
-                return "Digite para buscar";
-            },
-            loadingMore: function() {
-                return "Carregando mais...";
+        // Inicializar Select2
+        $('.select2').select2({
+            placeholder: 'Digite para buscar...'
+            , allowClear: true
+            , width: '100%'
+            , minimumInputLength: 0
+            , language: {
+                noResults: function() {
+                    return "Nenhum resultado encontrado";
+                }
+                , searching: function() {
+                    return "Procurando...";
+                }
+                , inputTooShort: function() {
+                    return "Digite para buscar";
+                }
+                , loadingMore: function() {
+                    return "Carregando mais...";
+                }
             }
-        }
-    });
+        });
 
-    // Manter seleção após erro de validação Laravel
-    @if(old('client_id'))
-        $('#client_id').val('{{ old('client_id') }}').trigger('change');
-    @endif
+        // Manter seleção após erro de validação Laravel
+        @if(old('client_id'))
+        $('#client_id').val('{{ old('
+            client_id ') }}').trigger('change');
+        @endif
 
-    // Aplicar estilo de erro se houver erro do Laravel
-    @error('client_id')
+        // Aplicar estilo de erro se houver erro do Laravel
+        @error('client_id')
         $('#client_id').next('.select2-container').addClass('select2-container--error');
-    @enderror
+        @enderror
 
-    // Remover erro ao selecionar
-    $('#client_id').on('change', function() {
-        if ($(this).val()) {
-            $(this).next('.select2-container').removeClass('select2-container--error');
-        }
+        // Remover erro ao selecionar
+        $('#client_id').on('change', function() {
+            if ($(this).val()) {
+                $(this).next('.select2-container').removeClass('select2-container--error');
+            }
+        });
+
     });
 
-});
 </script>
 @endpush
 
 @push('styles')
 <style>
-/* Loading animation */
-@keyframes spin {
-from {
-transform: rotate(0deg);
-}
-to {
-transform: rotate(360deg);
-}
-}
+    /* Loading animation */
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
 
-.animate-spin {
-animation: spin 1s linear infinite;
-}
+        to {
+            transform: rotate(360deg);
+        }
+    }
 
-/* Animation for notifications */
-@keyframes slideInRight {
-from {
-transform: translateX(100%);
-opacity: 0;
-}
-to {
-transform: translateX(0);
-opacity: 1;
-}
-}
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
 
-.notification {
-animation: slideInRight 0.3s ease-out;
-}
+    /* Animation for notifications */
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
 
-/* Custom focus styles */
-.focus\:ring-2:focus {
-box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-}
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
 
-/* Hover transitions */
-.transition-colors {
-transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-transition-duration: 150ms;
-}
+    .notification {
+        animation: slideInRight 0.3s ease-out;
+    }
 
-/* Item card hover effects */
-.item-card {
-transition: all 0.2s ease-in-out;
-}
+    /* Custom focus styles */
+    .focus\:ring-2:focus {
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
 
-.item-card:hover {
-transform: translateY(-1px);
-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
+    /* Hover transitions */
+    .transition-colors {
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+    }
 
-/* Modal overlay */
-.modal-overlay {
-backdrop-filter: blur(4px);
-}
+    /* Item card hover effects */
+    .item-card {
+        transition: all 0.2s ease-in-out;
+    }
 
-/* Sticky sidebar */
-.sticky {
-position: sticky;
-top: 2rem;
-}
+    .item-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
 
-/* Enhanced form inputs */
-input:focus, select:focus, textarea:focus {
-transform: translateY(-1px);
-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 2px rgba(59, 130, 246, 0.5);
-}
+    /* Modal overlay */
+    .modal-overlay {
+        backdrop-filter: blur(4px);
+    }
 
-/* Button hover effects */
-button:hover:not(:disabled), a:hover {
-transform: translateY(-1px);
-}
+    /* Sticky sidebar */
+    .sticky {
+        position: sticky;
+        top: 2rem;
+    }
 
-button:disabled {
-transform: none;
-opacity: 0.6;
-cursor: not-allowed;
-}
+    /* Enhanced form inputs */
+    input:focus,
+    select:focus,
+    textarea:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
 
-/* Custom scrollbar */
-.overflow-y-auto::-webkit-scrollbar {
-width: 8px;
-}
+    /* Button hover effects */
+    button:hover:not(:disabled),
+    a:hover {
+        transform: translateY(-1px);
+    }
 
-.overflow-y-auto::-webkit-scrollbar-track {
-background: #f1f5f9;
-border-radius: 4px;
-}
+    button:disabled {
+        transform: none;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 
-.overflow-y-auto::-webkit-scrollbar-thumb {
-background: #cbd5e1;
-border-radius: 4px;
-}
+    /* Custom scrollbar */
+    .overflow-y-auto::-webkit-scrollbar {
+        width: 8px;
+    }
 
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-background: #94a3b8;
-}
+    .overflow-y-auto::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
 
-/* Responsive improvements */
-@media (max-width: 640px) {
-.grid-cols-4 {
-grid-template-columns: repeat(2, minmax(0, 1fr));
-gap: 0.75rem;
-}
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
 
-.space-x-3 > * + * {
-margin-left: 0;
-margin-top: 0.75rem;
-}
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
 
-.flex.space-x-3 {
-flex-direction: column;
-}
-}
+    /* Responsive improvements */
+    @media (max-width: 640px) {
+        .grid-cols-4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
 
-/* Enhanced card styling */
-.bg-white {
-transition: all 0.2s ease-in-out;
-}
+        .space-x-3>*+* {
+            margin-left: 0;
+            margin-top: 0.75rem;
+        }
 
-.bg-white:hover {
-box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
+        .flex.space-x-3 {
+            flex-direction: column;
+        }
+    }
 
-/* Gradient backgrounds */
-.bg-gradient-to-r {
-background-image: linear-gradient(to right, var(--tw-gradient-stops));
-}
+    /* Enhanced card styling */
+    .bg-white {
+        transition: all 0.2s ease-in-out;
+    }
 
-/* Price display styling */
-.item-total {
-font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-}
+    .bg-white:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
 
-/* Selection styling */
-.product-item:hover, .service-item:hover {
-border-color: #3b82f6;
-background-color: #eff6ff;
-}
+    /* Gradient backgrounds */
+    .bg-gradient-to-r {
+        background-image: linear-gradient(to right, var(--tw-gradient-stops));
+    }
 
-.product-item input:checked + *, .service-item input:checked + * {
-background-color: #dbeafe;
-}
+    /* Price display styling */
+    .item-total {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    }
 
-/* Badge styling improvements */
-.inline-flex.items-center {
-align-items: center;
-}
+    /* Selection styling */
+    .product-item:hover,
+    .service-item:hover {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+    }
 
-/* Enhanced visibility for required fields */
-label:has(+ input[required])::after,
-label:has(+ select[required])::after {
-content: ' *';
-color: #ef4444;
-}
+    .product-item input:checked+*,
+    .service-item input:checked+* {
+        background-color: #dbeafe;
+    }
+
+    /* Badge styling improvements */
+    .inline-flex.items-center {
+        align-items: center;
+    }
+
+    /* Enhanced visibility for required fields */
+    label:has(+ input[required])::after,
+    label:has(+ select[required])::after {
+        content: ' *';
+        color: #ef4444;
+    }
+
 </style>
 @endpush
 @endsection
