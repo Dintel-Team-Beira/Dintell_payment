@@ -65,7 +65,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500">Total de Logins</p>
-                        <p class="text-2xl font-semibold text-gray-900">{{ number_format($metrics['total_logins']) }}</p>
+                        {{-- <p class="text-2xl font-semibold text-gray-900">{{ number_format($metrics['total_logins']) }}</p> --}}
                         <p class="text-sm text-gray-500">acessos no período</p>
                     </div>
                 </div>
