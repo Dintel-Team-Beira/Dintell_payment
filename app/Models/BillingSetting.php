@@ -23,6 +23,7 @@ class BillingSetting extends Model
         'company_phone',
         'company_address',
         'company_nuit'
+
     ];
 
     protected $casts = [
@@ -39,6 +40,10 @@ class BillingSetting extends Model
         return self::firstOrCreate(
             ['id' => 1],
             [
+                'company_name' => 'Minha Empresa',
+                'company_address' => 'Endereço da Empresa',
+                'company_phone' => '123456789',
+                'company_email' => '',
                 'invoice_prefix' => 'FAT',
                 'next_invoice_number' => 1,
                 'quote_prefix' => 'COT',
