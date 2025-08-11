@@ -5,7 +5,7 @@ use App\Http\Controllers\Admin\SettingsController;
 
 
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->group(function () {
 
     // Configurações - Dashboard principal
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
@@ -45,10 +45,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/settings/import', [SettingsController::class, 'importSettings'])->name('settings.import');
 
     // Logs do Sistema
-    Route::get('/logs', [SettingsController::class, 'logs'])->name('logs.index');
-    Route::get('/logs/{file}', [SettingsController::class, 'viewLog'])->name('logs.show');
-    Route::delete('/logs/{file}', [SettingsController::class, 'deleteLog'])->name('logs.delete');
-    Route::post('/logs/clear-all', [SettingsController::class, 'clearAllLogs'])->name('logs.clear-all');
+    // Route::get('/logs', [SettingsController::class, 'logs'])->name('logs.index');
+    // Route::get('/logs/{file}', [SettingsController::class, 'viewLog'])->name('logs.show');
+    // Route::delete('/logs/{file}', [SettingsController::class, 'deleteLog'])->name('logs.delete');
+    // Route::post('/logs/clear-all', [SettingsController::class, 'clearAllLogs'])->name('logs.clear-all');
 
 
 
