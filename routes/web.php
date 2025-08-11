@@ -218,7 +218,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Logs do Sistema
     Route::prefix('logs')->name('logs.')->group(function () {
-        Route::get('/', [LogsController::class, 'index'])->name('index');
+        Route::get('/', [ApiLogController::class, 'index'])->name('index');
         Route::get('/{log}', [LogsController::class, 'show'])->name('show');
         Route::delete('/{log}', [LogsController::class, 'destroy'])->name('destroy');
         Route::post('/clear', [LogsController::class, 'clear'])->name('clear');
