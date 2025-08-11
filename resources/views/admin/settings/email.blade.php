@@ -455,9 +455,9 @@ function testEmailConnection() {
     });
 }
 
-function previewTemplate() {
-    window.open('{{ route("admin.settings.email.preview") }}', '_blank', 'width=800,height=600');
-}
+// function previewTemplate() {
+//     window.open('{{ route("admin.settings.email.preview") }}', '_blank', 'width=800,height=600');
+// }
 
 function showNotification(message, type = 'info') {
     // Remove existing notifications
