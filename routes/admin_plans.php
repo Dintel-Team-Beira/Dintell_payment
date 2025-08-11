@@ -3,7 +3,7 @@
 use App\Http\Controllers\Admin\PlansController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->group(function () {
 
     // Rotas para planos
     Route::resource('plans', PlansController::class);
