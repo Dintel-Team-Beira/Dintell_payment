@@ -105,6 +105,39 @@
                 </div>
             </li>
 
+
+            <!-- Planos -->
+            <li>
+                <div x-data="{ open: {{ request()->routeIs('admin.plans.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open"
+                            class="group flex w-full items-center gap-x-3 rounded-md p-2 text-left text-sm leading-6 font-semibold {{ request()->routeIs('admin.plans.*') ? 'bg-gray-50 text-blue-600' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50' }}">
+                        <svg class="h-6 w-6 shrink-0 {{ request()->routeIs('admin.plans.*') ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600' }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Planos
+                        <svg class="ml-auto h-5 w-5 shrink-0 {{ request()->routeIs('admin.plans.*') ? 'text-blue-600 rotate-90' : 'text-gray-400 group-hover:text-blue-600' }}"
+                             :class="{ 'rotate-90': open }"
+                             viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <ul x-show="open" x-transition class="px-2 mt-1 space-y-1">
+                        <li>
+                            <a href="{{ route('admin.plans.index') }}"
+                               class="group flex gap-x-3 rounded-md py-2 pl-9 pr-2 text-sm leading-6 {{ request()->routeIs('admin.plans.index') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600' }}">
+                                Listar Planos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.plans.create') }}"
+                               class="group flex gap-x-3 rounded-md py-2 pl-9 pr-2 text-sm leading-6 {{ request()->routeIs('admin.plans.create') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600' }}">
+                                Novo Plano
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
             <!-- Configurações -->
             <li>
                 <div x-data="{ open: {{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }} }">
@@ -121,7 +154,13 @@
                             <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <ul x-show="open" x-transition class="px-2 mt-1 space-y-1">
+                      <ul x-show="open" x-transition class="px-2 mt-1 space-y-1">
+                        {{-- <li>
+                            <a href="{{ route('admin.settings.index') }}"
+                               class="group flex gap-x-3 rounded-md py-2 pl-9 pr-2 text-sm leading-6 {{ request()->routeIs('admin.settings.index') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600' }}">
+                                Dashboard
+                            </a>
+                        </li> --}}
                         <li>
                             <a href="{{ route('admin.settings.system') }}"
                                class="group flex gap-x-3 rounded-md py-2 pl-9 pr-2 text-sm leading-6 {{ request()->routeIs('admin.settings.system') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600' }}">
@@ -144,6 +183,12 @@
                             <a href="{{ route('admin.settings.backups') }}"
                                class="group flex gap-x-3 rounded-md py-2 pl-9 pr-2 text-sm leading-6 {{ request()->routeIs('admin.settings.backups') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600' }}">
                                 Backups
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.settings.security') }}"
+                               class="group flex gap-x-3 rounded-md py-2 pl-9 pr-2 text-sm leading-6 {{ request()->routeIs('admin.settings.security') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600' }}">
+                                Segurança
                             </a>
                         </li>
                     </ul>
