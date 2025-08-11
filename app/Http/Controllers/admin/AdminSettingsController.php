@@ -9,23 +9,19 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class AdminSettingsController extends Controller
 {
-  /**
-     * Dashboard principal de configurações
+    /**
+     * Configurações do Sistema
      */
-    public function index()
+    public function system(Request $request)
     {
-        // Estatísticas básicas para o dashboard
-        $stats = [
-            'total_users' => \App\Models\User::count(),
-            'total_invoices' => 0, // Substituir pela query real quando tiver o model
-            'disk_usage' => $this->formatBytes(disk_free_space('/')),
-            'last_backup' => 'Nunca' // Implementar lógica de backup
-        ];
+        $settings = $this->getSystemSettings();
 
-        return view('admin.settings.index', compact('stats'));
+        return view('admin.settings.system', compact('settings'));
     }
 
     public function updateSystem(Request $request)
@@ -78,6 +74,9 @@ class AdminSettingsController extends Controller
                         ->with('success', 'Configurações do sistema atualizadas com sucesso!');
     }
 
+    /**
+     * Configurações de Faturação
+     */
     public function billing(Request $request)
     {
         $settings = $this->getBillingSettings();
@@ -122,6 +121,9 @@ class AdminSettingsController extends Controller
                         ->with('success', 'Configurações de faturação atualizadas com sucesso!');
     }
 
+    /**
+     * Configurações de Email
+     */
     public function email(Request $request)
     {
         $settings = $this->getEmailSettings();
@@ -187,25 +189,28 @@ class AdminSettingsController extends Controller
         }
     }
 
+    /**
+     * Configurações de Backup
+     */
     public function backups(Request $request)
     {
-        $backups = $this->getBackupsList();
         $settings = $this->getBackupSettings();
+        $backups = $this->getAvailableBackups();
 
-        return view('admin.settings.backups', compact('backups', 'settings'));
+        return view('admin.settings.backups', compact('settings', 'backups'));
     }
 
     public function updateBackups(Request $request)
     {
         $request->validate([
-            'auto_backup_enabled' => 'boolean',
+            'backup_enabled' => 'boolean',
             'backup_frequency' => 'required|in:daily,weekly,monthly',
-            'backup_time' => 'required|string',
             'backup_retention_days' => 'required|integer|min:1|max:365',
-            'backup_storage' => 'required|in:local,s3,google',
-            'include_files' => 'boolean',
-            'include_database' => 'boolean',
-            'notification_email' => 'nullable|email',
+            'backup_storage' => 'required|in:local,s3,dropbox',
+            'backup_database' => 'boolean',
+            'backup_files' => 'boolean',
+            'backup_notifications' => 'boolean',
+            'backup_notification_email' => 'nullable|email',
         ]);
 
         $settingsData = $request->all();
@@ -226,11 +231,28 @@ class AdminSettingsController extends Controller
     public function createBackup(Request $request)
     {
         try {
-            Artisan::call('backup:run');
+            $filename = 'backup_' . now()->format('Y_m_d_H_i_s') . '.sql';
+
+            // Criar backup da base de dados
+            $databaseName = config('database.connections.mysql.database');
+            $username = config('database.connections.mysql.username');
+            $password = config('database.connections.mysql.password');
+            $host = config('database.connections.mysql.host');
+
+            $backupPath = storage_path('app/backups/' . $filename);
+
+            // Criar diretório se não existir
+            if (!File::exists(dirname($backupPath))) {
+                File::makeDirectory(dirname($backupPath), 0755, true);
+            }
+
+            $command = "mysqldump --user={$username} --password={$password} --host={$host} {$databaseName} > {$backupPath}";
+            exec($command);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Backup criado com sucesso!'
+                'message' => 'Backup criado com sucesso!',
+                'filename' => $filename
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -242,44 +264,60 @@ class AdminSettingsController extends Controller
 
     public function downloadBackup($filename)
     {
-        $backupPath = storage_path("app/backups/{$filename}");
+        $path = storage_path('app/backups/' . $filename);
 
-        if (!file_exists($backupPath)) {
-            return redirect()->route('admin.settings.backups')
-                            ->with('error', 'Arquivo de backup não encontrado!');
+        if (!File::exists($path)) {
+            abort(404, 'Backup não encontrado');
         }
 
-        return response()->download($backupPath);
+        return response()->download($path);
     }
 
     public function deleteBackup($filename)
     {
-        $backupPath = storage_path("app/backups/{$filename}");
-
-        if (file_exists($backupPath)) {
-            unlink($backupPath);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Backup deletado com sucesso!'
-        ]);
-    }
-
-    public function restoreBackup(Request $request, $filename)
-    {
-        $request->validate([
-            'confirm_restore' => 'required|accepted'
-        ]);
-
         try {
-            // Esta seria a lógica para restaurar o backup
-            // Por segurança, isso deveria ser feito via command line
-            Artisan::call('backup:restore', ['filename' => $filename]);
+            $path = storage_path('app/backups/' . $filename);
+
+            if (File::exists($path)) {
+                File::delete($path);
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Backup restaurado com sucesso! O sistema será reiniciado.'
+                'message' => 'Backup excluído com sucesso!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao excluir backup: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function restoreBackup($filename, Request $request)
+    {
+        try {
+            $path = storage_path('app/backups/' . $filename);
+
+            if (!File::exists($path)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Arquivo de backup não encontrado'
+                ], 404);
+            }
+
+            // Restaurar backup (implementação básica)
+            $databaseName = config('database.connections.mysql.database');
+            $username = config('database.connections.mysql.username');
+            $password = config('database.connections.mysql.password');
+            $host = config('database.connections.mysql.host');
+
+            $command = "mysql --user={$username} --password={$password} --host={$host} {$databaseName} < {$path}";
+            exec($command);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Backup restaurado com sucesso!'
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -289,7 +327,10 @@ class AdminSettingsController extends Controller
         }
     }
 
-    public function clearCache(Request $request)
+    /**
+     * Ações do Sistema
+     */
+    public function clearCache()
     {
         try {
             Artisan::call('cache:clear');
@@ -309,7 +350,7 @@ class AdminSettingsController extends Controller
         }
     }
 
-    public function optimizeSystem(Request $request)
+    public function optimizeSystem()
     {
         try {
             Artisan::call('optimize');
@@ -331,38 +372,21 @@ class AdminSettingsController extends Controller
 
     public function maintenanceMode(Request $request)
     {
-        $request->validate([
-            'enable' => 'required|boolean',
-            'message' => 'nullable|string|max:500'
-        ]);
-
         try {
-            if ($request->enable) {
-                Artisan::call('down', [
-                    '--message' => $request->message ?: 'Sistema em manutenção'
-                ]);
-                $message = 'Modo de manutenção ativado!';
-            } else {
+            if (app()->isDownForMaintenance()) {
                 Artisan::call('up');
                 $message = 'Modo de manutenção desativado!';
-            }
-
-            // Atualizar configuração
-            SystemSetting::updateOrCreate(
-                ['key' => 'maintenance_mode'],
-                ['value' => $request->enable]
-            );
-
-            if ($request->message) {
-                SystemSetting::updateOrCreate(
-                    ['key' => 'maintenance_message'],
-                    ['value' => $request->message]
-                );
+                $isDown = false;
+            } else {
+                Artisan::call('down', ['--render' => 'errors::503']);
+                $message = 'Modo de manutenção ativado!';
+                $isDown = true;
             }
 
             return response()->json([
                 'success' => true,
-                'message' => $message
+                'message' => $message,
+                'is_down' => $isDown
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -372,46 +396,39 @@ class AdminSettingsController extends Controller
         }
     }
 
+    /**
+     * Informações do Sistema
+     */
     public function getDatabaseInfo()
     {
         try {
-            $connection = \DB::connection();
-            $database = $connection->getDatabaseName();
+            $databaseName = config('database.default');
+            $connectionConfig = config("database.connections.{$databaseName}");
 
-            // Informações básicas do banco
-            $tables = \DB::select('SHOW TABLES');
-            $tableCount = count($tables);
-
-            // Tamanho do banco (MySQL)
-            $sizeQuery = "SELECT
-                ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'DB Size in MB'
-                FROM information_schema.tables
-                WHERE table_schema = ?";
-
-            $size = \DB::select($sizeQuery, [$database]);
-            $dbSize = $size[0]->{'DB Size in MB'} ?? 0;
-
-            // Estatísticas das tabelas principais
-            $tableStats = [
-                'users' => \DB::table('users')->count(),
-                'companies' => \DB::table('companies')->count(),
-                'invoices' => \DB::table('invoices')->count(),
-                'clients' => \DB::table('clients')->count(),
+            // Informações básicas
+            $info = [
+                'driver' => $connectionConfig['driver'] ?? 'unknown',
+                'database' => $connectionConfig['database'] ?? 'unknown',
+                'host' => $connectionConfig['host'] ?? 'unknown',
             ];
+
+            // Informações específicas do MySQL/MariaDB
+            if ($info['driver'] === 'mysql') {
+                $tables = DB::select("SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = ?", [$info['database']]);
+                $size = DB::select("SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS MB FROM information_schema.tables WHERE table_schema = ?", [$info['database']]);
+
+                $info['tables_count'] = $tables[0]->count ?? 0;
+                $info['size_mb'] = $size[0]->MB ?? 0;
+            }
 
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'database_name' => $database,
-                    'table_count' => $tableCount,
-                    'database_size' => $dbSize . ' MB',
-                    'table_stats' => $tableStats
-                ]
+                'data' => $info
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao obter informações do banco: ' . $e->getMessage()
+                'message' => 'Erro ao obter informações da base de dados: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -423,11 +440,14 @@ class AdminSettingsController extends Controller
                 'php_version' => phpversion(),
                 'laravel_version' => app()->version(),
                 'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
-                'max_execution_time' => ini_get('max_execution_time'),
                 'memory_limit' => ini_get('memory_limit'),
                 'upload_max_filesize' => ini_get('upload_max_filesize'),
-                'disk_space' => $this->getDiskSpace(),
-                'extensions' => $this->getRequiredExtensions()
+                'max_execution_time' => ini_get('max_execution_time'),
+                'disk_space' => [
+                    'total' => $this->formatBytes(disk_total_space('/')),
+                    'free' => $this->formatBytes(disk_free_space('/')),
+                    'used' => $this->formatBytes(disk_total_space('/') - disk_free_space('/'))
+                ]
             ];
 
             return response()->json([
@@ -442,24 +462,85 @@ class AdminSettingsController extends Controller
         }
     }
 
-    // Métodos auxiliares privados
+    /**
+     * Import/Export de Configurações
+     */
+    public function exportSettings()
+    {
+        try {
+            $settings = SystemSetting::all()->pluck('value', 'key');
+
+            $filename = 'configuracoes_sistema_' . now()->format('Y-m-d_H-i-s') . '.json';
+
+            $data = [
+                'exported_at' => now()->toISOString(),
+                'app_version' => config('app.version', '1.0.0'),
+                'settings' => $settings
+            ];
+
+            return response()->json($data)
+                            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao exportar configurações: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function importSettings(Request $request)
+    {
+        $request->validate([
+            'settings_file' => 'required|file|mimes:json'
+        ]);
+
+        try {
+            $content = file_get_contents($request->file('settings_file')->getRealPath());
+            $data = json_decode($content, true);
+
+            if (!isset($data['settings'])) {
+                throw new \Exception('Arquivo de configurações inválido');
+            }
+
+            foreach ($data['settings'] as $key => $value) {
+                SystemSetting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => $value]
+                );
+            }
+
+            // Limpar todos os caches
+            Cache::forget('system_settings');
+            Cache::forget('billing_settings');
+            Cache::forget('email_settings');
+            Cache::forget('backup_settings');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Configurações importadas com sucesso!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao importar configurações: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Métodos auxiliares privados
+     */
     private function getSystemSettings()
     {
         return Cache::remember('system_settings', 3600, function() {
-            $settings = SystemSetting::whereIn('key', [
-                'app_name', 'app_description', 'app_logo', 'app_favicon',
-                'timezone', 'locale', 'date_format', 'currency', 'currency_symbol',
-                'maintenance_mode', 'maintenance_message', 'registration_enabled',
-                'email_verification_required', 'max_users_per_company',
-                'max_invoices_per_month', 'session_lifetime', 'auto_logout_time'
-            ])->pluck('value', 'key');
+            $settings = SystemSetting::pluck('value', 'key');
 
             // Valores padrão
             return array_merge([
-                'app_name' => 'SFS - Sistema de Faturação',
-                'app_description' => 'Sistema completo de faturação e subscrição',
-                'timezone' => 'Africa/Maputo',
-                'locale' => 'pt_BR',
+                'app_name' => config('app.name', 'SFS'),
+                'app_description' => 'Sistema de Faturação e Subscrição',
+                'timezone' => config('app.timezone', 'Africa/Maputo'),
+                'locale' => config('app.locale', 'pt'),
                 'date_format' => 'd/m/Y',
                 'currency' => 'MZN',
                 'currency_symbol' => 'MT',
@@ -523,12 +604,14 @@ class AdminSettingsController extends Controller
 
             // Valores padrão
             return array_merge([
-                'mail_driver' => 'smtp',
-                'mail_host' => 'smtp.gmail.com',
-                'mail_port' => 587,
-                'mail_encryption' => 'tls',
-                'mail_from_address' => 'noreply@sfs.co.mz',
-                'mail_from_name' => 'SFS Sistema',
+                'mail_driver' => config('mail.default', 'smtp'),
+                'mail_host' => config('mail.mailers.smtp.host', 'localhost'),
+                'mail_port' => config('mail.mailers.smtp.port', 587),
+                'mail_username' => config('mail.mailers.smtp.username'),
+                'mail_password' => config('mail.mailers.smtp.password'),
+                'mail_encryption' => config('mail.mailers.smtp.encryption', 'tls'),
+                'mail_from_address' => config('mail.from.address', 'noreply@sfs.com'),
+                'mail_from_name' => config('mail.from.name', 'SFS'),
                 'email_notifications_enabled' => true,
             ], $cleanSettings);
         });
@@ -549,132 +632,50 @@ class AdminSettingsController extends Controller
 
             // Valores padrão
             return array_merge([
-                'auto_backup_enabled' => true,
+                'backup_enabled' => true,
                 'backup_frequency' => 'daily',
-                'backup_time' => '02:00',
                 'backup_retention_days' => 30,
                 'backup_storage' => 'local',
-                'include_files' => true,
-                'include_database' => true,
+                'backup_database' => true,
+                'backup_files' => false,
+                'backup_notifications' => true,
             ], $cleanSettings);
         });
     }
 
-    private function getBackupsList()
+    private function getAvailableBackups()
     {
         $backupPath = storage_path('app/backups');
+
+        if (!File::exists($backupPath)) {
+            return [];
+        }
+
+        $files = File::files($backupPath);
         $backups = [];
 
-        if (is_dir($backupPath)) {
-            $files = scandir($backupPath);
-            foreach ($files as $file) {
-                if ($file !== '.' && $file !== '..' && pathinfo($file, PATHINFO_EXTENSION) === 'zip') {
-                    $filePath = $backupPath . '/' . $file;
-                    $backups[] = [
-                        'filename' => $file,
-                        'size' => $this->formatBytes(filesize($filePath)),
-                        'created_at' => date('d/m/Y H:i:s', filemtime($filePath))
-                    ];
-                }
-            }
+        foreach ($files as $file) {
+            $backups[] = [
+                'filename' => $file->getFilename(),
+                'size' => $this->formatBytes($file->getSize()),
+                'created_at' => date('d/m/Y H:i:s', $file->getMTime()),
+                'path' => $file->getPathname()
+            ];
         }
 
         // Ordenar por data de criação (mais recente primeiro)
         usort($backups, function($a, $b) {
-            return strtotime($b['created_at']) - strtotime($a['created_at']);
+            return strcmp($b['created_at'], $a['created_at']);
         });
 
         return $backups;
     }
 
-    private function formatBytes($bytes, $precision = 2)
+    private function formatBytes($size, $precision = 2)
     {
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $base = log($size, 1024);
+        $suffixes = ['', 'KB', 'MB', 'GB', 'TB'];
 
-        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
-            $bytes /= 1024;
-        }
-
-        return round($bytes, $precision) . ' ' . $units[$i];
-    }
-
-    private function getDiskSpace()
-    {
-        $totalSpace = disk_total_space('/');
-        $freeSpace = disk_free_space('/');
-        $usedSpace = $totalSpace - $freeSpace;
-
-        return [
-            'total' => $this->formatBytes($totalSpace),
-            'used' => $this->formatBytes($usedSpace),
-            'free' => $this->formatBytes($freeSpace),
-            'usage_percentage' => round(($usedSpace / $totalSpace) * 100, 2)
-        ];
-    }
-
-    private function getRequiredExtensions()
-    {
-        $required = [
-            'openssl', 'pdo', 'mbstring', 'tokenizer', 'xml', 'ctype',
-            'json', 'bcmath', 'curl', 'fileinfo', 'gd', 'zip'
-        ];
-
-        $extensions = [];
-        foreach ($required as $ext) {
-            $extensions[$ext] = extension_loaded($ext);
-        }
-
-        return $extensions;
-    }
-
-    public function exportSettings(Request $request)
-    {
-        $settings = SystemSetting::all()->pluck('value', 'key');
-
-        $filename = 'configuracoes_sistema_' . now()->format('Y-m-d_H-i-s') . '.json';
-
-        $data = [
-            'exported_at' => now()->toISOString(),
-            'app_version' => config('app.version', '1.0.0'),
-            'settings' => $settings
-        ];
-
-        return response()->json($data)
-                        ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
-    }
-
-    public function importSettings(Request $request)
-    {
-        $request->validate([
-            'settings_file' => 'required|file|mimes:json'
-        ]);
-
-        try {
-            $content = file_get_contents($request->file('settings_file')->getRealPath());
-            $data = json_decode($content, true);
-
-            if (!isset($data['settings'])) {
-                throw new \Exception('Arquivo de configurações inválido');
-            }
-
-            foreach ($data['settings'] as $key => $value) {
-                SystemSetting::updateOrCreate(
-                    ['key' => $key],
-                    ['value' => $value]
-                );
-            }
-
-            // Limpar cache
-            Cache::forget('system_settings');
-            Cache::forget('billing_settings');
-            Cache::forget('email_settings');
-            Cache::forget('backup_settings');
-
-            return redirect()->back()
-                            ->with('success', 'Configurações importadas com sucesso!');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                            ->with('error', 'Erro ao importar configurações: ' . $e->getMessage());
-        }
+        return round(pow(1024, $base - floor($base)), $precision) . ' ' . $suffixes[floor($base)];
     }
 }
