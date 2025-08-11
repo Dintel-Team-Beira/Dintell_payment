@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Artisan;
 class SettingsController extends Controller
+
 {
   /**
      * Dashboard principal de configurações
