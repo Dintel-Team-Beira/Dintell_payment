@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use DB;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Artisan;
-
 class SettingsController extends Controller
 {
     public function system(Request $request)
@@ -366,7 +365,7 @@ class SettingsController extends Controller
     public function getDatabaseInfo()
     {
         try {
-            $connection = \DB::connection();
+            $connection = DB ::connection();
             $database = $connection->getDatabaseName();
 
             // Informações básicas do banco
