@@ -177,7 +177,7 @@ class InvoiceController extends Controller
         'is_cash_sale' => 'nullable|boolean',
         'cash_received' => 'nullable|numeric|min:0'
     ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
     try {
         DB::beginTransaction();
 
@@ -414,7 +414,7 @@ class InvoiceController extends Controller
             'notes' => 'nullable|string',
             'terms_conditions' => 'nullable|string'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         try {
             DB::beginTransaction();
 

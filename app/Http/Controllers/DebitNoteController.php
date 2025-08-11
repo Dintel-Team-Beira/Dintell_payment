@@ -52,7 +52,7 @@ class DebitNoteController extends Controller
             'tax_rate' => 'nullable|numeric|min:0|max:100',
             'notes' => 'nullable|string'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         try {
             DB::beginTransaction();
 

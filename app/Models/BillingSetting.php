@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\CompanyScope;
 use Illuminate\Database\Eloquent\Model;
 
 class BillingSetting extends Model
@@ -71,5 +72,9 @@ class BillingSetting extends Model
         $number = $this->debit_note_prefix . str_pad($this->next_debit_note_number, 6, '0', STR_PAD_LEFT);
         $this->increment('next_debit_note_number');
         return $number;
+    }
+     protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
     }
 }

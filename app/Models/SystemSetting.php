@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\CompanyScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -119,5 +120,9 @@ class SystemSetting extends Model
     public function scopeBackup($query)
     {
         return $query->where('group', 'backup');
+    }
+     protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
     }
 }

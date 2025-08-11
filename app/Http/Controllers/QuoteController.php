@@ -100,7 +100,7 @@ class QuoteController extends Controller
             'notes' => 'nullable|string',
             'terms_conditions' => 'nullable|string'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         try {
             DB::beginTransaction();
 
@@ -189,7 +189,7 @@ return redirect('/quotes/' . $quote->id)->with('success', 'Cotação criada com 
             'notes' => 'nullable|string',
             'terms_conditions' => 'nullable|string'
         ]);
-
+        $validated['company_id'] = auth()->user()->company->id;
         try {
             DB::beginTransaction();
 

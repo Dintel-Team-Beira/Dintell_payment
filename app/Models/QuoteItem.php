@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\CompanyScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -151,5 +152,9 @@ class QuoteItem extends Model
         ];
 
         return $colors[$this->complexity_level] ?? 'gray';
+    }
+     protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
     }
 }

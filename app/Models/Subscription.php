@@ -3,6 +3,7 @@
 
 namespace App\Models;
 
+use App\Scopes\CompanyScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -485,4 +486,9 @@ public function getGracePeriodEndAttribute()
            $this->suspended_at->addDays(7) :
            now()->addDays(7);
 }
+
+ protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
+    }
 }

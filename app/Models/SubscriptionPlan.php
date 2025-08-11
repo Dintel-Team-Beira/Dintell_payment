@@ -3,6 +3,7 @@
 
 namespace App\Models;
 
+use App\Scopes\CompanyScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -106,5 +107,10 @@ class SubscriptionPlan extends Model
             'lifetime' => null, // Vitalício não tem próxima cobrança
             default => $startDate->copy()->addDays($this->billing_cycle_days)
         };
+    }
+
+     protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
     }
 }

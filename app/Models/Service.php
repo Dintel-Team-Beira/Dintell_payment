@@ -3,6 +3,7 @@
 // Service.php
 namespace App\Models;
 
+use App\Scopes\CompanyScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -185,5 +186,9 @@ class Service extends Model
             'Manual do usuário',
             'Suporte pós-entrega (30 dias)'
         ];
+    }
+     protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
     }
 }

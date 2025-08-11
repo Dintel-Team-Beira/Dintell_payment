@@ -89,6 +89,7 @@ class ProductController extends Controller
             'is_active' => 'boolean'
         ]);
 
+                $validated['company_id'] = auth()->user()->company->id;
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
@@ -155,6 +156,7 @@ class ProductController extends Controller
             'is_active' => 'boolean'
         ]);
 
+                $validated['company_id'] = auth()->user()->company->id;
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
