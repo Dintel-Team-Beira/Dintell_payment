@@ -12,11 +12,20 @@ use Illuminate\Support\Facades\Artisan;
 
 class AdminSettingsController extends Controller
 {
-    public function system(Request $request)
+  /**
+     * Dashboard principal de configurações
+     */
+    public function index()
     {
-        $settings = $this->getSystemSettings();
+        // Estatísticas básicas para o dashboard
+        $stats = [
+            'total_users' => \App\Models\User::count(),
+            'total_invoices' => 0, // Substituir pela query real quando tiver o model
+            'disk_usage' => $this->formatBytes(disk_free_space('/')),
+            'last_backup' => 'Nunca' // Implementar lógica de backup
+        ];
 
-        return view('admin.settings.system', compact('settings'));
+        return view('admin.settings.index', compact('stats'));
     }
 
     public function updateSystem(Request $request)
