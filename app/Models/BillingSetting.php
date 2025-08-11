@@ -75,6 +75,6 @@ class BillingSetting extends Model
     }
      protected static function booted()
     {
-        // static::addGlobalScope(new CompanyScope);
+        static::addGlobalScope(new CompanyScope);
     }
 }
