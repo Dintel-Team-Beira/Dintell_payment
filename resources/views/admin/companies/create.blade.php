@@ -245,57 +245,105 @@
                         </div>
                     </div>
                     <div class="p-6 space-y-6">
-                        <div>
-                            <label for="subscription_plan" class="block mb-2 text-sm font-medium text-gray-700">
-                                Plano de Assinatura *
-                            </label>
-                            <select name="subscription_plan"
-                                    id="subscription_plan"
-                                    required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('subscription_plan') border-red-300 @enderror">
-                                <option value="">Selecione um plano</option>
-                                @foreach($subscriptionPlans as $key => $plan)
-                                <option value="{{ $key }}"
-                                        {{ old('subscription_plan') === $key ? 'selected' : '' }}
-                                        data-price="{{ $plan['price'] }}"
-                                        data-users="{{ $plan['max_users'] }}"
-                                        data-invoices="{{ $plan['max_invoices_per_month'] }}"
-                                        data-clients="{{ $plan['max_clients'] }}">
-                                    {{ $plan['name'] }} - {{ number_format($plan['price'], 2, ',', '.') }} MT/mês
-                                </option>
-                                @endforeach
-                            </select>
-                            @error('subscription_plan')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+               <div>
+    <label for="subscription_plan" class="block mb-2 text-sm font-medium text-gray-700">
+        Plano de Assinatura *
+    </label>
+    <select name="subscription_plan"
+            id="subscription_plan"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('subscription_plan') border-red-300 @enderror">
+        <option value="">Selecione um plano</option>
+        @foreach($subscriptionPlans as $key => $plan)
+        <option value="{{ $key }}"
+                {{ old('subscription_plan') === $key ? 'selected' : '' }}
+                data-id="{{ $plan['id'] }}"
+                data-price="{{ $plan['price'] }}"
+                data-formatted-price="{{ $plan['formatted_price'] }}"
+                data-users="{{ $plan['max_users'] ?? 'Ilimitado' }}"
+                data-companies="{{ $plan['max_companies'] ?? 'Ilimitado' }}"
+                data-invoices="{{ $plan['max_invoices_per_month'] ?? 'Ilimitado' }}"
+                data-clients="{{ $plan['max_clients'] ?? 'Ilimitado' }}"
+                data-products="{{ $plan['max_products'] ?? 'Ilimitado' }}"
+                data-storage="{{ $plan['storage_formatted'] ?? 'Ilimitado' }}"
+                data-features="{{ json_encode($plan['features']) }}"
+                data-billing-cycle="{{ $plan['billing_cycle_text'] }}"
+                data-trial-days="{{ $plan['trial_days'] }}"
+                data-has-trial="{{ $plan['has_trial'] ? 'true' : 'false' }}"
+                data-popular="{{ $plan['is_popular'] ? 'true' : 'false' }}"
+                data-color="{{ $plan['color'] }}"
+                data-description="{{ $plan['description'] }}">
+            @if($plan['is_popular'])
+                ⭐
+            @endif
+            {{ $plan['name'] }} - {{ $plan['formatted_price'] }}
+            @if($plan['billing_cycle'] !== 'monthly')
+                ({{ $plan['billing_cycle_text'] }})
+            @endif
+        </option>
+        @endforeach
+    </select>
+    @error('subscription_plan')
+    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+    @enderror
+</div>
 
                         <!-- Detalhes do Plano -->
-                        <div id="planDetails" class="hidden p-4 border border-gray-200 rounded-lg bg-gray-50">
-                            <h4 class="mb-3 text-sm font-medium text-gray-900">Detalhes do Plano:</h4>
-                            <div class="space-y-2 text-sm text-gray-600">
-                                <div class="flex justify-between">
-                                    <span>Usuários:</span>
-                                    <span id="planUsers">-</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Faturas/mês:</span>
-                                    <span id="planInvoices">-</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Clientes:</span>
-                                    <span id="planClients">-</span>
-                                </div>
-                                <div class="flex justify-between font-semibold">
-                                    <span>Preço mensal:</span>
-                                    <span id="planPrice">-</span>
-                                </div>
-                            </div>
-                            <div id="planFeatures" class="mt-3">
-                                <h5 class="text-xs font-medium text-gray-700">Recursos inclusos:</h5>
-                                <ul id="featuresList" class="mt-1 text-xs text-gray-600"></ul>
-                            </div>
-                        </div>
+                       <!-- Detalhes do Plano Atualizado -->
+<div id="planDetails" class="hidden p-4 border border-gray-200 rounded-lg bg-gray-50">
+    <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-medium text-gray-900">Detalhes do Plano:</h4>
+        <span id="planPopularBadge" class="hidden px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">
+            ⭐ Popular
+        </span>
+    </div>
+
+    <div id="planDescription" class="mb-3 text-sm text-gray-600"></div>
+
+    <div class="space-y-2 text-sm text-gray-600">
+        <div class="flex justify-between">
+            <span>Usuários:</span>
+            <span id="planUsers">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span>Empresas:</span>
+            <span id="planCompanies">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span>Faturas/mês:</span>
+            <span id="planInvoices">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span>Clientes:</span>
+            <span id="planClients">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span>Produtos:</span>
+            <span id="planProducts">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span>Armazenamento:</span>
+            <span id="planStorage">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span>Ciclo de cobrança:</span>
+            <span id="planBillingCycle">-</span>
+        </div>
+        <div class="flex justify-between">
+            <span>Trial:</span>
+            <span id="planTrial">-</span>
+        </div>
+        <div class="flex justify-between pt-2 mt-2 font-semibold border-t">
+            <span>Preço:</span>
+            <span id="planPrice">-</span>
+        </div>
+    </div>
+
+    <div id="planFeatures" class="mt-3">
+        <h5 class="mb-2 text-xs font-medium text-gray-700">Recursos inclusos:</h5>
+        <ul id="featuresList" class="space-y-1 text-xs text-gray-600"></ul>
+    </div>
+</div>
 
                         <div>
                             <label for="status" class="block mb-2 text-sm font-medium text-gray-700">
@@ -370,9 +418,13 @@
 </div>
 @endsection
 
+{{-- Substitua todo o conteúdo da seção @push('scripts') por este código corrigido --}}
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Script de criação de empresa carregado');
+
     const nameInput = document.getElementById('name');
     const slugInput = document.getElementById('slug');
     const planSelect = document.getElementById('subscription_plan');
@@ -380,94 +432,293 @@ document.addEventListener('DOMContentLoaded', function() {
     const trialDaysField = document.getElementById('trialDaysField');
     const planDetails = document.getElementById('planDetails');
 
+    // Verificar se elementos existem
+    if (!planSelect) {
+        console.error('❌ Elemento planSelect não encontrado');
+        return;
+    }
+
+    if (!planDetails) {
+        console.error('❌ Elemento planDetails não encontrado');
+        return;
+    }
+
+    console.log('✅ Elementos encontrados:', {
+        planSelect: !!planSelect,
+        planDetails: !!planDetails,
+        statusSelect: !!statusSelect
+    });
+
     // Auto-generate slug from name
-    nameInput.addEventListener('input', function() {
-        if (!slugInput.value || slugInput.dataset.autoGenerated) {
-            const slug = this.value
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-                .replace(/[^a-z0-9\s]/g, '') // Remove caracteres especiais
-                .replace(/\s+/g, '-') // Substitui espaços por hífens
-                .replace(/-+/g, '-') // Remove hífens duplos
-                .replace(/^-|-$/g, ''); // Remove hífens do início e fim
+    if (nameInput && slugInput) {
+        nameInput.addEventListener('input', function() {
+            if (!slugInput.value || slugInput.dataset.autoGenerated) {
+                const slug = this.value
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                    .replace(/[^a-z0-9\s]/g, '') // Remove caracteres especiais
+                    .replace(/\s+/g, '-') // Substitui espaços por hífens
+                    .replace(/-+/g, '-') // Remove hífens duplos
+                    .replace(/^-|-$/g, ''); // Remove hífens do início e fim
 
-            slugInput.value = slug;
-            slugInput.dataset.autoGenerated = 'true';
-        }
-    });
+                slugInput.value = slug;
+                slugInput.dataset.autoGenerated = 'true';
+            }
+        });
 
-    // Mark slug as manually edited
-    slugInput.addEventListener('input', function() {
-        delete this.dataset.autoGenerated;
-    });
+        // Mark slug as manually edited
+        slugInput.addEventListener('input', function() {
+            delete this.dataset.autoGenerated;
+        });
+    }
 
     // Show/hide trial days based on status
-    statusSelect.addEventListener('change', function() {
-        if (this.value === 'trial') {
-            trialDaysField.classList.remove('hidden');
-        } else {
-            trialDaysField.classList.add('hidden');
-        }
-    });
+    if (statusSelect && trialDaysField) {
+        statusSelect.addEventListener('change', function() {
+            console.log('📝 Status alterado para:', this.value);
+            if (this.value === 'trial') {
+                trialDaysField.classList.remove('hidden');
+            } else {
+                trialDaysField.classList.add('hidden');
+            }
+        });
+    }
 
-    // Show plan details
+    // Show plan details - VERSÃO SIMPLIFICADA E DEBUGÁVEL
     planSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
+        console.log('📋 Plano selecionado:', this.value);
 
-        if (selectedOption.value) {
-            const price = selectedOption.dataset.price;
-            const users = selectedOption.dataset.users;
-            const invoices = selectedOption.dataset.invoices;
-            const clients = selectedOption.dataset.clients;
+        try {
+            const selectedOption = this.options[this.selectedIndex];
 
-            document.getElementById('planUsers').textContent = users === '999' ? 'Ilimitado' : users;
-            document.getElementById('planInvoices').textContent = invoices === '999999' ? 'Ilimitado' : invoices;
-            document.getElementById('planClients').textContent = clients === '999999' ? 'Ilimitado' : clients;
-            document.getElementById('planPrice').textContent = new Intl.NumberFormat('pt-MZ', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(price) + ' MT';
-
-            // Show features based on plan
-            const featuresList = document.getElementById('featuresList');
-            const planKey = selectedOption.value;
-
-            let features = [];
-            if (planKey === 'basic') {
-                features = ['Faturação básica', 'Relatórios simples', 'Suporte por email'];
-            } else if (planKey === 'premium') {
-                features = ['Faturação avançada', 'API access', 'Relatórios avançados', 'Suporte prioritário'];
-            } else if (planKey === 'enterprise') {
-                features = ['Recursos ilimitados', 'Domínio personalizado', 'Integração avançada', 'Suporte dedicado'];
+            if (!selectedOption.value) {
+                console.log('❌ Nenhum plano selecionado, ocultando detalhes');
+                planDetails.classList.add('hidden');
+                return;
             }
 
-            featuresList.innerHTML = features.map(feature => `<li>• ${feature}</li>`).join('');
+            console.log('✅ Processando plano:', selectedOption.text);
 
+            // Obter dados do option selecionado de forma segura
+            const getData = (attribute, defaultValue = '-') => {
+                const value = selectedOption.dataset[attribute];
+                return value !== undefined ? value : defaultValue;
+            };
+
+            // Dados básicos
+            const planData = {
+                price: getData('formattedPrice', selectedOption.dataset.price || '0,00 MT'),
+                users: getData('users', '1'),
+                companies: getData('companies', '1'),
+                invoices: getData('invoices', '50'),
+                clients: getData('clients', '100'),
+                products: getData('products', '50'),
+                storage: getData('storage', '250 MB'),
+                billingCycle: getData('billingCycle', 'Mensal'),
+                trialDays: getData('trialDays', '0'),
+                hasTrial: getData('hasTrial', 'false'),
+                isPopular: getData('popular', 'false'),
+                description: getData('description', ''),
+                features: getData('features', '[]')
+            };
+
+            console.log('📊 Dados do plano:', planData);
+
+            // Atualizar elementos de forma segura
+            const updateElement = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value;
+                    console.log(`✅ Atualizado ${id}:`, value);
+                } else {
+                    console.warn(`⚠️ Elemento ${id} não encontrado`);
+                }
+            };
+
+            updateElement('planUsers', planData.users);
+            updateElement('planCompanies', planData.companies);
+            updateElement('planInvoices', planData.invoices);
+            updateElement('planClients', planData.clients);
+            updateElement('planProducts', planData.products);
+            updateElement('planStorage', planData.storage);
+            updateElement('planBillingCycle', planData.billingCycle);
+            updateElement('planPrice', planData.price);
+
+            // Descrição
+            const descriptionEl = document.getElementById('planDescription');
+            if (descriptionEl) {
+                descriptionEl.textContent = planData.description;
+            }
+
+            // Trial info
+            const hasTrial = planData.hasTrial === 'true';
+            const trialText = hasTrial
+                ? `${planData.trialDays} dias de trial gratuito`
+                : 'Sem trial';
+            updateElement('planTrial', trialText);
+
+            // Popular badge
+            const popularBadge = document.getElementById('planPopularBadge');
+            if (popularBadge) {
+                const isPopular = planData.isPopular === 'true';
+                if (isPopular) {
+                    popularBadge.classList.remove('hidden');
+                } else {
+                    popularBadge.classList.add('hidden');
+                }
+            }
+
+            // Features - com tratamento de erro robusto
+            const featuresList = document.getElementById('featuresList');
+            if (featuresList) {
+                try {
+                    const features = JSON.parse(planData.features);
+                    if (Array.isArray(features) && features.length > 0) {
+                        featuresList.innerHTML = features
+                            .map(feature => `<li class="flex items-start"><span class="mr-2 text-green-500">✓</span><span>${feature}</span></li>`)
+                            .join('');
+                        console.log('✅ Features carregadas:', features.length);
+                    } else {
+                        featuresList.innerHTML = '<li class="text-gray-400">Nenhum recurso especificado</li>';
+                    }
+                } catch (e) {
+                    console.error('❌ Erro ao processar features:', e);
+                    featuresList.innerHTML = '<li class="text-gray-400">Erro ao carregar recursos</li>';
+                }
+            }
+
+            // Mostrar detalhes
             planDetails.classList.remove('hidden');
-        } else {
-            planDetails.classList.add('hidden');
+            console.log('✅ Detalhes do plano exibidos com sucesso');
+
+            // Auto-ajustar trial days baseado no plano
+            if (hasTrial && statusSelect && statusSelect.value === 'trial') {
+                const trialDaysInput = document.getElementById('trial_days');
+                if (trialDaysInput && !trialDaysInput.value) {
+                    trialDaysInput.value = planData.trialDays;
+                    console.log('✅ Trial days ajustado para:', planData.trialDays);
+                }
+            }
+
+        } catch (error) {
+            console.error('❌ Erro ao processar mudança de plano:', error);
+            console.error('Stack trace:', error.stack);
+
+            // Mostrar erro para o usuário
+            planDetails.innerHTML = `
+                <div class="p-4 border border-red-200 rounded-lg bg-red-50">
+                    <p class="text-sm text-red-800">
+                        <strong>Erro ao carregar detalhes do plano.</strong><br>
+                        Por favor, recarregue a página e tente novamente.
+                    </p>
+                    <p class="mt-2 text-xs text-red-600">
+                        Erro técnico: ${error.message}
+                    </p>
+                </div>
+            `;
+            planDetails.classList.remove('hidden');
         }
     });
 
     // Trigger plan details on page load if plan is selected
     if (planSelect.value) {
+        console.log('🔄 Disparando evento de mudança para plano pré-selecionado');
         planSelect.dispatchEvent(new Event('change'));
     }
 
     // File upload preview
     const logoInput = document.getElementById('logo');
-    logoInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // You can add preview functionality here
-                console.log('Logo selecionado:', file.name);
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    if (logoInput) {
+        logoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('📁 Logo selecionado:', file.name, file.size, 'bytes');
+
+                // Validação básica
+                if (file.size > 2048000) { // 2MB
+                    alert('Arquivo muito grande! Máximo 2MB.');
+                    this.value = '';
+                    return;
+                }
+
+                if (!file.type.startsWith('image/')) {
+                    alert('Por favor, selecione apenas arquivos de imagem.');
+                    this.value = '';
+                    return;
+                }
+            }
+        });
+    }
+
+    // Validação do formulário
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('📝 Submetendo formulário...');
+
+            const selectedPlan = planSelect.value;
+            const status = statusSelect ? statusSelect.value : null;
+
+            if (!selectedPlan) {
+                e.preventDefault();
+                alert('Por favor, selecione um plano de assinatura.');
+                planSelect.focus();
+                return false;
+            }
+
+            if (status === 'trial') {
+                const trialDaysInput = document.getElementById('trial_days');
+                if (trialDaysInput && (!trialDaysInput.value || trialDaysInput.value < 1)) {
+                    e.preventDefault();
+                    alert('Para status de trial, especifique o número de dias (mínimo 1).');
+                    trialDaysInput.focus();
+                    return false;
+                }
+            }
+
+            // Mostrar loading no botão
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Criando...';
+
+                // Restaurar botão após 10 segundos se algo der errado
+                setTimeout(() => {
+                    if (submitBtn.disabled) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                }, 10000);
+            }
+
+            console.log('✅ Formulário válido, enviando...');
+        });
+    }
+
+    console.log('🎉 Script de criação de empresa inicializado com sucesso');
 });
+
+// Função global para debug
+window.debugCompanyForm = function() {
+    console.log('🔍 Debug - Estado atual dos elementos:');
+    console.log('planSelect:', document.getElementById('subscription_plan'));
+    console.log('planDetails:', document.getElementById('planDetails'));
+    console.log('statusSelect:', document.getElementById('status'));
+    console.log('Plano selecionado:', document.getElementById('subscription_plan')?.value);
+
+    // Mostrar dados dos planos
+    const planSelect = document.getElementById('subscription_plan');
+    if (planSelect) {
+        console.log('📋 Planos disponíveis:');
+        Array.from(planSelect.options).forEach((option, index) => {
+            if (option.value) {
+                console.log(`${index}: ${option.text} (${option.value})`);
+                console.log('   Dados:', option.dataset);
+            }
+        });
+    }
+};
 </script>
 @endpush
