@@ -104,7 +104,6 @@ class DebitNoteController extends Controller
 
             return redirect()->route('debit-notes.show', $debitNote)
                 ->with('success', 'Nota de débito criada com sucesso!');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()
@@ -131,9 +130,9 @@ class DebitNoteController extends Controller
 
         $debitNote->load(['client', 'items', 'relatedInvoice']);
         $settings = BillingSetting::getSettings();
-
+        $company = auth()->user()->company;
         $pdf = app('dompdf.wrapper');
-        $pdf->loadView('pdfs.debit-notes', compact('debitNote', 'settings'));
+        $pdf->loadView('pdfs.debit-notes', compact('debitNote', 'settings', 'company'));
 
         $filename = 'nota-debito-' . $debitNote->invoice_number . '.pdf';
 

@@ -151,9 +151,11 @@ class CreditNoteController extends Controller
 
         $creditNote->load(['client', 'items', 'relatedInvoice']);
         $settings = BillingSetting::getSettings();
+        $company = auth()->user()->company;
+        
 
         $pdf = app('dompdf.wrapper');
-        $pdf->loadView('pdfs.credit-notes', compact('creditNote', 'settings'));
+        $pdf->loadView('pdfs.credit-notes', compact('creditNote', 'settings', 'company'));
 
         $filename = 'nota-credito-' . $creditNote->invoice_number . '.pdf';
 

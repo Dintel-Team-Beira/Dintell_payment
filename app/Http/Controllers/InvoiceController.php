@@ -636,6 +636,7 @@ class InvoiceController extends Controller
                 return $this->pdfService->downloadInvoicePdf($invoice);
             }
 
+            
             // Fallback se o serviço não estiver disponível
             return $this->generateSimplePdf($invoice);
 
@@ -957,8 +958,10 @@ class InvoiceController extends Controller
     }
     private function generateSimplePdf(Invoice $invoice)
     {
+        $company = auth()->user()->company;
+        // dd($invoice->items);
         // Implementação simples de PDF se o serviço não estiver disponível
-        $html = view('pdfs.invoice', compact('invoice'))->render();
+        $html = view('pdfs.invoice', compact('invoice','company'))->render();
 
         // Usar DomPDF ou similar
         $pdf = app('dompdf.wrapper');

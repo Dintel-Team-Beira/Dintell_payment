@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\BillingSetting;
+use App\Models\Company;
 use App\Models\User;
 use App\Services\BillingCalculatorService;
 use App\Services\InvoicePdfService;
@@ -398,6 +399,8 @@ class QuoteController extends Controller
     public function downloadPdf(Quote $quote)
     {
         try {
+            
+            // dd(Company::findOrFail(auth()->user()->company_id));
             return $this->pdfService->downloadQuotePdf($quote);
         } catch (\Exception $e) {
             return response()->json([

@@ -273,7 +273,7 @@ Route::get('/', function () {
         if ($user->company_id) {
             $company = \App\Models\Company::find($user->company_id);
             if ($company && $company->slug) {
-                return redirect("v1/dashboard");
+                return redirect("dashboard");
             }
         }
 
