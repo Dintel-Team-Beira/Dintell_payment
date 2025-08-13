@@ -52,12 +52,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Dentro do grupo admin existente
    // ADICIONE ESTA SEÇÃO COMPLETA:
-    Route::prefix('settings')->name('settings.')->group(function () {
-        // Configurações gerais
-        Route::get('/', [SettingsController::class, 'index'])->name('index');
+ Route::prefix('settings')->name('settings.')->group(function () {
+        // ... suas outras rotas de settings ...
 
-        // Configurações de email
+        // ADICIONE ESTA LINHA PARA RESOLVER O ERRO:
         Route::get('/email', [SettingsController::class, 'emailSettings'])->name('email');
+
+        // E também adicione o grupo completo de rotas de email:
         Route::prefix('email')->name('email.')->group(function () {
             Route::get('/', [SettingsController::class, 'emailSettings'])->name('index');
             Route::post('/update', [SettingsController::class, 'updateEmailSettings'])->name('update');
