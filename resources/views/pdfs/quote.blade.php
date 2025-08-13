@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
     <meta charset="UTF-8">
     <title>Cotação {{ $quote->quote_number }}</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: DejaVu Sans, Arial, sans-serif;
@@ -267,27 +272,48 @@
             margin-left: 10px;
         }
 
-        .status-draft { background-color: #6c757d; color: white; }
-        .status-sent { background-color: #007bff; color: white; }
-        .status-accepted { background-color: #28a745; color: white; }
-        .status-rejected { background-color: #dc3545; color: white; }
-        .status-expired { background-color: #fd7e14; color: white; }
+        .status-draft {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .status-sent {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .status-accepted {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .status-expired {
+            background-color: #fd7e14;
+            color: white;
+        }
     </style>
 </head>
+
 <body>
     <div class="clearfix header">
         <div class="company-section">
             <div class="company-info">
-                @if(file_exists(Storage::url($company->logo)))
-                <img src="{{ Storage::url($company->logo) }}" style="width: 200px;" alt="Logo">
+                @if (file_exists(public_path('storage/' . $company->logo)) && $company->logo)
+                    <img src="{{ public_path('storage/' . $company->logo) }}" style="width: 200px;"
+                        alt="Logotipo {{ $company->name }}">
                 @else
-                <div class="company-name">{{ $company->name }}</div>
-                {{-- <div class="company-slogan">beyond technology, intelligence.</div> --}}
+                    <div class="company-name">{{ $company->name }}</div>
                 @endif
                 <div class="company-details">
                     <strong>Contribuinte Nº:</strong> {{ $company->tax_number }}<br>
                     {{ $company->address }}<br>
-                    {{ $company->city }} - {{ $company->country}}<br>
+                    {{-- {{ config('company.address_beira', 'Av. Secundária nº 456, 1º Andar') }}<br> --}}
+                    {{ $company->country }}<br>
                     {{ $company->phone }} | {{ $company->email }}
                 </div>
             </div>
@@ -299,7 +325,7 @@
                 <strong>{{ $quote->client->name }}</strong><br>
                 <strong>Nº CLIENTE:</strong> {{ str_pad($quote->client->id, 10, '0', STR_PAD_LEFT) }}<br>
                 {{ $quote->client->phone ?? 'N/A' }}<br>
-                {{ $quote->client->address ?? $quote->client->city ?? 'Moçambique' }}
+                {{ $quote->client->address ?? ($quote->client->city ?? 'Moçambique') }}
             </div>
         </div>
     </div>
@@ -333,11 +359,11 @@
         </tr>
     </table>
 
-    @if($quote->valid_until->isPast() && $quote->status !== 'accepted')
-    <div class="validity-section">
-        <strong>⚠️ ATENÇÃO:</strong> Esta cotação expirou em {{ $quote->valid_until->format('d/m/Y') }}.
-        Para renovar a validade, solicite uma nova cotação.
-    </div>
+    @if ($quote->valid_until->isPast() && $quote->status !== 'accepted')
+        <div class="validity-section">
+            <strong>⚠️ ATENÇÃO:</strong> Esta cotação expirou em {{ $quote->valid_until->format('d/m/Y') }}.
+            Para renovar a validade, solicite uma nova cotação.
+        </div>
     @endif
 
     <table class="items-table no-break">
@@ -353,26 +379,26 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($quote->items as $item)
-            @php
-                $itemSubtotal = $item->quantity * $item->unit_price;
-                $itemTax = $itemSubtotal * ($item->tax_rate / 100);
-                $itemTotal = $itemSubtotal;
-            @endphp
-            <tr>
-                <td>{{ $item->code ?? strtoupper(substr($item->name, 0, 8)) }}</td>
-                <td>
-                    <strong>{{ $item->name }}</strong>
-                    @if($item->description)
-                    <br><small>{{ $item->description }}</small>
-                    @endif
-                </td>
-                <td class="text-right">{{ number_format($item->quantity, 2) }}</td>
-                <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
-                <td class="text-right">0.00</td>
-                <td class="text-right">{{ number_format($itemTax, 2) }}</td>
-                <td class="text-right">{{ number_format($itemTotal, 2) }}</td>
-            </tr>
+            @foreach ($quote->items as $item)
+                @php
+                    $itemSubtotal = $item->quantity * $item->unit_price;
+                    $itemTax = $itemSubtotal * ($item->tax_rate / 100);
+                    $itemTotal = $itemSubtotal;
+                @endphp
+                <tr>
+                    <td>{{ $item->code ?? strtoupper(substr($item->name, 0, 8)) }}</td>
+                    <td>
+                        <strong>{{ $item->name }}</strong>
+                        @if ($item->description)
+                            <br><small>{{ $item->description }}</small>
+                        @endif
+                    </td>
+                    <td class="text-right">{{ number_format($item->quantity, 2) }}</td>
+                    <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
+                    <td class="text-right">0.00</td>
+                    <td class="text-right">{{ number_format($itemTax, 2) }}</td>
+                    <td class="text-right">{{ number_format($itemTotal, 2) }}</td>
+                </tr>
             @endforeach
         </tbody>
     </table>
@@ -429,7 +455,7 @@
     <div class="observations">OBSERVAÇÕES</div>
 
     <div style="margin: 10px 0; font-size: 10px; line-height: 1.4;">
-        @if($quote->notes)
+        @if ($quote->notes)
             {{ $quote->notes }}<br><br>
         @endif
 
@@ -437,17 +463,17 @@
         <strong>Prazo de Entrega:</strong> A combinar após confirmação do pedido<br>
         <strong>Validade da Proposta:</strong> {{ $quote->valid_until->format('d/m/Y') }}
 
-        @if($quote->terms_conditions)
-        <br><br><strong>Termos e Condições:</strong><br>
-        {{ $quote->terms_conditions }}
+        @if ($quote->terms_conditions)
+            <br><br><strong>Termos e Condições:</strong><br>
+            {{ $quote->terms_conditions }}
         @endif
     </div>
 
     <div class="clearfix payment-section">
-        @if(file_exists(public_path('bci.svg')))
-        <div class="bank-logo">
-            <img src="{{ public_path('bci.svg') }}" style="width: 20px;" alt="BCI">
-        </div>
+        @if (file_exists(public_path('bci.svg')))
+            <div class="bank-logo">
+                <img src="{{ public_path('bci.svg') }}" style="width: 20px;" alt="BCI">
+            </div>
         @endif
         <div class="payment-details">
             O pagamento pode ser efectuado em numerário, cheque, depósito ou transferência<br>
@@ -463,4 +489,5 @@
         <strong>Impresso por:</strong> {{ auth()->user()->name ?? 'ADMIN' }}
     </div>
 </body>
+
 </html>

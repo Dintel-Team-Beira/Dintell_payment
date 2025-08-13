@@ -354,7 +354,6 @@
 
     <div class="invoice-header">
         <div class="original-label">Original</div>
-        {{$company->logo}}
         <div class="invoice-title">
             Fatura Nº {{ $invoice->invoice_number }}
             <!-- @php

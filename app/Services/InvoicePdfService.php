@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\Quote;
 use App\Models\Invoice;
 use Dompdf\Dompdf;
@@ -25,7 +26,7 @@ class InvoicePdfService
     public function generateQuotePdf(Quote $quote)
     {
         $quote->load(['client', 'items']);
-        $company = auth()->user()->company;
+       $company = Company::findOrFail(auth()->user()->company_id);
 
         $html = view('pdfs.quote', compact('quote', 'company'))->render();
 
@@ -39,6 +40,7 @@ class InvoicePdfService
     public function downloadQuotePdf(Quote $quote, $filename = null)
     {
         $filename = $filename ?: 'cotacao_' . $quote->quote_number . '.pdf';
+        
         $pdf = $this->generateQuotePdf($quote);
 
         return response($pdf, 200)
