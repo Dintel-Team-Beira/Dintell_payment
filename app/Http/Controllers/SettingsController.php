@@ -264,6 +264,7 @@ class SettingsController extends Controller
 
     /**
      * API: Buscar produtos/serviços
+    //  * APi
      */
     public function searchItems(Request $request)
     {
