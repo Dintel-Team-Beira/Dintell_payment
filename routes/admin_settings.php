@@ -50,8 +50,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Route::delete('/logs/{file}', [SettingsController::class, 'deleteLog'])->name('logs.delete');
     // Route::post('/logs/clear-all', [SettingsController::class, 'clearAllLogs'])->name('logs.clear-all');
 
-
-
+    // Dentro do grupo admin existente
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::prefix('email')->name('email.')->group(function () {
+            Route::get('/', [SettingsController::class, 'emailSettings'])->name('index');
+            Route::post('/update', [SettingsController::class, 'updateEmailSettings'])->name('update');
+            Route::get('/preview', [SettingsController::class, 'emailPreview'])->name('preview');
+            Route::post('/test', [SettingsController::class, 'sendTestEmail'])->name('test');
+        });
+    });
 });
-
-
