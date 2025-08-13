@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\Plan;
 use App\Models\User;
 use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
@@ -113,40 +114,85 @@ class CompaniesController extends Controller
         return view('admin.companies.show', compact('company', 'stats', 'monthlyActivity'));
     }
 
-    public function create()
+   public function create()
     {
-        $subscriptionPlans = [
-            'basic' => [
-                'name' => 'Básico',
-                'price' => 500,
-                'max_users' => 1,
-                'max_invoices_per_month' => 50,
-                'max_clients' => 100,
-                'features' => ['Faturação básica', 'Relatórios simples']
-            ],
-            'premium' => [
-                'name' => 'Premium',
-                'price' => 1500,
-                'max_users' => 5,
-                'max_invoices_per_month' => 200,
-                'max_clients' => 500,
-                'features' => ['Faturação avançada', 'API access', 'Relatórios avançados', 'Suporte prioritário']
-            ],
-            'enterprise' => [
-                'name' => 'Empresarial',
-                'price' => 3000,
-                'max_users' => 999,
-                'max_invoices_per_month' => 999999,
-                'max_clients' => 999999,
-                'features' => ['Ilimitado', 'Domínio personalizado', 'Integração avançada', 'Suporte dedicado']
-            ]
-        ];
+        // Buscar planos ativos do banco de dados, ordenados por sort_order e preço
+        $subscriptionPlans = Plan::active()
+            ->ordered()
+            ->get()
+            ->keyBy('slug')
+            ->map(function ($plan) {
+                return [
+                    'id' => $plan->id,
+                    'name' => $plan->name,
+                    'description' => $plan->description,
+                    'price' => $plan->price,
+                    'currency' => $plan->currency,
+                    'billing_cycle' => $plan->billing_cycle,
+                    'billing_cycle_text' => $plan->billing_cycle_text,
+                    'formatted_price' => $plan->formatted_price,
+                    'max_users' => $plan->max_users ?? 999,
+                    'max_companies' => $plan->max_companies ?? 1,
+                    'max_invoices_per_month' => $plan->max_invoices_per_month ?? 999999,
+                    'max_clients' => $plan->max_clients ?? 999999,
+                    'max_products' => $plan->max_products ?? 999999,
+                    'max_storage_mb' => $plan->max_storage_mb,
+                    'storage_formatted' => $plan->storage_formatted,
+                    'features' => $plan->features ?? [],
+                    'limitations' => $plan->limitations ?? [],
+                    'trial_days' => $plan->trial_days,
+                    'has_trial' => $plan->has_trial,
+                    'is_popular' => $plan->is_popular,
+                    'color' => $plan->color,
+                    'icon' => $plan->icon,
+                    'metadata' => $plan->metadata ?? []
+                ];
+            });
+
+        // Se não houver planos no banco, criar planos padrão
+        if ($subscriptionPlans->isEmpty()) {
+            $this->createDefaultPlans();
+
+            // Buscar novamente após criar
+            $subscriptionPlans = Plan::active()
+                ->ordered()
+                ->get()
+                ->keyBy('slug')
+                ->map(function ($plan) {
+                    return [
+                        'id' => $plan->id,
+                        'name' => $plan->name,
+                        'description' => $plan->description,
+                        'price' => $plan->price,
+                        'currency' => $plan->currency,
+                        'billing_cycle' => $plan->billing_cycle,
+                        'billing_cycle_text' => $plan->billing_cycle_text,
+                        'formatted_price' => $plan->formatted_price,
+                        'max_users' => $plan->max_users ?? 999,
+                        'max_companies' => $plan->max_companies ?? 1,
+                        'max_invoices_per_month' => $plan->max_invoices_per_month ?? 999999,
+                        'max_clients' => $plan->max_clients ?? 999999,
+                        'max_products' => $plan->max_products ?? 999999,
+                        'max_storage_mb' => $plan->max_storage_mb,
+                        'storage_formatted' => $plan->storage_formatted,
+                        'features' => $plan->features ?? [],
+                        'limitations' => $plan->limitations ?? [],
+                        'trial_days' => $plan->trial_days,
+                        'has_trial' => $plan->has_trial,
+                        'is_popular' => $plan->is_popular,
+                        'color' => $plan->color,
+                        'icon' => $plan->icon,
+                        'metadata' => $plan->metadata ?? []
+                    ];
+                });
+        }
 
         // Log da ação
         $this->logAdminActivity('Acessou formulário de criação de empresa');
 
         return view('admin.companies.create', compact('subscriptionPlans'));
     }
+
 
     public function store(Request $request)
     {
