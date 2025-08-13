@@ -99,7 +99,7 @@ class Company extends Model
 
     public function users(): HasMany
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'company_id');
     }
 
     public function invoices(): HasMany
