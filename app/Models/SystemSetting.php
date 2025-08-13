@@ -15,7 +15,8 @@ class SystemSetting extends Model
         'value',
         'type',
         'group',
-        'description'
+        'description',
+        'company_id'
     ];
 
     protected $casts = [
