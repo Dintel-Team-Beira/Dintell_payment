@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -265,18 +266,42 @@ class SettingsController extends Controller
     /**
      * Métodos auxiliares privados
      */
+  // MÉTODO CORRIGIDO - getSystemSettings()
     private function getSystemSettings()
     {
-        return [
-            'app_name' => config('app.name'),
-            'app_description' => 'Sistema de Faturação e Subscrição',
-            'timezone' => config('app.timezone'),
-            'locale' => config('app.locale'),
-            'maintenance_mode' => false,
-            'registration_enabled' => true,
-            'email_verification_required' => false,
-            // Adicionar mais configurações conforme necessário
-        ];
+        return Cache::remember('system_settings', 3600, function() {
+            $settings = SystemSetting::whereIn('key', [
+                'app_name', 'app_description', 'app_logo', 'app_favicon',
+                'timezone', 'locale', 'date_format', 'currency', 'currency_symbol',
+                'maintenance_mode', 'maintenance_message', 'registration_enabled',
+                'email_verification_required', 'max_users_per_company',
+                'max_invoices_per_month', 'session_lifetime', 'auto_logout_time'
+            ])->pluck('value', 'key');
+
+            // VALORES PADRÃO COMPLETOS - Esta é a correção principal
+            $defaults = [
+                'app_name' => 'SFS - Sistema de Faturação',
+                'app_description' => 'Sistema completo de faturação e subscrição',
+                'app_logo' => null,
+                'app_favicon' => null,
+                'timezone' => 'Africa/Maputo',
+                'locale' => 'pt_BR',
+                'date_format' => 'd/m/Y',  // ← ESTA CHAVE ESTAVA FALTANDO OU NULA
+                'currency' => 'MZN',
+                'currency_symbol' => 'MT',
+                'maintenance_mode' => false,
+                'maintenance_message' => 'Sistema em manutenção. Tente novamente mais tarde.',
+                'registration_enabled' => true,
+                'email_verification_required' => false,
+                'max_users_per_company' => 50,
+                'max_invoices_per_month' => 1000,
+                'session_lifetime' => 120,
+                'auto_logout_time' => 30,
+            ];
+
+            // Merge dos valores do banco com os padrões
+            return array_merge($defaults, $settings->toArray());
+        });
     }
 
     private function getBillingSettings()
