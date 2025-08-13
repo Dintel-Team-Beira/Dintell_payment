@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Mail;
 
 class SettingsController extends Controller
 {
@@ -511,7 +512,7 @@ class SettingsController extends Controller
             ]);
 
             // Limpar cache de configuração
-            \Artisan::call('config:clear');
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
 
             return redirect()->route('admin.settings.email.index')
                            ->with('success', 'Configurações de email atualizadas com sucesso!');
@@ -534,7 +535,7 @@ class SettingsController extends Controller
         try {
             $sampleData = $this->getSampleDataForTemplate($request->template);
 
-            \Mail::send("emails.templates.{$request->template}", $sampleData, function ($message) use ($request) {
+            Mail::send("emails.templates.{$request->template}", $sampleData, function ($message) use ($request) {
                 $message->to($request->test_email)
                        ->subject('Email de Teste - ' . config('app.name'));
             });
