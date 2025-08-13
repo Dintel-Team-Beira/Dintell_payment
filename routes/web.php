@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\CompaniesController as AdminCompaniesController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\LogsController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\TemplatePreviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -564,6 +565,12 @@ Route::prefix('dintell')->group(function () {
         Route::get('/usage', [DashboardController::class, 'usageReport'])->name('usage');
         Route::get('/export/{type}', [DashboardController::class, 'exportReport'])->name('export');
     });
+
+
+
+
+    // Template preview
+    Route::get('template-preview/{type}',[TemplatePreviewController::class,'show'])->name('template-preview');
 });
 
 /*
