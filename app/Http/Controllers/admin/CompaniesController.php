@@ -72,49 +72,85 @@ class CompaniesController extends Controller
         return view('admin.companies.index', compact('companies', 'stats'));
     }
 
-    public function show(Company $company)
-    {
-        $company->load(['creator', 'users', 'invoices' => function ($query) {
-            $query->latest()->limit(10);
-        }]);
+public function show(Company $company)
+{
+    $company->load(['creator', 'users', 'invoices' => function ($query) {
+        $query->latest()->limit(10);
+    }]);
 
-        // Estatísticas da empresa
-        $stats = [
-            'total_invoices' => $company->invoices()->count(),
-            'paid_invoices' => $company->invoices()->where('status', 'paid')->count(),
-            'pending_invoices' => $company->invoices()->where('status', 'pending')->count(),
-            'total_revenue' => $company->invoices()->where('status', 'paid')->sum('total'),
-            'monthly_revenue' => $company->invoices()
-                ->where('status', 'paid')
-                ->whereMonth('created_at', now()->month)
-                ->sum('total'),
-            'avg_invoice_value' => $company->invoices()->where('status', 'paid')->avg('total'),
-        ];
+    // Estatísticas da empresa
+    $stats = [
+        'total_invoices' => $company->invoices()->count(),
+        'paid_invoices' => $company->invoices()->where('status', 'paid')->count(),
+        'pending_invoices' => $company->invoices()->where('status', 'pending')->count(),
+        'total_revenue' => $company->invoices()->where('status', 'paid')->sum('total_amount'),
+        'monthly_revenue' => $company->invoices()
+            ->where('status', 'paid')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_amount'),
+        'avg_invoice_value' => $company->invoices()->where('status', 'paid')->avg('total_amount'),
+        // Adicionar estatísticas que faltavam
+        'users' => $company->users()->count(),
+        'clients' => $company->clients()->count(),
+        'invoices_this_month' => $company->invoices()
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count(),
+    ];
 
-        // Atividade mensal (últimos 12 meses)
-        $monthlyActivity = DB::table('invoices')
-            ->where('company_id', $company->id)
-            ->where('created_at', '>=', now()->subMonths(12))
-            ->select(
-                DB::raw('YEAR(created_at) as year'),
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('COUNT(*) as invoices_count'),
-                DB::raw('SUM(CASE WHEN status = "paid" THEN total ELSE 0 END) as revenue')
-            )
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
-            ->get();
+    // Atividade mensal (últimos 12 meses)
+    $monthlyActivity = DB::table('invoices')
+        ->where('company_id', $company->id)
+        ->where('created_at', '>=', now()->subMonths(12))
+        ->select(
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('COUNT(*) as invoices_count'),
+            DB::raw('SUM(CASE WHEN status = "paid" THEN total_amount ELSE 0 END) as revenue')
+        )
+        ->groupBy('year', 'month')
+        ->orderBy('year', 'desc')
+        ->orderBy('month', 'desc')
+        ->get();
 
-        // Log da visualização
-        $this->logAdminActivity('Visualizou detalhes da empresa', [
-            'company_id' => $company->id,
-            'company_name' => $company->name,
-            'company_status' => $company->status
-        ]);
+    // Carregar planos de subscrição para eventual alteração
+    $subscriptionPlans = [
+        'basic' => [
+            'name' => 'Básico',
+            'price' => 500,
+            'max_users' => 1,
+            'max_invoices_per_month' => 50,
+            'max_clients' => 100,
+            'features' => ['Faturação básica', 'Relatórios simples']
+        ],
+        'premium' => [
+            'name' => 'Premium',
+            'price' => 1500,
+            'max_users' => 5,
+            'max_invoices_per_month' => 200,
+            'max_clients' => 500,
+            'features' => ['Faturação avançada', 'API access', 'Relatórios avançados', 'Suporte prioritário']
+        ],
+        'enterprise' => [
+            'name' => 'Empresarial',
+            'price' => 3000,
+            'max_users' => 999,
+            'max_invoices_per_month' => 999999,
+            'max_clients' => 999999,
+            'features' => ['Ilimitado', 'Domínio personalizado', 'Integração avançada', 'Suporte dedicado']
+        ]
+    ];
 
-        return view('admin.companies.show', compact('company', 'stats', 'monthlyActivity'));
-    }
+    // Log da visualização
+    $this->logAdminActivity('Visualizou detalhes da empresa', [
+        'company_id' => $company->id,
+        'company_name' => $company->name,
+        'company_status' => $company->status
+    ]);
+
+    return view('admin.companies.show', compact('company', 'stats', 'monthlyActivity', 'subscriptionPlans'));
+}
 
    public function create()
     {
@@ -289,85 +325,6 @@ class CompaniesController extends Controller
         }
     }
 
-     /**
-     * Criar planos padrão se não existirem
-     */
-    private function createDefaultPlans()
-    {
-        $defaultPlans = [
-            [
-                'name' => 'Básico',
-                'slug' => 'basic',
-                'description' => 'Ideal para pequenos negócios',
-                'price' => 500,
-                'currency' => 'MZN',
-                'billing_cycle' => 'monthly',
-                'is_popular' => false,
-                'is_active' => true,
-                'sort_order' => 1,
-                'max_users' => 1,
-                'max_companies' => 1,
-                'max_invoices_per_month' => 50,
-                'max_clients' => 100,
-                'max_products' => 50,
-                'max_storage_mb' => 250,
-                'features' => ['Faturação básica', 'Relatórios simples', 'Suporte por email'],
-                'trial_days' => 7,
-                'has_trial' => true,
-                'color' => '#10B981',
-                'icon' => 'building'
-            ],
-            [
-                'name' => 'Premium',
-                'slug' => 'premium',
-                'description' => 'Para empresas em crescimento',
-                'price' => 1500,
-                'currency' => 'MZN',
-                'billing_cycle' => 'monthly',
-                'is_popular' => true,
-                'is_active' => true,
-                'sort_order' => 2,
-                'max_users' => 5,
-                'max_companies' => 2,
-                'max_invoices_per_month' => 200,
-                'max_clients' => 500,
-                'max_products' => 200,
-                'max_storage_mb' => 1024,
-                'features' => ['Faturação avançada', 'API access', 'Relatórios avançados', 'Suporte prioritário'],
-                'trial_days' => 14,
-                'has_trial' => true,
-                'color' => '#3B82F6',
-                'icon' => 'star'
-            ],
-            [
-                'name' => 'Empresarial',
-                'slug' => 'enterprise',
-                'description' => 'Solução completa para grandes empresas',
-                'price' => 3000,
-                'currency' => 'MZN',
-                'billing_cycle' => 'monthly',
-                'is_popular' => false,
-                'is_active' => true,
-                'sort_order' => 3,
-                'max_users' => 15,
-                'max_companies' => 5,
-                'max_invoices_per_month' => 1000,
-                'max_clients' => 2000,
-                'max_products' => 1000,
-                'max_storage_mb' => 5120,
-                'features' => ['Recursos ilimitados', 'Domínio personalizado', 'Integração avançada', 'Suporte dedicado'],
-                'trial_days' => 30,
-                'has_trial' => true,
-                'color' => '#7C3AED',
-                'icon' => 'building-office'
-            ]
-        ];
-
-        foreach ($defaultPlans as $planData) {
-            Plan::create($planData);
-        }
-    }
-
     public function suspend(Request $request, Company $company)
     {
         $request->validate([
@@ -520,4 +477,43 @@ class CompaniesController extends Controller
 
         return $configs[$plan] ?? $configs['basic'];
     }
+
+    public function edit(Company $company)
+{
+    $subscriptionPlans = [
+        'basic' => [
+            'name' => 'Básico',
+            'price' => 500,
+            'max_users' => 1,
+            'max_invoices_per_month' => 50,
+            'max_clients' => 100,
+            'features' => ['Faturação básica', 'Relatórios simples']
+        ],
+        'premium' => [
+            'name' => 'Premium',
+            'price' => 1500,
+            'max_users' => 5,
+            'max_invoices_per_month' => 200,
+            'max_clients' => 500,
+            'features' => ['Faturação avançada', 'API access', 'Relatórios avançados', 'Suporte prioritário']
+        ],
+        'enterprise' => [
+            'name' => 'Empresarial',
+            'price' => 3000,
+            'max_users' => 999,
+            'max_invoices_per_month' => 999999,
+            'max_clients' => 999999,
+            'features' => ['Ilimitado', 'Domínio personalizado', 'Integração avançada', 'Suporte dedicado']
+        ]
+    ];
+
+    // Log da ação
+    $this->logAdminActivity('Acessou formulário de edição de empresa', [
+        'company_id' => $company->id,
+        'company_name' => $company->name
+    ]);
+
+    return view('admin.companies.edit', compact('company', 'subscriptionPlans'));
+}
+
 }
