@@ -174,7 +174,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.settings.email') }}"
+                            <a href="{{ route('admin.settings.email.index') }}"
                                class="group flex gap-x-3 rounded-md py-2 pl-9 pr-2 text-sm leading-6 {{ request()->routeIs('admin.settings.email') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600' }}">
                                 Email
                             </a>
