@@ -67,6 +67,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('login', [AdminAuthController::class, 'login'])->name('login.submit');
     });
 
+        // Rotas para AdminActivity
+    Route::prefix('activities')->name('activities.')->group(function () {
+        Route::get('/', [AdminActivitiesController::class, 'index'])->name('index');
+        Route::get('/dashboard', [AdminActivitiesController::class, 'dashboard'])->name('dashboard');
+        Route::get('/export', [AdminActivitiesController::class, 'export'])->name('export');
+        Route::get('/{activity}', [AdminActivitiesController::class, 'show'])->name('show');
+        Route::delete('/clear', [AdminActivitiesController::class, 'clear'])->name('clear');
+    });
+
     Route::post('logout', [AdminAuthController::class, 'logout'])
         ->middleware('auth')
         ->name('logout');
