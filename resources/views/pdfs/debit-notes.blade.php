@@ -416,19 +416,19 @@
 </head>
 <body>
     <div class="clearfix header">
-        <div class="company-section">
+          <div class="company-section">
             <div class="company-info">
-                @if(file_exists(public_path('logo.png')))
-                <img src="{{ public_path('logo.png') }}" style="width: 200px;" alt="Logo">
+                @if(file_exists(public_path('storage/'.$company->logo)) && $company->logo)
+                    <img src="{{ public_path('storage/'.$company->logo) }}" style="width: 200px;" alt="Logo">
                 @else
-                <div class="company-name">{{ $settings->company_name ?? 'Minha Empresa' }}</div>
-                <div class="company-slogan">beyond technology, intelligence.</div>
+                    <div class="company-name">{{ $company->name}}</div>
                 @endif
                 <div class="company-details">
-                    <strong>Contribuinte Nº:</strong> {{ $settings->company_nuit ?? '123456789' }}<br>
-                    {{ $settings->company_address ?? 'Av. Principal nº 123, R/C' }}<br>
-                    {{ $settings->company_address_maputo ?? 'Maputo, Moçambique' }}<br>
-                    {{ $settings->company_phone ?? '+258 84 123 4567' }} | {{ $settings->company_email ?? 'geral@empresa.co.mz' }}
+                    <strong>Contribuinte Nº:</strong> {{ $company->tax_number}}<br>
+                    {{ $company->address }}<br>
+                    {{-- {{ config('company.address_beira', 'Av. Secundária nº 456, 1º Andar') }}<br> --}}
+                    {{ $company->country }}<br>
+                    {{ $company->phone}} | {{$company->email }} 
                 </div>
             </div>
         </div>
