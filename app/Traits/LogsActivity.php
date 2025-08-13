@@ -76,4 +76,6 @@ trait LogsActivity
 
         Log::channel('company')->info($action, $logData);
     }
+
+    
 }
