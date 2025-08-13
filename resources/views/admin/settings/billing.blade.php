@@ -5,7 +5,7 @@
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <!-- Header -->
-    <div class="bg-white shadow">
+    <div class="mx-5 bg-white rounded-md shadow">
         <div class="px-6 py-4">
             <div class="flex items-center justify-between">
                 <div>
