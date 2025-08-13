@@ -313,4 +313,202 @@ class SettingsController extends Controller
 
         return response()->json($results->take(20));
     }
+
+    /**
+     * Exibir preview das configurações de email
+     */
+    public function emailPreview(Request $request)
+    {
+        try {
+            // Verificar se é uma requisição AJAX para preview dinâmico
+            if ($request->ajax()) {
+                $template = $request->input('template', 'invoice');
+                $sampleData = $this->getSampleDataForTemplate($template);
+
+                $view = view("emails.templates.{$template}", $sampleData)->render();
+
+                return response()->json([
+                    'success' => true,
+                    'html' => $view
+                ]);
+            }
+
+            // Buscar configurações atuais de email
+            $emailSettings = [
+                'smtp_host' => config('mail.mailers.smtp.host'),
+                'smtp_port' => config('mail.mailers.smtp.port'),
+                'smtp_username' => config('mail.mailers.smtp.username'),
+                'smtp_encryption' => config('mail.mailers.smtp.encryption'),
+                'from_address' => config('mail.from.address'),
+                'from_name' => config('mail.from.name'),
+            ];
+
+            // Templates disponíveis
+            $templates = [
+                'invoice' => 'Fatura',
+                'quote' => 'Cotação',
+                'credit_note' => 'Nota de Crédito',
+                'debit_note' => 'Nota de Débito',
+                'payment_reminder' => 'Lembrete de Pagamento',
+                'welcome' => 'Boas-vindas'
+            ];
+
+            return view('admin.settings.email.preview', compact('emailSettings', 'templates'));
+
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Erro ao carregar preview: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Configurações de email do sistema
+     */
+    public function emailSettings()
+    {
+        $settings = [
+            'smtp_host' => config('mail.mailers.smtp.host'),
+            'smtp_port' => config('mail.mailers.smtp.port'),
+            'smtp_username' => config('mail.mailers.smtp.username'),
+            'smtp_encryption' => config('mail.mailers.smtp.encryption'),
+            'from_address' => config('mail.from.address'),
+            'from_name' => config('mail.from.name'),
+        ];
+
+        return view('admin.settings.email.index', compact('settings'));
+    }
+
+    /**
+     * Atualizar configurações de email
+     */
+    public function updateEmailSettings(Request $request)
+    {
+        $request->validate([
+            'smtp_host' => 'required|string|max:255',
+            'smtp_port' => 'required|integer|between:1,65535',
+            'smtp_username' => 'required|email|max:255',
+            'smtp_password' => 'nullable|string|max:255',
+            'smtp_encryption' => 'required|in:tls,ssl,null',
+            'from_address' => 'required|email|max:255',
+            'from_name' => 'required|string|max:255',
+        ]);
+
+        try {
+            // Atualizar configurações no .env
+            $this->updateEnvFile([
+                'MAIL_HOST' => $request->smtp_host,
+                'MAIL_PORT' => $request->smtp_port,
+                'MAIL_USERNAME' => $request->smtp_username,
+                'MAIL_PASSWORD' => $request->smtp_password ?: config('mail.mailers.smtp.password'),
+                'MAIL_ENCRYPTION' => $request->smtp_encryption === 'null' ? null : $request->smtp_encryption,
+                'MAIL_FROM_ADDRESS' => $request->from_address,
+                'MAIL_FROM_NAME' => $request->from_name,
+            ]);
+
+            // Limpar cache de configuração
+            \Artisan::call('config:clear');
+
+            return redirect()->route('admin.settings.email.index')
+                           ->with('success', 'Configurações de email atualizadas com sucesso!');
+
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Erro ao atualizar configurações: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Enviar email de teste
+     */
+    public function sendTestEmail(Request $request)
+    {
+        $request->validate([
+            'test_email' => 'required|email',
+            'template' => 'required|string'
+        ]);
+
+        try {
+            $sampleData = $this->getSampleDataForTemplate($request->template);
+
+            \Mail::send("emails.templates.{$request->template}", $sampleData, function ($message) use ($request) {
+                $message->to($request->test_email)
+                       ->subject('Email de Teste - ' . config('app.name'));
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Email de teste enviado com sucesso!'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao enviar email: ' . $e->getMessage()
+            ], 422);
+        }
+    }
+
+    /**
+     * Gerar dados de exemplo para templates
+     */
+    private function getSampleDataForTemplate($template)
+    {
+        switch ($template) {
+            case 'invoice':
+                return [
+                    'invoice' => (object) [
+                        'invoice_number' => 'FAT-2025-001',
+                        'total' => 1500.00,
+                        'due_date' => now()->addDays(30)->format('d/m/Y'),
+                        'client' => (object) [
+                            'name' => 'Empresa Exemplo Lda',
+                            'email' => 'exemplo@empresa.com'
+                        ]
+                    ]
+                ];
+
+            case 'quote':
+                return [
+                    'quote' => (object) [
+                        'quote_number' => 'COT-2025-001',
+                        'total' => 2500.00,
+                        'valid_until' => now()->addDays(15)->format('d/m/Y'),
+                        'client' => (object) [
+                            'name' => 'Cliente Exemplo',
+                            'email' => 'cliente@exemplo.com'
+                        ]
+                    ]
+                ];
+
+            default:
+                return [
+                    'company' => config('app.name'),
+                    'user' => (object) [
+                        'name' => 'Usuário Exemplo',
+                        'email' => 'usuario@exemplo.com'
+                    ]
+                ];
+        }
+    }
+
+    /**
+     * Atualizar arquivo .env
+     */
+    private function updateEnvFile($data)
+    {
+        $envFile = base_path('.env');
+        $envContent = file_get_contents($envFile);
+
+        foreach ($data as $key => $value) {
+            $value = is_null($value) ? '' : $value;
+            $pattern = "/^{$key}=.*/m";
+            $replacement = "{$key}={$value}";
+
+            if (preg_match($pattern, $envContent)) {
+                $envContent = preg_replace($pattern, $replacement, $envContent);
+            } else {
+                $envContent .= "\n{$replacement}";
+            }
+        }
+
+        file_put_contents($envFile, $envContent);
+    }
 }
