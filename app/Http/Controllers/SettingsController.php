@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BillingSetting;
+use App\Models\Company;
 use App\Models\Product;
 use App\Models\Service;
 use Illuminate\Http\Request;
@@ -49,8 +50,9 @@ class SettingsController extends Controller
             return back()->withErrors($validator)->withInput();
         }
         $validated['company_id'] = auth()->user()->company->id;
-        $settings = BillingSetting::getSettings();
+        $settings = Company::find($validated['company_id']); //BillingSetting::getSettings();
 
+        // dd($settings);
         $data = $request->only([
             'company_name',
             'company_address',
@@ -62,10 +64,11 @@ class SettingsController extends Controller
 
         // Upload do logo se fornecido
         if ($request->hasFile('company_logo')) {
-            $logoPath = $request->file('company_logo')->store('logos', 'public');
-            $data['company_logo'] = $logoPath;
+            $logoPath = $request->file('company_logo')->store('companies/logos', 'public');
+            $data['logo'] = $logoPath;
         }
 
+        // dd($data['logo']);
         $settings->update($data);
 
         return back()->with('success', 'Configurações da empresa atualizadas com sucesso!');
