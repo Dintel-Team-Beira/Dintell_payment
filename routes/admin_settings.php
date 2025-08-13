@@ -51,7 +51,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Route::post('/logs/clear-all', [SettingsController::class, 'clearAllLogs'])->name('logs.clear-all');
 
     // Dentro do grupo admin existente
+   // ADICIONE ESTA SEÇÃO COMPLETA:
     Route::prefix('settings')->name('settings.')->group(function () {
+        // Configurações gerais
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+
+        // Configurações de email
+        Route::get('/email', [SettingsController::class, 'emailSettings'])->name('email');
         Route::prefix('email')->name('email.')->group(function () {
             Route::get('/', [SettingsController::class, 'emailSettings'])->name('index');
             Route::post('/update', [SettingsController::class, 'updateEmailSettings'])->name('update');
