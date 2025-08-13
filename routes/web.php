@@ -570,7 +570,11 @@ Route::prefix('dintell')->group(function () {
 
 
     // Template preview
-    Route::get('template-preview/{type}',[TemplatePreviewController::class,'show'])->name('template-preview');
+    // Route::get('template-preview/{type}',[TemplatePreviewController::class,'show'])->name('template-preview');
+    Route::get('template-preview/list/{type}',[TemplatePreviewController::class,'list'])->name('template-preview.list');
+    Route::get('template-preview/preview/{templateId}',[TemplatePreviewController::class,'show'])->name('template-preview');
+    
+    
 });
 
 /*
