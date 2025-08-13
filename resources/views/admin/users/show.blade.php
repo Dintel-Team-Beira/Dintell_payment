@@ -230,111 +230,193 @@
             </div>
 
             <!-- Recent Activity -->
-            <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-medium text-gray-900">Atividade Recente</h3>
-                        <span class="text-sm text-gray-500">Últimos 30 dias</span>
-                    </div>
-                </div>
-                <div class="px-6 py-4">
-                    @if($user->invoices->count() > 0 || $user->quotes->count() > 0)
-                        <div class="flow-root">
-                            <ul class="-mb-8">
-                                @php
-                                    $activities = collect();
-
-                                    // Add recent invoices
-                                    foreach($user->invoices->take(5) as $invoice) {
-                                        $activities->push([
-                                            'type' => 'invoice',
-                                            'title' => 'Fatura ' . $invoice->number . ' criada',
-                                            'description' => 'Valor: ' . number_format($invoice->total_amount, 2) . ' MT',
-                                            'date' => $invoice->created_at,
-                                            'status' => $invoice->status,
-                                            'icon' => 'invoice'
-                                        ]);
-                                    }
-
-                                    // Add recent quotes
-                                    foreach($user->quotes->take(5) as $quote) {
-                                        $activities->push([
-                                            'type' => 'quote',
-                                            'title' => 'Cotação ' . $quote->number . ' criada',
-                                            'description' => 'Valor: ' . number_format($quote->total_amount, 2) . ' MT',
-                                            'date' => $quote->created_at,
-                                            'status' => $quote->status,
-                                            'icon' => 'quote'
-                                        ]);
-                                    }
-
-                                    $activities = $activities->sortByDesc('date')->take(10);
-                                @endphp
-
-                                @foreach($activities as $index => $activity)
-                                    <li>
-                                        <div class="relative pb-8">
-                                            @if(!$loop->last)
-                                                <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+        {{-- Substituir o conteúdo da seção de Atividade Recente na view --}}
+<div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-gray-900">Atividade Recente</h3>
+            <span class="text-sm text-gray-500">Últimos 30 dias</span>
+        </div>
+    </div>
+    <div class="px-6 py-4">
+        @if(isset($recentActivity) && $recentActivity->count() > 0)
+            {{-- Se existe AdminActivity --}}
+            <div class="flow-root">
+                <ul class="-mb-8">
+                    @foreach($recentActivity as $activity)
+                    <li>
+                        <div class="relative pb-8">
+                            @if(!$loop->last)
+                            <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                            @endif
+                            <div class="relative flex items-start space-x-3">
+                                <div class="relative">
+                                    <div class="flex items-center justify-center w-10 h-10 rounded-full
+                                        {{ $activity->severity === 'critical' ? 'bg-red-100' :
+                                           ($activity->severity === 'high' ? 'bg-yellow-100' : 'bg-blue-100') }}">
+                                        <svg class="w-5 h-5 {{ $activity->severity === 'critical' ? 'text-red-600' :
+                                                                 ($activity->severity === 'high' ? 'text-yellow-600' : 'text-blue-600') }}"
+                                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            @if($activity->category === 'user_management')
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                            @elseif($activity->category === 'company_management')
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                            @elseif($activity->category === 'security')
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                            @else
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                             @endif
-                                            <div class="relative flex space-x-3">
-                                                <div>
-                                                    <span class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white
-                                                        @if($activity['icon'] === 'invoice') bg-blue-500
-                                                        @else bg-green-500
-                                                        @endif">
-                                                        @if($activity['icon'] === 'invoice')
-                                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
-                                                            </svg>
-                                                        @else
-                                                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                                            </svg>
-                                                        @endif
-                                                    </span>
-                                                </div>
-                                                <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                                    <div>
-                                                        <p class="text-sm text-gray-900">{{ $activity['title'] }}</p>
-                                                        <p class="text-sm text-gray-500">{{ $activity['description'] }}</p>
-                                                    </div>
-                                                    <div class="text-sm text-right text-gray-500 whitespace-nowrap">
-                                                        <time datetime="{{ $activity['date']->format('Y-m-d') }}">
-                                                            {{ $activity['date']->format('d/m/Y') }}
-                                                        </time>
-                                                        <div class="mt-1">
-                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                                @if($activity['status'] === 'paid') bg-green-100 text-green-800
-                                                                @elseif($activity['status'] === 'sent') bg-blue-100 text-blue-800
-                                                                @elseif($activity['status'] === 'draft') bg-gray-100 text-gray-800
-                                                                @else bg-yellow-100 text-yellow-800
-                                                                @endif">
-                                                                {{ ucfirst($activity['status']) }}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div>
+                                        <div class="text-sm text-gray-500">
+                                            <span class="font-medium text-gray-900">{{ $activity->description }}</span>
                                         </div>
-                                    </li>
-                                @endforeach
-                            </ul>
+                                        <p class="mt-0.5 text-xs text-gray-500">
+                                            {{ $activity->created_at->diffForHumans() }}
+                                        </p>
+                                        @if($activity->category)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 mt-1">
+                                            {{ $activity->category_label }}
+                                        </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    @else
-                        <div class="py-12 text-center">
-                            <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma atividade</h3>
-                            <p class="mt-1 text-sm text-gray-500">Este usuário ainda não criou faturas ou cotações.</p>
-                        </div>
-                    @endif
-                </div>
+                    </li>
+                    @endforeach
+                </ul>
             </div>
+        @elseif($user->company_id)
+            {{-- Se não tem AdminActivity, mas tem empresa, mostrar atividades da empresa --}}
+            @php
+                $activities = collect();
+
+                // Buscar faturas da empresa do usuário
+                $companyInvoices = \App\Models\Invoice::where('company_id', $user->company_id)
+                    ->latest()
+                    ->limit(5)
+                    ->get();
+
+                foreach($companyInvoices as $invoice) {
+                    $activities->push([
+                        'type' => 'invoice',
+                        'title' => 'Fatura criada',
+                        'description' => 'Fatura #' . $invoice->invoice_number,
+                        'value' => number_format($invoice->total, 2) . ' MT',
+                        'date' => $invoice->created_at,
+                        'status' => $invoice->status
+                    ]);
+                }
+
+                // Buscar quotes da empresa do usuário
+                $companyQuotes = \App\Models\Quote::where('company_id', $user->company_id)
+                    ->latest()
+                    ->limit(3)
+                    ->get();
+
+                foreach($companyQuotes as $quote) {
+                    $activities->push([
+                        'type' => 'quote',
+                        'title' => 'Orçamento criado',
+                        'description' => 'Orçamento #' . $quote->quote_number,
+                        'value' => number_format($quote->total, 2) . ' MT',
+                        'date' => $quote->created_at,
+                        'status' => $quote->status
+                    ]);
+                }
+
+                $activities = $activities->sortByDesc('date')->take(8);
+            @endphp
+
+            @if($activities->count() > 0)
+            <div class="flow-root">
+                <ul class="-mb-8">
+                    @foreach($activities as $activity)
+                    <li>
+                        <div class="relative pb-8">
+                            @if(!$loop->last)
+                            <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                            @endif
+                            <div class="relative flex items-start space-x-3">
+                                <div class="relative">
+                                    <div class="flex items-center justify-center w-10 h-10 rounded-full
+                                        {{ $activity['type'] === 'invoice' ? 'bg-green-100' : 'bg-blue-100' }}">
+                                        <svg class="w-5 h-5 {{ $activity['type'] === 'invoice' ? 'text-green-600' : 'text-blue-600' }}"
+                                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            @if($activity['type'] === 'invoice')
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            @else
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                            @endif
+                                        </svg>
+                                    </div>
+
+                                    @if(isset($activity['status']))
+                                    <div class="absolute -bottom-0.5 -right-1 rounded-tl bg-white">
+                                        <div class="w-3 h-3 rounded-full
+                                            {{ $activity['status'] === 'paid' ? 'bg-green-400' :
+                                               ($activity['status'] === 'sent' ? 'bg-blue-400' :
+                                               ($activity['status'] === 'draft' ? 'bg-gray-400' : 'bg-yellow-400')) }}">
+                                        </div>
+                                    </div>
+                                    @endif
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div>
+                                        <div class="text-sm text-gray-500">
+                                            <span class="font-medium text-gray-900">{{ $activity['title'] }}</span>
+                                        </div>
+                                        <p class="mt-0.5 text-sm text-gray-500">
+                                            {{ $activity['description'] }}
+                                            @if(isset($activity['value']))
+                                            <span class="font-medium text-gray-900"> - {{ $activity['value'] }}</span>
+                                            @endif
+                                        </p>
+                                        <p class="mt-0.5 text-xs text-gray-500">
+                                            {{ $activity['date']->diffForHumans() }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    @endforeach
+                </ul>
+            </div>
+            @else
+            <div class="py-6 text-center">
+                <svg class="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma atividade</h3>
+                <p class="mt-1 text-sm text-gray-500">A empresa ainda não possui atividades registradas.</p>
+            </div>
+            @endif
+        @else
+            {{-- Se não tem empresa nem AdminActivity --}}
+            <div class="py-6 text-center">
+                <svg class="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Super Administrador</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    @if($user->is_super_admin)
+                        Super administrador sem empresa associada.
+                    @else
+                        Usuário sem atividades recentes.
+                    @endif
+                </p>
+            </div>
+        @endif
+    </div>
+</div>
 
             <!-- Recent Invoices -->
-            @if($user->invoices->count() > 0)
+ {{-- @if($user->invoices->count() > 0 || $user->quotes->count() > 0)
                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center justify-between">
@@ -391,7 +473,7 @@
             @endif
         </div>
     </div>
-</div>
+</div> --}}
 
 @push('scripts')
 <script>
