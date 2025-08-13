@@ -7,8 +7,11 @@ use App\Models\User;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Models\Invoice;
 
+use App\Traits\LogsActivity;
 class UsersController extends Controller
 {
     public function index(Request $request)
@@ -88,20 +91,61 @@ class UsersController extends Controller
                         ->with('success', 'Usuário criado com sucesso!');
     }
 
-    public function show(User $user)
-    {
-        $user->load(['company', 'invoices', 'quotes']);
+   public function show(User $user)
+{
+    // Carregamento correto das relações
+    $user->load(['company']);
 
-        // Estatísticas do usuário
-        $userStats = [
-            'invoices_count' => $user->invoices()->count(),
-            'quotes_count' => $user->quotes()->count(),
-            'total_revenue' => $user->invoices()->where('status', 'paid')->sum('total_amount'),
-            'last_login' => $user->last_login_at,
-        ];
+    // Estatísticas do usuário baseadas na estrutura real
+    $userStats = [
+        // Se o usuário tem company_id, buscar dados da empresa
+        'invoices_count' => $user->company_id ?
+            \App\Models\Invoice::where('company_id', $user->company_id)->count() : 0,
 
-        return view('admin.users.show', compact('user', 'userStats'));
+        'quotes_count' => $user->company_id ?
+            \App\Models\Quote::where('company_id', $user->company_id)->count() : 0,
+
+        'total_revenue' => $user->company_id ?
+            \App\Models\Invoice::where('company_id', $user->company_id)
+                ->where('status', 'paid')
+                ->sum('total') : 0,
+
+        'last_login' => $user->last_login_at,
+
+        // Estatísticas adicionais se for admin da empresa
+        'clients_count' => $user->company_id ?
+            \App\Models\Client::where('company_id', $user->company_id)->count() : 0,
+
+        'products_count' => $user->company_id ?
+            \App\Models\Product::where('company_id', $user->company_id)->count() : 0,
+
+        'services_count' => $user->company_id ?
+            \App\Models\Service::where('company_id', $user->company_id)->count() : 0,
+    ];
+
+    // Atividade recente do usuário (se for super admin)
+    $recentActivity = [];
+    if ($user->is_super_admin) {
+        $recentActivity = \App\Models\AdminActivity::where('admin_id', $user->id)
+            ->latest()
+            ->limit(10)
+            ->get();
     }
+
+    // Dados da empresa se o usuário pertencer a uma
+    $companyStats = null;
+    if ($user->company_id && $user->company) {
+        $companyStats = [
+            'status' => $user->company->status,
+            'subscription_plan' => $user->company->subscription_plan,
+            'trial_ends_at' => $user->company->trial_ends_at,
+            'users_count' => $user->company->users()->count(),
+            'max_users' => $user->company->max_users,
+        ];
+    }
+     $this->logUserActivity('suspended', $user, 'Suspendeu usuário');
+    return view('admin.users.show', compact('user', 'userStats', 'recentActivity', 'companyStats'));
+}
 
     public function edit(User $user)
     {
@@ -133,8 +177,8 @@ class UsersController extends Controller
         // Upload avatar se fornecido
         if ($request->hasFile('avatar')) {
             // Deletar avatar anterior se existir
-            if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
-                \Storage::disk('public')->delete($user->avatar);
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
             }
 
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
@@ -156,8 +200,8 @@ class UsersController extends Controller
         }
 
         // Deletar avatar se existir
-        if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
-            \Storage::disk('public')->delete($user->avatar);
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
         }
 
         $user->delete();
