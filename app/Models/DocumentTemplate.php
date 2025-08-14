@@ -12,12 +12,14 @@ class DocumentTemplate extends Model
         'html_template',
         'css_styles',
         'is_default',
-        'company_id'
+        'company_id',
+        'is_selected'
     ];
 
     protected $casts = [
         // 'css_styles' => 'array',
         'is_default' => 'boolean',
+         'is_selected' => 'boolean',
     ];
 
     public function company()

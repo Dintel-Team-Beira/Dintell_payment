@@ -48,13 +48,13 @@
                     Selecionar Template
                 </button>
 
-                <!-- Indicador de Template Ativo na Sidebar -->
-                <div id="selectedIndicatorSidebar" class="w-full px-4 py-2 mb-2 text-sm font-medium text-green-800 bg-green-100 border border-green-200 rounded-md hidden">
+                <!-- Indicador de Template Em Uso na Sidebar -->
+                <div id="selectedIndicatorSidebar" class="w-full px-4 py-2 mb-2 text-sm font-medium text-blue-800 bg-blue-100 border border-blue-200 rounded-md hidden">
                     <div class="flex items-center justify-center">
                         <svg class="inline w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
-                        Template Ativo
+                        Template Em Uso
                     </div>
                 </div>
 
@@ -89,12 +89,12 @@
                     <div class="flex items-center space-x-3">
                         <span class="text-sm text-gray-500" id="previewStatus">Aguardando seleção...</span>
                         
-                        <!-- Indicador de Template Selecionado -->
-                        <div id="selectedIndicator" class="hidden flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full">
+                        <!-- Indicador de Template Em Uso -->
+                        <div id="selectedIndicator" class="hidden flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
                             <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="text-xs font-medium">Template Ativo</span>
+                            <span class="text-xs font-medium">Em Uso</span>
                         </div>
                         
                         <button id="selectTemplateTop"
@@ -160,19 +160,19 @@
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                         <h3 class="text-lg leading-6 font-medium text-gray-900">
-                            Selecionar Template
+                            Usar Template
                         </h3>
                         <div class="mt-2">
                             <p class="text-sm text-gray-500">
-                                Deseja realmente selecionar este template como padrão? Esta ação irá definir "<span id="modalTemplateName"></span>" como o template principal para <span id="modalTemplateType"></span>.
+                                Deseja realmente usar este template? Esta ação irá definir "<span id="modalTemplateName"></span>" como o template em uso para <span id="modalTemplateType"></span>.
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button id="confirmSelect" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
-                    Selecionar
+                <button id="confirmSelect" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                    Usar Template
                 </button>
                 <button id="cancelSelect" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                     Cancelar
@@ -296,9 +296,24 @@
                 templates.forEach(template => {
                     const option = document.createElement('option');
                     option.value = template.id;
-                    // Adicionar indicador visual no select
-                    const indicator = template.is_default ? ' ✓ ' : '';
-                    option.textContent = `${indicator}${template.name}${template.is_default ? ' (Ativo)' : ''}`;
+                    
+                    // Indicadores visuais no select
+                    let indicator = '';
+                    let suffix = '';
+                    
+                    if (template.is_selected && template.is_default) {
+                        indicator = '🔹 ';
+                        suffix = ' (Em Uso - Padrão)';
+                    } else if (template.is_selected==1) {
+                        indicator = '🔹 ';
+                        suffix = ' (Em Uso)';
+                    } else if (template.is_default==1) {
+                        indicator = '';
+                        suffix = ' (Padrão)';
+                    }
+                    console.log(template);
+                    
+                    option.textContent = `${indicator}${template.name}${suffix}`;
                     templateSelect.appendChild(option);
                 });
                 templateSelect.disabled = false;
@@ -336,16 +351,11 @@
     }
 
     function showSelectButtons() {
-        // Verificar se o template atual já está selecionado
-        if (currentSelectedTemplate && currentSelectedTemplate.is_default) {
-            // Template já selecionado - mostrar como selecionado
+        if (currentSelectedTemplate && currentSelectedTemplate.is_selected) {
             selectTemplateBtn.classList.add('hidden');
             selectTemplateTopBtn.classList.add('hidden');
-            
-            // Mostrar indicador de selecionado no header
             showSelectedIndicator();
         } else {
-            // Template não selecionado - mostrar botões
             selectTemplateBtn.classList.remove('hidden');
             selectTemplateTopBtn.classList.remove('hidden');
             hideSelectedIndicator();
@@ -360,8 +370,6 @@
 
     function loadTemplate(templateId) {
         showLoadingState();
-        
-        // Carregar preview do template
         const previewUrl = `/dintell/template-preview/preview/${templateId}`;
         templatePreview.src = previewUrl;
         
@@ -382,11 +390,30 @@
         currentSelectedTemplate = template;
         
         if (template) {
-            // Determinar se é o template ativo
-            const isActive = template.is_default;
-            const statusBadge = isActive 
-                ? '<span class="inline-block px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full mt-1">Template Ativo</span>'
-                : '<span class="inline-block px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full mt-1">Disponível</span>';
+            const isSelected = template.is_selected;
+            const isDefault = template.is_default;
+            
+            let statusBadge = '';
+            let statusText = '';
+            let statusColor = '';
+            
+            if (isSelected && isDefault) {
+                statusBadge = '<span class="inline-block px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full mt-1 mr-1">Em Uso</span><span class="inline-block px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full mt-1">Padrão</span>';
+                statusText = 'Em Uso (Padrão)';
+                statusColor = 'text-blue-600';
+            } else if (isSelected) {
+                statusBadge = '<span class="inline-block px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full mt-1">Em Uso</span>';
+                statusText = 'Em Uso';
+                statusColor = 'text-blue-600';
+            } else if (isDefault) {
+                statusBadge = '<span class="inline-block px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full mt-1">Padrão</span>';
+                statusText = 'Padrão';
+                statusColor = 'text-green-600';
+            } else {
+                statusBadge = '<span class="inline-block px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full mt-1">Disponível</span>';
+                statusText = 'Disponível';
+                statusColor = 'text-gray-600';
+            }
             
             templateInfo.innerHTML = `
                 <div class="mb-3">
@@ -401,7 +428,7 @@
                     </div>
                     <div>
                         <span class="text-gray-500">Status:</span>
-                        <span class="font-medium ${isActive ? 'text-green-600' : 'text-gray-600'}">${isActive ? 'Ativo' : 'Disponível'}</span>
+                        <span class="font-medium ${statusColor}">${statusText}</span>
                     </div>
                     <div>
                         <span class="text-gray-500">Criado em:</span>
@@ -450,7 +477,7 @@
                 updateTemplateAsSelected();
                 
                 // Mostrar notificação de sucesso
-                showNotification('Template selecionado com sucesso!', 'success');
+                showNotification('Template definido como em uso!', 'success');
                 
                 // Recarregar a lista de templates para atualizar o status
                 loadTemplatesList(typeSelect.value);
@@ -464,9 +491,9 @@
     }
 
     function updateTemplateAsSelected() {
-        // Atualizar visualmente que o template foi selecionado
+        // Atualizar visualmente que o template foi selecionado para uso
         if (currentSelectedTemplate) {
-            currentSelectedTemplate.is_default = true;
+            currentSelectedTemplate.is_selected = true;
             updateTemplateInfo(currentSelectedTemplate.id);
         }
     }

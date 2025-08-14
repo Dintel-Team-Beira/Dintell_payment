@@ -19,7 +19,7 @@ class TemplatePreviewController extends Controller
             ->where('company_id', $companyId)
             ->orderBy('is_default', 'desc')
             ->orderBy('name')
-            ->get(['id', 'name', 'is_default', 'created_at', 'updated_at']);
+            ->get(['id', 'name', 'is_default','is_selected', 'created_at', 'updated_at']);
 
         return response()->json($templates);
     }
