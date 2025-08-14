@@ -372,10 +372,11 @@
                 @endif
 
                 @yield('content')
+
             </main>
         </div>
     </div>
-
+  @include('components.support-popup')
     @stack('scripts')
 
 

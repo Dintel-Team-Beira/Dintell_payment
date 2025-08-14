@@ -585,8 +585,8 @@ Route::prefix('dintell')->group(function () {
     Route::get('template-preview/download/{templateId}',[TemplatePreviewController::class,'download'])->name('template-preview.download');
     Route::post('template-preview/select/{idTemplate}', [TemplatePreviewController::class, 'selectTemplate'])
         ->name('template-preview.select');
-    
-    
+
+
 });
 
 /*
@@ -625,9 +625,11 @@ Route::middleware(['auth', TenantMiddleware::class])->group(function () {
 
 // Incluir rotas de autenticação do sistema
 require __DIR__ . '/auth.php';
+require __DIR__ . '/support.php';
 require __DIR__ . '/admin_settings.php';
 require __DIR__ . '/admin_plans.php';
 require __DIR__ . '/Admin_monitoring.php';
+
 /*
 |--------------------------------------------------------------------------
 | UTILITÁRIOS

@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
 class SupportTicket extends Model
@@ -12,213 +13,193 @@ class SupportTicket extends Model
     use HasFactory;
 
     protected $fillable = [
+        'ticket_number',
         'user_id',
+        'company_id',
+        'assigned_to',
         'subject',
         'description',
-        'category',
         'priority',
         'status',
-        'satisfaction_rating',
-        'satisfaction_comment',
+        'category',
         'first_response_at',
         'resolved_at',
-        'admin_viewed_at',
+        'closed_at',
+        'last_activity_at',
+        'satisfaction_rating',
+        'satisfaction_comment',
+        'attachments',
         'metadata'
     ];
 
     protected $casts = [
+        'attachments' => 'array',
         'metadata' => 'array',
         'first_response_at' => 'datetime',
         'resolved_at' => 'datetime',
-        'admin_viewed_at' => 'datetime',
-        'satisfaction_rating' => 'integer'
+        'closed_at' => 'datetime',
+        'last_activity_at' => 'datetime',
     ];
 
-    // Relacionamentos
-    public function user()
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($ticket) {
+            $ticket->ticket_number = static::generateTicketNumber();
+            $ticket->last_activity_at = now();
+        });
+
+        static::updating(function ($ticket) {
+            $ticket->last_activity_at = now();
+        });
+    }
+
+    // Relationships
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function replies()
+    public function company(): BelongsTo
     {
-        return $this->hasMany(TicketReply::class)->orderBy('created_at');
+        return $this->belongsTo(Company::class);
     }
 
-    public function attachments()
-    {
-        return $this->hasMany(TicketAttachment::class);
-    }
-
-    public function assignedTo()
+    public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    public function replies(): HasMany
+    {
+        return $this->hasMany(SupportTicketReply::class, 'ticket_id')->orderBy('created_at');
+    }
+
+    public function views(): HasMany
+    {
+        return $this->hasMany(SupportTicketView::class, 'ticket_id');
+    }
+
     // Scopes
-    public function scopeOpen(Builder $query)
+    public function scopeOpen($query)
     {
         return $query->where('status', 'open');
     }
 
-    public function scopePending(Builder $query)
+    public function scopePending($query)
     {
         return $query->where('status', 'pending');
     }
 
-    public function scopeResolved(Builder $query)
+    public function scopeInProgress($query)
+    {
+        return $query->where('status', 'in_progress');
+    }
+
+    public function scopeResolved($query)
     {
         return $query->where('status', 'resolved');
     }
 
-    public function scopeClosed(Builder $query)
+    public function scopeClosed($query)
     {
         return $query->where('status', 'closed');
     }
 
-    public function scopeHighPriority(Builder $query)
-    {
-        return $query->where('priority', 'high');
-    }
-
-    public function scopeUnassigned(Builder $query)
+    public function scopeUnassigned($query)
     {
         return $query->whereNull('assigned_to');
     }
 
-    public function scopeOverdue(Builder $query)
+    public function scopeOverdue($query)
     {
-        return $query->where('created_at', '<', now()->subDays(2))
-                     ->whereIn('status', ['open', 'pending']);
+        return $query->where('created_at', '<', now()->subHours(24))
+                    ->whereIn('status', ['open', 'pending']);
     }
 
-    // Mutators & Accessors
-    public function getStatusColorAttribute()
+    public function scopeHighPriority($query)
+    {
+        return $query->whereIn('priority', ['high', 'urgent']);
+    }
+
+    // Métodos auxiliares
+    public static function generateTicketNumber(): string
+    {
+        $prefix = 'TKT';
+        $year = date('Y');
+        $month = date('m');
+
+        $lastTicket = static::whereYear('created_at', $year)
+                           ->whereMonth('created_at', $month)
+                           ->orderByDesc('id')
+                           ->first();
+
+        $number = $lastTicket ?
+            (int) substr($lastTicket->ticket_number, -4) + 1 : 1;
+
+        return $prefix . '-' . $year . $month . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+    }
+
+    public function getStatusColorAttribute(): string
     {
         return match($this->status) {
-            'open' => 'bg-red-100 text-red-800',
+            'open' => 'bg-green-100 text-green-800',
             'pending' => 'bg-yellow-100 text-yellow-800',
-            'resolved' => 'bg-green-100 text-green-800',
+            'in_progress' => 'bg-blue-100 text-blue-800',
+            'resolved' => 'bg-purple-100 text-purple-800',
             'closed' => 'bg-gray-100 text-gray-800',
             default => 'bg-gray-100 text-gray-800'
         };
     }
 
-    public function getPriorityColorAttribute()
+    public function getPriorityColorAttribute(): string
     {
         return match($this->priority) {
-            'low' => 'bg-blue-100 text-blue-800',
-            'normal' => 'bg-gray-100 text-gray-800',
+            'low' => 'bg-gray-100 text-gray-800',
+            'medium' => 'bg-blue-100 text-blue-800',
             'high' => 'bg-orange-100 text-orange-800',
             'urgent' => 'bg-red-100 text-red-800',
             default => 'bg-gray-100 text-gray-800'
         };
     }
 
-    public function getStatusTextAttribute()
+    public function isOverdue(): bool
     {
-        return match($this->status) {
-            'open' => 'Aberto',
-            'pending' => 'Pendente',
-            'resolved' => 'Resolvido',
-            'closed' => 'Fechado',
-            default => ucfirst($this->status)
-        };
-    }
-
-    public function getPriorityTextAttribute()
-    {
-        return match($this->priority) {
-            'low' => 'Baixa',
-            'normal' => 'Normal',
-            'high' => 'Alta',
-            'urgent' => 'Urgente',
-            default => ucfirst($this->priority)
-        };
-    }
-
-    public function getCategoryTextAttribute()
-    {
-        return match($this->category) {
-            'technical' => 'Técnico',
-            'billing' => 'Faturação',
-            'feature' => 'Funcionalidade',
-            'bug' => 'Bug',
-            'general' => 'Geral',
-            default => ucfirst($this->category)
-        };
-    }
-
-    public function getResponseTimeAttribute()
-    {
-        if (!$this->first_response_at) {
-            return $this->created_at->diffForHumans();
-        }
-
-        return $this->created_at->diffForHumans($this->first_response_at);
-    }
-
-    public function getResolutionTimeAttribute()
-    {
-        if (!$this->resolved_at) {
-            return null;
-        }
-
-        return $this->created_at->diffForHumans($this->resolved_at);
-    }
-
-    // Métodos auxiliares
-    public function isOpen()
-    {
-        return $this->status === 'open';
-    }
-
-    public function isPending()
-    {
-        return $this->status === 'pending';
-    }
-
-    public function isResolved()
-    {
-        return $this->status === 'resolved';
-    }
-
-    public function isClosed()
-    {
-        return $this->status === 'closed';
-    }
-
-    public function isOverdue()
-    {
-        return $this->created_at->lt(now()->subDays(2)) &&
+        return $this->created_at->lt(now()->subHours(24)) &&
                in_array($this->status, ['open', 'pending']);
     }
 
-    public function hasReplies()
+    public function markAsViewed(User $user): void
     {
-        return $this->replies()->count() > 0;
+        $this->views()->updateOrCreate(
+            ['user_id' => $user->id],
+            ['viewed_at' => now()]
+        );
     }
 
-    public function lastReply()
+    public function hasBeenViewedBy(User $user): bool
     {
-        return $this->replies()->latest()->first();
+        return $this->views()->where('user_id', $user->id)->exists();
     }
 
-    public function markAsViewed()
+    public function close(string $comment = null): void
     {
-        if (!$this->admin_viewed_at) {
-            $this->update(['admin_viewed_at' => now()]);
+        $this->update([
+            'status' => 'closed',
+            'closed_at' => now()
+        ]);
+
+        if ($comment) {
+            $this->replies()->create([
+                'user_id' => auth()->id(),
+                'message' => $comment,
+                'is_system' => true
+            ]);
         }
     }
 
-    public function setFirstResponse()
-    {
-        if (!$this->first_response_at) {
-            $this->update(['first_response_at' => now()]);
-        }
-    }
-
-    public function resolve($comment = null)
+    public function resolve(string $comment = null): void
     {
         $this->update([
             'status' => 'resolved',
@@ -229,120 +210,147 @@ class SupportTicket extends Model
             $this->replies()->create([
                 'user_id' => auth()->id(),
                 'message' => $comment,
-                'is_internal' => false,
-                'is_resolution' => true
+                'is_system' => true
             ]);
         }
     }
 
-    public function close($comment = null)
+    public function assignTo(User $user): void
     {
-        $this->update(['status' => 'closed']);
-
-        if ($comment) {
-            $this->replies()->create([
-                'user_id' => auth()->id(),
-                'message' => $comment,
-                'is_internal' => false,
-                'is_closure' => true
-            ]);
-        }
-    }
-
-    public function assignTo(User $user)
-    {
-        $this->update(['assigned_to' => $user->id]);
+        $this->update([
+            'assigned_to' => $user->id,
+            'status' => 'in_progress'
+        ]);
 
         $this->replies()->create([
             'user_id' => auth()->id(),
             'message' => "Ticket atribuído para {$user->name}",
             'is_internal' => true,
-            'is_assignment' => true
+            'is_system' => true
         ]);
     }
 
-    // Estatísticas estáticas
-    public static function getStats()
+    public function addReply(string $message, User $user, bool $isInternal = false, array $attachments = []): SupportTicketReply
+    {
+        $reply = $this->replies()->create([
+            'user_id' => $user->id,
+            'message' => $message,
+            'is_internal' => $isInternal,
+            'attachments' => $attachments
+        ]);
+
+        // Marcar primeira resposta se for de um admin
+        if (!$this->first_response_at && $user->is_super_admin) {
+            $this->update(['first_response_at' => now()]);
+        }
+
+        return $reply;
+    }
+
+    // Estatísticas
+    public static function getStats(): array
     {
         return [
             'total' => static::count(),
             'open' => static::open()->count(),
             'pending' => static::pending()->count(),
+            'in_progress' => static::inProgress()->count(),
             'resolved' => static::resolved()->count(),
             'closed' => static::closed()->count(),
             'overdue' => static::overdue()->count(),
             'unassigned' => static::unassigned()->count(),
-            'avg_response_time' => static::getAverageResponseTime(),
-            'satisfaction_rate' => static::getSatisfactionRate()
+            'high_priority' => static::highPriority()->count(),
         ];
     }
+}
 
-    public static function getAverageResponseTime()
+class SupportTicketReply extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'ticket_id',
+        'user_id',
+        'message',
+        'is_internal',
+        'is_system',
+        'attachments',
+        'read_at'
+    ];
+
+    protected $casts = [
+        'attachments' => 'array',
+        'read_at' => 'datetime',
+        'is_internal' => 'boolean',
+        'is_system' => 'boolean'
+    ];
+
+    public function ticket(): BelongsTo
     {
-        $tickets = static::whereNotNull('first_response_at')
-            ->select('created_at', 'first_response_at')
-            ->get();
-
-        if ($tickets->isEmpty()) {
-            return 'N/A';
-        }
-
-        $totalMinutes = $tickets->sum(function ($ticket) {
-            return $ticket->created_at->diffInMinutes($ticket->first_response_at);
-        });
-
-        $averageMinutes = $totalMinutes / $tickets->count();
-
-        if ($averageMinutes < 60) {
-            return round($averageMinutes) . ' min';
-        } elseif ($averageMinutes < 1440) {
-            return round($averageMinutes / 60, 1) . ' h';
-        } else {
-            return round($averageMinutes / 1440, 1) . ' dias';
-        }
+        return $this->belongsTo(SupportTicket::class, 'ticket_id');
     }
 
-    public static function getSatisfactionRate()
+    public function user(): BelongsTo
     {
-        $ratedTickets = static::whereNotNull('satisfaction_rating')->get();
-
-        if ($ratedTickets->isEmpty()) {
-            return 'N/A';
-        }
-
-        $averageRating = $ratedTickets->avg('satisfaction_rating');
-        return round(($averageRating / 5) * 100) . '%';
+        return $this->belongsTo(User::class);
     }
 
-    // Categories and priorities
-    public static function getCategories()
+    public function markAsRead(): void
     {
-        return [
-            'technical' => 'Técnico',
-            'billing' => 'Faturação',
-            'feature' => 'Funcionalidade',
-            'bug' => 'Bug',
-            'general' => 'Geral'
-        ];
+        $this->update(['read_at' => now()]);
+    }
+}
+
+class SupportTicketView extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'ticket_id',
+        'user_id',
+        'viewed_at'
+    ];
+
+    protected $casts = [
+        'viewed_at' => 'datetime'
+    ];
+
+    public function ticket(): BelongsTo
+    {
+        return $this->belongsTo(SupportTicket::class, 'ticket_id');
     }
 
-    public static function getPriorities()
+    public function user(): BelongsTo
     {
-        return [
-            'low' => 'Baixa',
-            'normal' => 'Normal',
-            'high' => 'Alta',
-            'urgent' => 'Urgente'
-        ];
+        return $this->belongsTo(User::class);
+    }
+}
+
+class SupportCategory extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'color',
+        'icon',
+        'is_active',
+        'sort_order'
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean'
+    ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 
-    public static function getStatuses()
+    public function scopeOrdered($query)
     {
-        return [
-            'open' => 'Aberto',
-            'pending' => 'Pendente',
-            'resolved' => 'Resolvido',
-            'closed' => 'Fechado'
-        ];
+        return $query->orderBy('sort_order')->orderBy('name');
     }
 }
