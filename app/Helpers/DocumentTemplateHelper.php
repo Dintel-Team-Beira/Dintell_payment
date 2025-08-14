@@ -21,12 +21,6 @@ class DocumentTemplateHelper
     const CACHE_TTL = 300; // 5 minutos
     
     /**
-     * Instância singleton do dompdf para reutilização
-     */
-    private static ?Dompdf $dompdfInstance = null;
-    private static ?Options $optionsInstance = null;
-    
-    /**
      * Gerar e baixar PDF do template (versão otimizada)
      *
      * @param DocumentTemplate $template
@@ -111,8 +105,8 @@ class DocumentTemplateHelper
     {
         $dompdf = self::getDompdfInstance($options);
         
-        // Limpar instância anterior
-        $dompdf->getCanvas()->destroy();
+        // Reset da instância (método correto)
+        $dompdf = new Dompdf(self::getOptimizedOptions($options));
         
         // Carregar HTML
         $dompdf->loadHtml($html);
@@ -132,15 +126,12 @@ class DocumentTemplateHelper
     }
     
     /**
-     * Obter instância singleton do dompdf (performance)
+     * Obter instância do dompdf (sem singleton para evitar conflitos)
      */
     protected static function getDompdfInstance(array $options = []): Dompdf
     {
-        if (self::$dompdfInstance === null) {
-            self::$dompdfInstance = new Dompdf(self::getOptimizedOptions($options));
-        }
-        
-        return self::$dompdfInstance;
+        // Sempre criar nova instância para evitar problemas
+        return new Dompdf(self::getOptimizedOptions($options));
     }
     
     /**
@@ -148,43 +139,39 @@ class DocumentTemplateHelper
      */
     protected static function getOptimizedOptions(array $customOptions = []): Options
     {
-        if (self::$optionsInstance === null) {
-            $options = new Options();
-            
-            // Configurações mínimas para máxima performance
-            $performanceConfig = [
-                'defaultFont' => self::DEFAULT_FONT,
-                'isRemoteEnabled' => false, // Desabilitar para performance
-                'isHtml5ParserEnabled' => true,
-                'chroot' => public_path(),
-                'tempDir' => sys_get_temp_dir(),
-                'enableFontSubsetting' => false, // Melhora performance
-                'pdfBackend' => 'CPDF',
-                'defaultMediaType' => 'print',
-                'dpi' => 96, // Menor DPI = melhor performance
-                'enablePhp' => false,
-                'enableJavascript' => false,
-                'debugKeepTemp' => false,
-                'debugCss' => false,
-                'debugLayout' => false,
-                'logOutputFile' => null,
-                'fontDir' => null, // Usar fontes do sistema
-                'fontCache' => null,
-            ];
-            
-            // Merge com opções customizadas
-            $finalConfig = array_merge($performanceConfig, $customOptions);
-            
-            foreach ($finalConfig as $key => $value) {
-                if ($value !== null) {
-                    $options->set($key, $value);
-                }
+        $options = new Options();
+        
+        // Configurações mínimas para máxima performance
+        $performanceConfig = [
+            'defaultFont' => self::DEFAULT_FONT,
+            'isRemoteEnabled' => false, // Desabilitar para performance
+            'isHtml5ParserEnabled' => true,
+            'chroot' => public_path(),
+            'tempDir' => sys_get_temp_dir(),
+            'enableFontSubsetting' => false, // Melhora performance
+            'pdfBackend' => 'CPDF',
+            'defaultMediaType' => 'print',
+            'dpi' => 96, // Menor DPI = melhor performance
+            'enablePhp' => false,
+            'enableJavascript' => false,
+            'debugKeepTemp' => false,
+            'debugCss' => false,
+            'debugLayout' => false,
+            'logOutputFile' => null,
+            'fontDir' => null, // Usar fontes do sistema
+            'fontCache' => null,
+        ];
+        
+        // Merge com opções customizadas
+        $finalConfig = array_merge($performanceConfig, $customOptions);
+        
+        foreach ($finalConfig as $key => $value) {
+            if ($value !== null) {
+                $options->set($key, $value);
             }
-            
-            self::$optionsInstance = $options;
         }
         
-        return self::$optionsInstance;
+        return $options;
     }
     
     /**
@@ -255,7 +242,7 @@ class DocumentTemplateHelper
         $options = new Options();
         $options->set('defaultFont', 'DejaVu Sans');
         $options->set('isRemoteEnabled', false);
-        $options->set('dpi', 96);
+        $options->set('dpi', 72);
         $options->set('enablePhp', false);
         $options->set('debugCss', false);
         
@@ -265,7 +252,7 @@ class DocumentTemplateHelper
         $dompdf->render();
         
         // Nome simples
-        $fileName = $template->name . '_' . time() . '.pdf';
+        $fileName = $template->id . '_' . time() . '.pdf';
         
         return response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
@@ -286,38 +273,37 @@ class DocumentTemplateHelper
     }
     
     /**
-     * Destruir instâncias singleton para liberar memória
+     * Limpeza simplificada (o GC do PHP cuida da memória)
      */
     public static function cleanup(): void
     {
-        if (self::$dompdfInstance) {
-            self::$dompdfInstance->getCanvas()->destroy();
-            self::$dompdfInstance = null;
+        // Forçar coleta de lixo se necessário
+        if (function_exists('gc_collect_cycles')) {
+            gc_collect_cycles();
         }
-        self::$optionsInstance = null;
     }
 }
 
 /**
  * Trait para controllers que usam o helper (performance)
  */
-// trait OptimizedPdfDownload
-// {
-//     protected function quickPdfDownload(int $templateId, array $data): Response
-//     {
-//         $template = DocumentTemplate::select(['id', 'name', 'html_template', 'css_styles'])
-//             ->findOrFail($templateId);
+trait OptimizedPdfDownload
+{
+    protected function quickPdfDownload(int $templateId, array $data): Response
+    {
+        $template = DocumentTemplate::select(['id', 'name', 'html_template', 'css_styles'])
+            ->findOrFail($templateId);
             
-//         return DocumentTemplateHelper::quickDownload($template, $data);
-//     }
+        return DocumentTemplateHelper::quickDownload($template, $data);
+    }
     
-//     protected function cachedPdfDownload(int $templateId, array $data): Response
-//     {
-//         $template = DocumentTemplate::findOrFail($templateId);
+    protected function cachedPdfDownload(int $templateId, array $data): Response
+    {
+        $template = DocumentTemplate::findOrFail($templateId);
         
-//         return DocumentTemplateHelper::downloadPdfDocument($template, $data, [
-//             'enable_cache' => true,
-//             'enable_logging' => false
-//         ]);
-//     }
-// }
+        return DocumentTemplateHelper::downloadPdfDocument($template, $data, [
+            'enable_cache' => true,
+            'enable_logging' => false
+        ]);
+    }
+}

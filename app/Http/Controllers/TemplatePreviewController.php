@@ -109,10 +109,12 @@ class TemplatePreviewController extends Controller
             'timestamp_format' => 'Y-m-d'
         ];
         // return DocumentTemplateHelper::quickDownload($template, $data);
-        return DocumentTemplateHelper::downloadPdfDocument($template, $data,[
-        'enable_cache' => true,
-        'enable_logging' => false
-        ]);
+        return DocumentTemplateHelper::downloadPdfDocument($template, $data, [
+    'enable_cache' => true,
+    'enable_logging' => false,
+    'paper_size' => 'A4',
+    'orientation' => 'portrait'
+]);
         // DocumentTemplateHelper::validateTemplate($template);
         // return DocumentTemplateHelper::downloadPdfDocument($template, $data, $options);
         // Renderizar template
