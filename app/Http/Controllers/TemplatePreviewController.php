@@ -15,7 +15,7 @@ class TemplatePreviewController extends Controller
 
     public function list($type)
     {
-        $companyId = auth()->user()->company_id; // ou como você obtém a empresa
+        $companyId = auth()->user()->company_id;
 
         $templates = DocumentTemplate::where('type', $type)
             ->where('company_id', $companyId)
@@ -108,7 +108,7 @@ class TemplatePreviewController extends Controller
         $options->set('defaultFont', 'DejaVu Sans');
         $options->set('isRemoteEnabled', true);
         $options->set('isHtml5ParserEnabled', true);
-        // $options->set('chroot', public_path());
+        $options->set('chroot', public_path());
 
         $dompdf = new Dompdf($options);
 
