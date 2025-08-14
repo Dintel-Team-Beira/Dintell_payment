@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Company;
 use App\Models\Plan;
 use App\Models\User;
+use App\Models\Company;
+use Illuminate\Support\Str;
 use App\Traits\LogsActivity;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 
 class CompaniesController extends Controller
 {
@@ -70,49 +72,85 @@ class CompaniesController extends Controller
         return view('admin.companies.index', compact('companies', 'stats'));
     }
 
-    public function show(Company $company)
-    {
-        $company->load(['creator', 'users', 'invoices' => function ($query) {
-            $query->latest()->limit(10);
-        }]);
+public function show(Company $company)
+{
+    $company->load(['creator', 'users', 'invoices' => function ($query) {
+        $query->latest()->limit(10);
+    }]);
 
-        // Estatísticas da empresa
-        $stats = [
-            'total_invoices' => $company->invoices()->count(),
-            'paid_invoices' => $company->invoices()->where('status', 'paid')->count(),
-            'pending_invoices' => $company->invoices()->where('status', 'pending')->count(),
-            'total_revenue' => $company->invoices()->where('status', 'paid')->sum('total_amount'),
-            'monthly_revenue' => $company->invoices()
-                ->where('status', 'paid')
-                ->whereMonth('created_at', now()->month)
-                ->sum('total_amount'),
-            'avg_invoice_value' => $company->invoices()->where('status', 'paid')->avg('total_amount'),
-        ];
+    // Estatísticas da empresa
+    $stats = [
+        'total_invoices' => $company->invoices()->count(),
+        'paid_invoices' => $company->invoices()->where('status', 'paid')->count(),
+        'pending_invoices' => $company->invoices()->where('status', 'pending')->count(),
+        'total_revenue' => $company->invoices()->where('status', 'paid')->sum('total_amount'),
+        'monthly_revenue' => $company->invoices()
+            ->where('status', 'paid')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_amount'),
+        'avg_invoice_value' => $company->invoices()->where('status', 'paid')->avg('total_amount'),
+        // Adicionar estatísticas que faltavam
+        'users' => $company->users()->count(),
+        'clients' => $company->clients()->count(),
+        'invoices_this_month' => $company->invoices()
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count(),
+    ];
 
-        // Atividade mensal (últimos 12 meses)
-        $monthlyActivity = DB::table('invoices')
-            ->where('company_id', $company->id)
-            ->where('created_at', '>=', now()->subMonths(12))
-            ->select(
-                DB::raw('YEAR(created_at) as year'),
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('COUNT(*) as invoices_count'),
-                DB::raw('SUM(CASE WHEN status = "paid" THEN total_amount ELSE 0 END) as revenue')
-            )
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
-            ->get();
+    // Atividade mensal (últimos 12 meses)
+    $monthlyActivity = DB::table('invoices')
+        ->where('company_id', $company->id)
+        ->where('created_at', '>=', now()->subMonths(12))
+        ->select(
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('COUNT(*) as invoices_count'),
+            DB::raw('SUM(CASE WHEN status = "paid" THEN total_amount ELSE 0 END) as revenue')
+        )
+        ->groupBy('year', 'month')
+        ->orderBy('year', 'desc')
+        ->orderBy('month', 'desc')
+        ->get();
 
-        // Log da visualização
-        $this->logAdminActivity('Visualizou detalhes da empresa', [
-            'company_id' => $company->id,
-            'company_name' => $company->name,
-            'company_status' => $company->status
-        ]);
+    // Carregar planos de subscrição para eventual alteração
+    $subscriptionPlans = [
+        'basic' => [
+            'name' => 'Básico',
+            'price' => 500,
+            'max_users' => 1,
+            'max_invoices_per_month' => 50,
+            'max_clients' => 100,
+            'features' => ['Faturação básica', 'Relatórios simples']
+        ],
+        'premium' => [
+            'name' => 'Premium',
+            'price' => 1500,
+            'max_users' => 5,
+            'max_invoices_per_month' => 200,
+            'max_clients' => 500,
+            'features' => ['Faturação avançada', 'API access', 'Relatórios avançados', 'Suporte prioritário']
+        ],
+        'enterprise' => [
+            'name' => 'Empresarial',
+            'price' => 3000,
+            'max_users' => 999,
+            'max_invoices_per_month' => 999999,
+            'max_clients' => 999999,
+            'features' => ['Ilimitado', 'Domínio personalizado', 'Integração avançada', 'Suporte dedicado']
+        ]
+    ];
 
-        return view('admin.companies.show', compact('company', 'stats', 'monthlyActivity'));
-    }
+    // Log da visualização
+    $this->logAdminActivity('Visualizou detalhes da empresa', [
+        'company_id' => $company->id,
+        'company_name' => $company->name,
+        'company_status' => $company->status
+    ]);
+
+    return view('admin.companies.show', compact('company', 'stats', 'monthlyActivity', 'subscriptionPlans'));
+}
 
    public function create()
     {
@@ -194,78 +232,96 @@ class CompaniesController extends Controller
     }
 
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:companies',
-            'email' => 'required|email|unique:companies',
+            'slug' => 'nullable|string|max:255|unique:companies,slug',
+            'email' => 'required|email|max:255|unique:companies,email',
             'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
+            'address' => 'nullable|string|max:500',
             'city' => 'nullable|string|max:100',
             'tax_number' => 'nullable|string|max:50',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'subscription_plan' => 'required|in:basic,premium,enterprise',
-            'status' => 'required|in:active,trial,suspended',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'subscription_plan' => 'required|exists:plans,slug',
+            'status' => 'required|in:trial,active,suspended',
             'trial_days' => 'nullable|integer|min:1|max:90',
             'custom_domain_enabled' => 'boolean',
             'api_access_enabled' => 'boolean',
         ]);
 
-        DB::beginTransaction();
-
         try {
+            // Gerar slug se não fornecido
+            $slug = $request->slug;
+            if (empty($slug)) {
+                $slug = Str::slug($request->name);
+
+                // Verificar se slug já existe e gerar um único
+                $originalSlug = $slug;
+                $counter = 1;
+                while (Company::where('slug', $slug)->exists()) {
+                    $slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+            }
+
+            // Buscar o plano selecionado
+            $plan = Plan::where('slug', $request->subscription_plan)->firstOrFail();
+
             // Upload do logo se fornecido
+            $logoPath = null;
             if ($request->hasFile('logo')) {
-                $validated['logo'] = $request->file('logo')->store('companies/logos', 'public');
+                $logoPath = $request->file('logo')->store('companies/logos', 'public');
             }
 
-            // Configurações baseadas no plano
-            $planConfig = $this->getPlanConfiguration($validated['subscription_plan']);
-            $validated = array_merge($validated, $planConfig);
-
-            // Configurar trial se necessário
-            if ($validated['status'] === 'trial') {
-                $trialDays = $validated['trial_days'] ?? 30;
-                $validated['trial_ends_at'] = now()->addDays($trialDays);
-            }
-
-            $validated['created_by'] = auth()->id();
-
-            $company = Company::create($validated);
-
-            DB::commit();
-
-            // Log da criação
-            $this->logAdminActivity('Criou nova empresa', [
-                'company_id' => $company->id,
-                'company_name' => $company->name,
-                'company_email' => $company->email,
-                'subscription_plan' => $company->subscription_plan,
-                'status' => $company->status
+            // Criar a empresa
+            $company = Company::create([
+                'name' => $request->name,
+                'slug' => $slug,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'city' => $request->city,
+                'tax_number' => $request->tax_number,
+                'logo' => $logoPath,
+                'plan_id' => $plan->id,
+                'status' => $request->status,
+                'trial_ends_at' => $request->status === 'trial' && $request->trial_days
+                    ? now()->addDays($request->trial_days)
+                    : null,
+                'custom_domain_enabled' => $request->boolean('custom_domain_enabled'),
+                'api_access_enabled' => $request->boolean('api_access_enabled'),
+                'settings' => [
+                    'created_by_admin' => true,
+                    'creation_date' => now()->toDateString(),
+                    'initial_plan' => $plan->slug,
+                    'plan_limits' => [
+                        'max_users' => $plan->max_users,
+                        'max_invoices_per_month' => $plan->max_invoices_per_month,
+                        'max_clients' => $plan->max_clients,
+                        'max_products' => $plan->max_products,
+                        'max_storage_mb' => $plan->max_storage_mb,
+                    ]
+                ]
             ]);
+
+            // Log da ação
+            $this->logAdminActivity("Criou empresa: {$company->name} (ID: {$company->id})");
 
             return redirect()
                 ->route('admin.companies.show', $company)
-                ->with('success', 'Empresa criada com sucesso!');
+                ->with('success', "Empresa '{$company->name}' criada com sucesso!");
 
         } catch (\Exception $e) {
-            DB::rollBack();
-
-            // Remover logo se foi feito upload
-            if (isset($validated['logo'])) {
-                Storage::disk('public')->delete($validated['logo']);
-            }
-
             // Log do erro
-            $this->logAdminActivity('Erro ao criar empresa', [
-                'error' => $e->getMessage(),
-                'data' => $validated
+            Log::error('Erro ao criar empresa: ' . $e->getMessage(), [
+                'request_data' => $request->except(['logo']),
+                'error' => $e->getTraceAsString()
             ]);
 
             return back()
-                ->withErrors(['error' => 'Erro ao criar empresa: ' . $e->getMessage()])
-                ->withInput();
+                ->withInput()
+                ->withErrors(['error' => 'Erro ao criar empresa: ' . $e->getMessage()]);
         }
     }
 
@@ -421,4 +477,43 @@ class CompaniesController extends Controller
 
         return $configs[$plan] ?? $configs['basic'];
     }
+
+    public function edit(Company $company)
+{
+    $subscriptionPlans = [
+        'basic' => [
+            'name' => 'Básico',
+            'price' => 500,
+            'max_users' => 1,
+            'max_invoices_per_month' => 50,
+            'max_clients' => 100,
+            'features' => ['Faturação básica', 'Relatórios simples']
+        ],
+        'premium' => [
+            'name' => 'Premium',
+            'price' => 1500,
+            'max_users' => 5,
+            'max_invoices_per_month' => 200,
+            'max_clients' => 500,
+            'features' => ['Faturação avançada', 'API access', 'Relatórios avançados', 'Suporte prioritário']
+        ],
+        'enterprise' => [
+            'name' => 'Empresarial',
+            'price' => 3000,
+            'max_users' => 999,
+            'max_invoices_per_month' => 999999,
+            'max_clients' => 999999,
+            'features' => ['Ilimitado', 'Domínio personalizado', 'Integração avançada', 'Suporte dedicado']
+        ]
+    ];
+
+    // Log da ação
+    $this->logAdminActivity('Acessou formulário de edição de empresa', [
+        'company_id' => $company->id,
+        'company_name' => $company->name
+    ]);
+
+    return view('admin.companies.edit', compact('company', 'subscriptionPlans'));
+}
+
 }

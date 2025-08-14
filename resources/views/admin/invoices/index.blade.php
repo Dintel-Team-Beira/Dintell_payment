@@ -242,8 +242,8 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $invoice->client->name }}</div>
-                                <div class="text-xs text-gray-500">{{ $invoice->client->email }}</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $invoice->client?->name }}</div>
+                                <div class="text-xs text-gray-500">{{ $invoice->client?->email }}</div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                                 <div>{{ $invoice->date}}</div>

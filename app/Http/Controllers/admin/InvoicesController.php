@@ -16,7 +16,7 @@ class InvoicesController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Invoice::with(['company:id,name,email,logo', 'client:id,name,email']);
+        $query = Invoice::with(['company', 'client']);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -83,7 +83,7 @@ class InvoicesController extends Controller
 
     public function show(Invoice $invoice)
     {
-        $invoice->load(['user', 'company', 'client', 'items', 'payments']);
+        $invoice->load([ 'company', 'client', 'items']);
 
         return view('admin.invoices.show', compact('invoice'));
     }
