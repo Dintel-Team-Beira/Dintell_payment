@@ -972,7 +972,7 @@ class InvoiceController extends Controller
 
         //USANDO O TEMPLATE
         $data = compact('invoice','company');
-        $template = DocumentTemplate::where('company_id',$company->id)->where('is_selected',true)->first();
+        $template = DocumentTemplate::where('company_id',$company->id)->where('type','invoice')->where('is_selected',true)->first();
         return DocumentTemplateHelper::downloadPdfDocument($template, $data);
       
     }

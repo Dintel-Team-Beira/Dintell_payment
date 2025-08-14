@@ -158,7 +158,7 @@ class DocumentTemplateHelper
             'debugCss' => false,
             'debugLayout' => false,
             'logOutputFile' => null,
-            'fontDir' => null, // Usar fontes do sistema
+            // 'fontDir' => null, // Usar fontes do sistema
             'fontCache' => null,
         ];
         
