@@ -29,7 +29,7 @@ class QuoteController extends Controller
 
     public function index(Request $request)
     {
-             
+
         $query = Quote::with(['client', 'items']);
         // Filtros
         if ($request->filled('status')) {
@@ -101,7 +101,7 @@ class QuoteController extends Controller
             'notes' => 'nullable|string',
             'terms_conditions' => 'nullable|string'
         ]);
-        
+
         $validated['company_id'] = auth()->user()->company_id;
         try {
             DB::beginTransaction();
@@ -361,6 +361,7 @@ class QuoteController extends Controller
             $newQuote->valid_until = Carbon::today()->addDays(30);
             $newQuote->converted_to_invoice_at = null;
             $newQuote->invoice_id = null;
+            $newQuote->company_id = auth()->user()->company_id;
             $newQuote->save();
 
             // Duplicar itens
@@ -399,7 +400,7 @@ class QuoteController extends Controller
     public function downloadPdf(Quote $quote)
     {
         try {
-            
+
             // dd(Company::findOrFail(auth()->user()->company_id));
             return $this->pdfService->downloadQuotePdf($quote);
         } catch (\Exception $e) {
@@ -475,7 +476,7 @@ class QuoteController extends Controller
     // API Methods para AJAX
     public function getActiveProducts(Request $request, $user_id)
     {
-       
+
         try {
             $company_id = User::findOrFail($user_id)->company->id;
         $query = Product::where('is_active', true)->where('company_id', $company_id);
@@ -575,9 +576,10 @@ class QuoteController extends Controller
             'description' => $itemData['description'] ?? '',
             'quantity' => $itemData['quantity'],
             'unit_price' => $itemData['unit_price'],
-            'tax_rate' => $itemData['tax_rate'] ?? 0
+            'tax_rate' => $itemData['tax_rate'] ?? 0,
+            'company_id' => auth()->user()->company_id
         ]);
-
+//    $quoteItem['company_id'] = auth()->user()->company->id;
         // Buscar dados adicionais do produto/serviço
         if ($itemData['type'] === 'product') {
             $product = Product::find($itemData['item_id']);

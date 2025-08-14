@@ -66,11 +66,11 @@
                     </svg>
                     Sistema
                 </button>
-                <button class="px-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent tab-button whitespace-nowrap hover:text-gray-700 hover:border-gray-300" data-tab="template">                     
-                    <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">                         
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM14 5a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM14 17a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2z"/>                     
-                    </svg>                     
-                    Templates                 
+                <button class="px-1 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent tab-button whitespace-nowrap hover:text-gray-700 hover:border-gray-300" data-tab="template">
+                    <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM14 5a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM14 17a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2z"/>
+                    </svg>
+                    Templates
                 </button>
             </nav>
         </div>
@@ -159,7 +159,7 @@
                     <p class="text-xs text-gray-500">produtos cadastrados</p>
                 </div>
                 <div class="flex space-x-3">
-                    <a href="/produtos/create"
+                    <a href="{{ route('products.index') }}"
                        class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-900">
                         Gerenciar
                     </a>
@@ -191,7 +191,7 @@
                     <p class="text-xs text-gray-500">serviços cadastrados</p>
                 </div>
                 <div class="flex space-x-3">
-                    <a href="/servicos/dintell"
+                    <a href="{{ route('services.index') }}"
                        class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-900">
                         Gerenciar
                     </a>
