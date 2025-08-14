@@ -66,4 +66,33 @@ class TemplatePreviewController extends Controller
         eval('?>' . $htmlTemplate);
         return ob_get_clean();
     }
+
+    public function download($templateId)
+    {
+        $template = DocumentTemplate::findOrFail($templateId);
+        $html = $this->show($templateId)->getContent();
+
+        $fileName = "{$template->name}.html";
+        return response($html, 200, [
+            'Content-Type' => 'text/html',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        ]);
+    }
+    public function selectTemplate(Request $request, $idTemplate)
+    {
+        $template = DocumentTemplate::findOrFail($idTemplate);
+        $companyId = auth()->user()->company_id;
+        // dd($companyId);
+
+        // Desmarcar todos os outros templates como selecionados
+        DocumentTemplate::where('company_id', $companyId)
+            ->where('is_selected', true)
+            ->update(['is_selected' => false]);
+
+        // Marcar o template atual como selecionado
+        $template->is_selected = true;
+        $template->save();
+
+        return response()->json(['message' => 'Template selecionado com sucesso.']);
+    }
 }

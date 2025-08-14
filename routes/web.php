@@ -582,6 +582,9 @@ Route::prefix('dintell')->group(function () {
     // Route::get('template-preview/{type}',[TemplatePreviewController::class,'show'])->name('template-preview');
     Route::get('template-preview/list/{type}',[TemplatePreviewController::class,'list'])->name('template-preview.list');
     Route::get('template-preview/preview/{templateId}',[TemplatePreviewController::class,'show'])->name('template-preview');
+    Route::get('template-preview/download/{templateId}',[TemplatePreviewController::class,'download'])->name('template-preview.download');
+    Route::post('template-preview/select/{idTemplate}', [TemplatePreviewController::class, 'selectTemplate'])
+        ->name('template-preview.select');
     
     
 });
