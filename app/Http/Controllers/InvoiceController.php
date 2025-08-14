@@ -180,7 +180,7 @@ class InvoiceController extends Controller
         'is_cash_sale' => 'nullable|boolean',
         'cash_received' => 'nullable|numeric|min:0'
     ]);
-        $validated['company_id'] = auth()->user()->company->id;
+
     try {
         DB::beginTransaction();
 
@@ -215,7 +215,8 @@ class InvoiceController extends Controller
             'status' => 'draft',
             'notes' => $validated['notes'],
             'terms_conditions' => $validated['terms_conditions'],
-            'document_type' => Invoice::TYPE_INVOICE
+            'document_type' => Invoice::TYPE_INVOICE,
+            'company_id'=> auth()->user()->company->id
         ];
 
         // Se é venda à dinheiro
@@ -294,7 +295,8 @@ class InvoiceController extends Controller
             'tax_rate' => $taxRate,
             'subtotal' => $subtotal,
             'tax_amount' => $taxAmount,
-            'total' => $total
+            'total' => $total,
+            'company_id'=>$invoice->company_id
         ]);
     }
 
