@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Blade;
 class TemplatePreviewController extends Controller
 {
 
-    
+
     public function list($type)
     {
         $companyId = auth()->user()->company_id;
@@ -36,7 +36,7 @@ class TemplatePreviewController extends Controller
 
         // Dados fictícios ou reais dependendo do tipo
         if ($template->type === 'invoice') {
-            $invoice = Invoice::where('company_id', $company->id)->where('id', 14)->first();
+            $invoice = Invoice::where('company_id', $company->id)->first();
             $data = compact('invoice', 'company');
         } elseif ($template->type === 'quote') {
             $quote = Quote::where('company_id', $company->id)->first();
@@ -87,7 +87,7 @@ class TemplatePreviewController extends Controller
         $template = DocumentTemplate::findOrFail($templateId);
         $company = $template->company;
         if ($template->type === 'invoice') {
-            $invoice = Invoice::with(['client', 'items'])->where('company_id', $company->id)->where('id',14)->first();
+            $invoice = Invoice::with(['client', 'items'])->where('company_id', $company->id)->first();
             if (!$invoice) {
                 $invoice = $this->createSampleInvoice($company);
             }
@@ -152,7 +152,7 @@ class TemplatePreviewController extends Controller
         //     'Pragma' => 'no-cache'
         // ]);
     }
- 
+
     public function selectTemplate(Request $request, $idTemplate)
     {
         $template = DocumentTemplate::findOrFail($idTemplate);

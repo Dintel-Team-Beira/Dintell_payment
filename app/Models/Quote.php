@@ -367,7 +367,8 @@ public function convertToInvoice()
         'total' => $this->total,
         'status' => 'draft',
         'notes' => $this->notes,
-        'invoice_number' => $this->generateInvoiceNumber()
+        'invoice_number' => $this->generateInvoiceNumber(),
+        'company_id' => $this->company_id // Garantir que a fatura pertença à mesma empresa
     ];
 
     $invoice = Invoice::create($invoiceData);
@@ -453,7 +454,8 @@ private function getInvoiceItemData($quoteItem, $invoiceId)
         'category' => $quoteItem->category ?? null,
         'unit' => $quoteItem->unit ?? null,
         'complexity_level' => $quoteItem->complexity_level ?? null,
-        'estimated_hours' => $quoteItem->estimated_hours ?? null
+        'estimated_hours' => $quoteItem->estimated_hours ?? null,
+        'company_id' => $quoteItem->company_id ?? auth()->user()->company_id
     ];
 
     // Adicionar apenas campos que existem na tabela
