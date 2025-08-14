@@ -7,384 +7,317 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Response;
 
 class DocumentTemplateHelper
 {
     /**
-     * Configurações padrão para PDF
+     * Configurações otimizadas para performance
      */
     const DEFAULT_PAPER_SIZE = 'A4';
     const DEFAULT_ORIENTATION = 'portrait';
     const DEFAULT_FONT = 'DejaVu Sans';
+    const CACHE_TTL = 300; // 5 minutos
     
     /**
-     * Gerar e baixar PDF do template
+     * Instância singleton do dompdf para reutilização
+     */
+    private static ?Dompdf $dompdfInstance = null;
+    private static ?Options $optionsInstance = null;
+    
+    /**
+     * Gerar e baixar PDF do template (versão otimizada)
      *
      * @param DocumentTemplate $template
      * @param array $data
      * @param array $options
      * @return Response
-     * @throws \Exception
      */
     public static function downloadPdfDocument(
         DocumentTemplate $template, 
         array $data, 
         array $options = []
     ): Response {
+        $startTime = microtime(true);
+        
         try {
-            // Renderizar HTML
-            $html = self::renderHtml($template, $data);
+            // Renderizar HTML (com cache se habilitado)
+            $html = self::renderHtmlOptimized($template, $data, $options);
             
-            // Gerar PDF
-            $dompdf = self::generatePdf($html, $options);
+            // Gerar PDF usando instância reutilizável
+            $pdfOutput = self::generatePdfOptimized($html, $options);
             
-            // Nome do arquivo
-            $fileName = self::generateFileName($template, $options);
+            // Nome do arquivo simples
+            $fileName = self::generateSimpleFileName($template);
             
-            // Log da operação
-            self::logPdfGeneration($template, $fileName);
-            
-            return self::createDownloadResponse($dompdf, $fileName);
-            
-        } catch (\Exception $e) {
-            Log::error('Erro ao gerar PDF do template', [
-                'template_id' => $template->id,
-                'template_name' => $template->name,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            throw new \Exception('Falha ao gerar PDF: ' . $e->getMessage(), 0, $e);
-        }
-    }
-    
-    /**
-     * Renderizar apenas o HTML (para preview)
-     *
-     * @param DocumentTemplate $template
-     * @param array $data
-     * @return string
-     */
-    public static function renderHtml(DocumentTemplate $template, array $data): string
-    {
-        try {
-            // Renderizar template Blade
-            $html = Blade::render($template->html_template, $data);
-            
-            // Aplicar CSS
-            if ($template->css_styles) {
-                $cssStyles = self::processCssStyles($template->css_styles);
-                $html = "<style>{$cssStyles}</style>" . $html;
+            // Log apenas se habilitado
+            if ($options['enable_logging'] ?? false) {
+                $duration = round((microtime(true) - $startTime) * 1000, 2);
+                self::logPdfGeneration($template, $fileName, $duration);
             }
             
-            return $html;
+            // Resposta otimizada
+            return self::createOptimizedDownloadResponse($pdfOutput, $fileName);
             
         } catch (\Exception $e) {
-            Log::error('Erro ao renderizar HTML do template', [
+            // Log de erro simplificado
+            Log::error('PDF generation failed', [
                 'template_id' => $template->id,
                 'error' => $e->getMessage()
             ]);
             
-            throw new \Exception('Falha ao renderizar template: ' . $e->getMessage(), 0, $e);
+            throw $e;
         }
     }
     
     /**
-     * Gerar PDF a partir do HTML
-     *
-     * @param string $html
-     * @param array $options
-     * @return Dompdf
+     * Renderizar HTML com otimizações
      */
-    public static function generatePdf(string $html, array $options = []): Dompdf
+    protected static function renderHtmlOptimized(
+        DocumentTemplate $template, 
+        array $data, 
+        array $options = []
+    ): string {
+        // Cache do HTML renderizado (opcional)
+        $enableCache = $options['enable_cache'] ?? false;
+        $cacheKey = $enableCache ? 'template_html_' . $template->id . '_' . md5(serialize($data)) : null;
+        
+        if ($enableCache && Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+        
+        // Renderizar template
+        $html = Blade::render($template->html_template, $data);
+        
+        // CSS otimizado
+        if ($template->css_styles) {
+            $css = self::processCssOptimized($template->css_styles);
+            $html = "<style>{$css}</style>{$html}";
+        }
+        
+        // Cache se habilitado
+        if ($enableCache && $cacheKey) {
+            Cache::put($cacheKey, $html, self::CACHE_TTL);
+        }
+        
+        return $html;
+    }
+    
+    /**
+     * Gerar PDF com otimizações máximas
+     */
+    protected static function generatePdfOptimized(string $html, array $options = []): string
     {
-        $dompdfOptions = self::loadOptions($options);
-        $dompdf = new Dompdf($dompdfOptions);
+        $dompdf = self::getDompdfInstance($options);
+        
+        // Limpar instância anterior
+        $dompdf->getCanvas()->destroy();
         
         // Carregar HTML
         $dompdf->loadHtml($html);
         
-        // Configurar papel
+        // Configurar papel (apenas se diferente do padrão)
         $paperSize = $options['paper_size'] ?? self::DEFAULT_PAPER_SIZE;
         $orientation = $options['orientation'] ?? self::DEFAULT_ORIENTATION;
-        $dompdf->setPaper($paperSize, $orientation);
+        
+        if ($paperSize !== self::DEFAULT_PAPER_SIZE || $orientation !== self::DEFAULT_ORIENTATION) {
+            $dompdf->setPaper($paperSize, $orientation);
+        }
         
         // Renderizar
         $dompdf->render();
         
-        return $dompdf;
+        return $dompdf->output();
     }
     
     /**
-     * Salvar PDF em arquivo
-     *
-     * @param DocumentTemplate $template
-     * @param array $data
-     * @param string $filePath
-     * @param array $options
-     * @return bool
+     * Obter instância singleton do dompdf (performance)
      */
-    public static function savePdfToFile(
-        DocumentTemplate $template,
-        array $data,
-        string $filePath,
-        array $options = []
-    ): bool {
-        try {
-            $html = self::renderHtml($template, $data);
-            $dompdf = self::generatePdf($html, $options);
-            
-            // Salvar arquivo
-            $pdfContent = $dompdf->output();
-            return file_put_contents($filePath, $pdfContent) !== false;
-            
-        } catch (\Exception $e) {
-            Log::error('Erro ao salvar PDF', [
-                'template_id' => $template->id,
-                'file_path' => $filePath,
-                'error' => $e->getMessage()
-            ]);
-            
-            return false;
-        }
-    }
-    
-    /**
-     * Configurar opções do dompdf
-     *
-     * @param array $customOptions
-     * @return Options
-     */
-    protected static function loadOptions(array $customOptions = []): Options
+    protected static function getDompdfInstance(array $options = []): Dompdf
     {
-        $options = new Options();
+        if (self::$dompdfInstance === null) {
+            self::$dompdfInstance = new Dompdf(self::getOptimizedOptions($options));
+        }
         
-        // Configurações padrão
-        $defaultOptions = [
-            'defaultFont' => self::DEFAULT_FONT,
-            'isRemoteEnabled' => true,
-            'isHtml5ParserEnabled' => true,
-            'chroot' => public_path(),
-            'tempDir' => sys_get_temp_dir(),
-            'fontDir' => storage_path('fonts/'),
-            'fontCache' => storage_path('fonts/'),
-            'logOutputFile' => null,
-            'enableFontSubsetting' => false,
-            'pdfBackend' => 'CPDF',
-            'defaultMediaType' => 'print',
-            'dpi' => 96,
-            'enablePhp' => false,
-            'enableJavascript' => false,
-            'debugKeepTemp' => false,
-            'debugCss' => false,
-            'debugLayout' => false,
-            'debugLayoutLines' => false,
-            'debugLayoutBlocks' => false,
-            'debugLayoutInline' => false,
-            'debugLayoutPaddingBox' => false,
-            'adminUsername' => null,
-            'adminPassword' => null,
-        ];
-        
-        // Mesclar com opções customizadas
-        $finalOptions = array_merge($defaultOptions, $customOptions);
-        
-        // Aplicar opções
-        foreach ($finalOptions as $key => $value) {
-            if ($value !== null) {
-                $options->set($key, $value);
+        return self::$dompdfInstance;
+    }
+    
+    /**
+     * Opções otimizadas para performance máxima
+     */
+    protected static function getOptimizedOptions(array $customOptions = []): Options
+    {
+        if (self::$optionsInstance === null) {
+            $options = new Options();
+            
+            // Configurações mínimas para máxima performance
+            $performanceConfig = [
+                'defaultFont' => self::DEFAULT_FONT,
+                'isRemoteEnabled' => false, // Desabilitar para performance
+                'isHtml5ParserEnabled' => true,
+                'chroot' => public_path(),
+                'tempDir' => sys_get_temp_dir(),
+                'enableFontSubsetting' => false, // Melhora performance
+                'pdfBackend' => 'CPDF',
+                'defaultMediaType' => 'print',
+                'dpi' => 96, // Menor DPI = melhor performance
+                'enablePhp' => false,
+                'enableJavascript' => false,
+                'debugKeepTemp' => false,
+                'debugCss' => false,
+                'debugLayout' => false,
+                'logOutputFile' => null,
+                'fontDir' => null, // Usar fontes do sistema
+                'fontCache' => null,
+            ];
+            
+            // Merge com opções customizadas
+            $finalConfig = array_merge($performanceConfig, $customOptions);
+            
+            foreach ($finalConfig as $key => $value) {
+                if ($value !== null) {
+                    $options->set($key, $value);
+                }
             }
+            
+            self::$optionsInstance = $options;
         }
         
-        return $options;
+        return self::$optionsInstance;
     }
     
     /**
-     * Processar estilos CSS
-     *
-     * @param mixed $cssStyles
-     * @return string
+     * Processar CSS de forma otimizada
      */
-    protected static function processCssStyles($cssStyles): string
+    protected static function processCssOptimized($cssStyles): string
     {
-        if (is_array($cssStyles)) {
-            return implode(' ', array_values($cssStyles));
-        }
-        
         if (is_string($cssStyles)) {
             return $cssStyles;
         }
         
-        // Se for JSON
-        if (is_string($cssStyles) && self::isJson($cssStyles)) {
-            $decoded = json_decode($cssStyles, true);
-            return is_array($decoded) ? implode(' ', array_values($decoded)) : '';
+        if (is_array($cssStyles)) {
+            return implode('', $cssStyles); // Sem espaços desnecessários
         }
         
         return '';
     }
     
     /**
-     * Verificar se string é JSON válido
-     *
-     * @param string $string
-     * @return bool
+     * Nome de arquivo simples (sem sanitização complexa)
      */
-    protected static function isJson(string $string): bool
+    protected static function generateSimpleFileName(DocumentTemplate $template): string
     {
-        json_decode($string);
-        return json_last_error() === JSON_ERROR_NONE;
+        $safeName = preg_replace('/[^a-zA-Z0-9\-_]/', '_', $template->name);
+        return $safeName . '_' . date('Ymd') . '.pdf';
     }
     
     /**
-     * Gerar nome do arquivo
-     *
-     * @param DocumentTemplate $template
-     * @param array $options
-     * @return string
+     * Resposta otimizada para download
      */
-    protected static function generateFileName(DocumentTemplate $template, array $options = []): string
+    protected static function createOptimizedDownloadResponse(string $pdfContent, string $fileName): Response
     {
-        $prefix = $options['file_prefix'] ?? '';
-        $suffix = $options['file_suffix'] ?? '';
-        $includeTimestamp = $options['include_timestamp'] ?? true;
-        $includeType = $options['include_type'] ?? true;
-        
-        $parts = [];
-        
-        if ($prefix) {
-            $parts[] = self::sanitizeFileName($prefix);
-        }
-        
-        if ($includeType) {
-            $parts[] = ucfirst($template->type);
-        }
-        
-        $parts[] = self::sanitizeFileName($template->name);
-        
-        if ($includeTimestamp) {
-            $timestamp = $options['timestamp_format'] ?? 'Y-m-d_H-i-s';
-            $parts[] = now()->format($timestamp);
-        }
-        
-        if ($suffix) {
-            $parts[] = self::sanitizeFileName($suffix);
-        }
-        
-        return implode('_', $parts) . '.pdf';
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+            'Content-Length' => strlen($pdfContent),
+            'Cache-Control' => 'no-store',
+            'Pragma' => 'no-cache'
+        ]);
     }
     
     /**
-     * Sanitizar nome do arquivo
-     *
-     * @param string $filename
-     * @return string
+     * Log simplificado
      */
-    protected static function sanitizeFileName(string $filename): string
+    protected static function logPdfGeneration(DocumentTemplate $template, string $fileName, float $duration): void
     {
-        // Converter para ASCII
-        $filename = transliterator_transliterate('Any-Latin; Latin-ASCII', $filename);
-        
-        // Remover caracteres especiais
-        $filename = preg_replace('/[^a-zA-Z0-9\-_]/', '_', $filename);
-        
-        // Remover underscores duplicados
-        $filename = preg_replace('/_+/', '_', $filename);
-        
-        return trim($filename, '_');
+        Log::info('PDF generated', [
+            'template_id' => $template->id,
+            'file_name' => $fileName,
+            'duration_ms' => $duration,
+            'user_id' => auth()->id()
+        ]);
     }
     
     /**
-     * Criar resposta de download
-     *
-     * @param Dompdf $dompdf
-     * @param string $fileName
-     * @return Response
+     * Versão ultra-rápida para downloads frequentes
      */
-    protected static function createDownloadResponse(Dompdf $dompdf, string $fileName): Response
+    public static function quickDownload(DocumentTemplate $template, array $data): Response
     {
+        // HTML mínimo
+        $html = Blade::render($template->html_template, $data);
+        
+        if ($template->css_styles) {
+            $html = "<style>{$template->css_styles}</style>{$html}";
+        }
+        
+        // PDF com configurações mínimas
+        $options = new Options();
+        $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('isRemoteEnabled', false);
+        $options->set('dpi', 96);
+        $options->set('enablePhp', false);
+        $options->set('debugCss', false);
+        
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        
+        // Nome simples
+        $fileName = $template->name . '_' . time() . '.pdf';
+        
         return response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-            'Content-Length' => strlen($dompdf->output()),
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-            'Pragma' => 'no-cache',
-            'Expires' => '0'
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
         ]);
     }
     
     /**
-     * Log da geração de PDF
-     *
-     * @param DocumentTemplate $template
-     * @param string $fileName
+     * Limpar cache se necessário
      */
-    protected static function logPdfGeneration(DocumentTemplate $template, string $fileName): void
+    public static function clearCache(int $templateId = null): void
     {
-        Log::info('PDF gerado com sucesso', [
-            'template_id' => $template->id,
-            'template_name' => $template->name,
-            'template_type' => $template->type,
-            'file_name' => $fileName,
-            'user_id' => auth()->id(),
-            'company_id' => $template->company_id,
-            'timestamp' => now()->toISOString()
-        ]);
-    }
-    
-    /**
-     * Validar template antes de processar
-     *
-     * @param DocumentTemplate $template
-     * @throws \Exception
-     */
-    public static function validateTemplate(DocumentTemplate $template): void
-    {
-        if (empty($template->html_template)) {
-            throw new \Exception('Template HTML está vazio');
-        }
-        
-        if (!in_array($template->type, ['invoice', 'quote'])) {
-            throw new \Exception('Tipo de template não suportado: ' . $template->type);
-        }
-        
-        // Validar se o template tem conteúdo mínimo
-        if (strlen(trim($template->html_template)) < 50) {
-            throw new \Exception('Template HTML muito pequeno para ser válido');
+        if ($templateId) {
+            Cache::forget("template_html_{$templateId}_*");
+        } else {
+            Cache::flush();
         }
     }
     
     /**
-     * Obter informações do PDF gerado
-     *
-     * @param Dompdf $dompdf
-     * @return array
+     * Destruir instâncias singleton para liberar memória
      */
-    public static function getPdfInfo(Dompdf $dompdf): array
+    public static function cleanup(): void
     {
-        return [
-            'page_count' => $dompdf->getCanvas()->get_page_count(),
-            'page_size' => $dompdf->getPaperSize(),
-            'orientation' => $dompdf->getPaperOrientation(),
-            'file_size' => strlen($dompdf->output()),
-            'file_size_formatted' => self::formatBytes(strlen($dompdf->output()))
-        ];
-    }
-    
-    /**
-     * Formatar bytes para leitura humana
-     *
-     * @param int $bytes
-     * @return string
-     */
-    protected static function formatBytes(int $bytes): string
-    {
-        $units = ['B', 'KB', 'MB', 'GB'];
-        $bytes = max($bytes, 0);
-        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-        $pow = min($pow, count($units) - 1);
-        $bytes /= (1 << (10 * $pow));
-        return round($bytes, 2) . ' ' . $units[$pow];
+        if (self::$dompdfInstance) {
+            self::$dompdfInstance->getCanvas()->destroy();
+            self::$dompdfInstance = null;
+        }
+        self::$optionsInstance = null;
     }
 }
+
+/**
+ * Trait para controllers que usam o helper (performance)
+ */
+// trait OptimizedPdfDownload
+// {
+//     protected function quickPdfDownload(int $templateId, array $data): Response
+//     {
+//         $template = DocumentTemplate::select(['id', 'name', 'html_template', 'css_styles'])
+//             ->findOrFail($templateId);
+            
+//         return DocumentTemplateHelper::quickDownload($template, $data);
+//     }
+    
+//     protected function cachedPdfDownload(int $templateId, array $data): Response
+//     {
+//         $template = DocumentTemplate::findOrFail($templateId);
+        
+//         return DocumentTemplateHelper::downloadPdfDocument($template, $data, [
+//             'enable_cache' => true,
+//             'enable_logging' => false
+//         ]);
+//     }
+// }

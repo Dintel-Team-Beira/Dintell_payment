@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DocumentTemplateHelper;
 use App\Models\DocumentTemplate;
 use App\Models\Invoice;
 use App\Models\Quote;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Blade;
 class TemplatePreviewController extends Controller
 {
 
+    
     public function list($type)
     {
         $companyId = auth()->user()->company_id;
@@ -80,11 +82,12 @@ class TemplatePreviewController extends Controller
         ]);
         */
 
+
         // BAIXAR EM PDF
         $template = DocumentTemplate::findOrFail($templateId);
         $company = $template->company;
         if ($template->type === 'invoice') {
-            $invoice = Invoice::with(['client', 'items'])->where('company_id', $company->id)->first();
+            $invoice = Invoice::with(['client', 'items'])->where('company_id', $company->id)->where('id',14)->first();
             if (!$invoice) {
                 $invoice = $this->createSampleInvoice($company);
             }
@@ -97,47 +100,57 @@ class TemplatePreviewController extends Controller
             $data = compact('quote', 'company');
         }
 
-        // Renderizar template
-        $html = Blade::render($template->html_template, $data);
-        if ($template->css_styles) {
-            $cssStyles =  $template->css_styles;
-            $html = "<style>{$cssStyles}</style>" . $html;
-        }
-        // Configurar dompdf
-        $options = new Options();
-        $options->set('defaultFont', 'DejaVu Sans');
-        $options->set('isRemoteEnabled', true);
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('chroot', public_path());
-
-        $dompdf = new Dompdf($options);
-
-        // Carregar HTML
-        $dompdf->loadHtml($html);
-
-        // Definir tamanho e orientação
-        $dompdf->setPaper('A4', 'portrait');
-
-        // Renderizar PDF
-        $dompdf->render();
-
-        // Nome do arquivo
-        $fileName = $template->name . '_' . now()->format('Y-m-d') . '.pdf';
-
-        // Download
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
-            'Cache-Control' => 'no-cache, must-revalidate',
-            'Pragma' => 'no-cache'
+        // Opções customizadas (opcional)
+        $options = [
+            'paper_size' => 'A4',
+            'orientation' => 'portrait',
+            'file_prefix' => $company->name,
+            'include_timestamp' => true,
+            'timestamp_format' => 'Y-m-d'
+        ];
+        // return DocumentTemplateHelper::quickDownload($template, $data);
+        return DocumentTemplateHelper::downloadPdfDocument($template, $data,[
+        'enable_cache' => true,
+        'enable_logging' => false
         ]);
+        // DocumentTemplateHelper::validateTemplate($template);
+        // return DocumentTemplateHelper::downloadPdfDocument($template, $data, $options);
+        // Renderizar template
+        // $html = Blade::render($template->html_template, $data);
+        // if ($template->css_styles) {
+        //     $cssStyles =  $template->css_styles;
+        //     $html = "<style>{$cssStyles}</style>" . $html;
+        // }
+        // // Configurar dompdf
+        // $options = new Options();
+        // $options->set('defaultFont', 'DejaVu Sans');
+        // $options->set('isRemoteEnabled', true);
+        // $options->set('isHtml5ParserEnabled', true);
+        // $options->set('chroot', public_path());
+
+        // $dompdf = new Dompdf($options);
+
+        // // Carregar HTML
+        // $dompdf->loadHtml($html);
+
+        // // Definir tamanho e orientação
+        // $dompdf->setPaper('A4', 'portrait');
+
+        // // Renderizar PDF
+        // $dompdf->render();
+
+        // // Nome do arquivo
+        // $fileName = $template->name . '_' . now()->format('Y-m-d') . '.pdf';
+
+        // // Download
+        // return response($dompdf->output(), 200, [
+        //     'Content-Type' => 'application/pdf',
+        //     'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        //     'Cache-Control' => 'no-cache, must-revalidate',
+        //     'Pragma' => 'no-cache'
+        // ]);
     }
-    private function sanitizeFileName($filename)
-    {
-        // Remover caracteres especiais e espaços
-        $filename = preg_replace('/[^a-zA-Z0-9\-_]/', '_', $filename);
-        return $filename;
-    }
+ 
     public function selectTemplate(Request $request, $idTemplate)
     {
         $template = DocumentTemplate::findOrFail($idTemplate);
