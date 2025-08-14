@@ -23,7 +23,8 @@ class QuoteItem extends Model
         'category',
         'unit',
         'complexity_level',
-        'estimated_hours'
+        'estimated_hours',
+        'company_id' // ID da empresa para escopo
     ];
 
     protected $casts = [

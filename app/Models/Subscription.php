@@ -45,7 +45,8 @@ class Subscription extends Model
         'email_notifications',
         'expiry_warning_days',
         'last_warning_sent',
-        'metadata'
+        'metadata',
+          'company_id', // Adicionar para multi-tenancy
     ];
 
     protected $casts = [

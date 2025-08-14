@@ -23,7 +23,8 @@ class InvoiceItem extends Model
         'category',
         'unit',
         'complexity_level',
-        'estimated_hours'
+        'estimated_hours',
+        'company_id'
     ];
 
     protected $casts = [

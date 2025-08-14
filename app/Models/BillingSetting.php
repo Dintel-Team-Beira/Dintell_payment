@@ -22,7 +22,8 @@ class BillingSetting extends Model
         'company_email',
         'company_phone',
         'company_address',
-        'company_nuit'
+        'company_nuit',
+        'company_id', // Adicionar para multi-tenancy
 
     ];
 
