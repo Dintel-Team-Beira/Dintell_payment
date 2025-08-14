@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DocumentTemplateHelper;
 use App\Mail\InvoiceMail;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Client;
 use App\Models\Quote;
 use App\Models\BillingSetting;
+use App\Models\DocumentTemplate;
 use App\Services\BillingCalculatorService;
 use App\Services\InvoicePdfService;
 use Illuminate\Http\Request;
@@ -960,13 +962,18 @@ class InvoiceController extends Controller
     {
         $company = auth()->user()->company;
         // dd($invoice->items);
-        // Implementação simples de PDF se o serviço não estiver disponível
-        $html = view('pdfs.invoice', compact('invoice','company'))->render();
+        // // Implementação simples de PDF se o serviço não estiver disponível
+        // $html = view('pdfs.invoice', compact('invoice','company'))->render();
 
-        // Usar DomPDF ou similar
-        $pdf = app('dompdf.wrapper');
-        $pdf->loadHTML($html);
+        // // Usar DomPDF ou similar
+        // $pdf = app('dompdf.wrapper');
+        // $pdf->loadHTML($html);
+          // return $pdf->download("fatura-{$invoice->invoice_number}.pdf");
 
-        return $pdf->download("fatura-{$invoice->invoice_number}.pdf");
+        //USANDO O TEMPLATE
+        $data = compact('invoice','company');
+        $template = DocumentTemplate::where('company_id',$company->id)->where('is_selected',true)->first();
+        return DocumentTemplateHelper::downloadPdfDocument($template, $data);
+      
     }
 }
