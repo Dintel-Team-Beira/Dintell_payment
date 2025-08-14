@@ -172,7 +172,7 @@
     <div class="p-6">
         <!-- Barra de Pesquisa -->
         <div class="mb-6">
-            <form method="GET" action="{{ ('invoices.index') }}" class="relative">
+            <form method="GET" action="{{ route('invoices.index') }}" class="relative">
                 <input type="hidden" name="status" value="{{ request('status') }}">
                 <input type="hidden" name="client_id" value="{{ request('client_id') }}">
                 <input type="hidden" name="date_from" value="{{ request('date_from') }}">
@@ -204,7 +204,7 @@
 
         <!-- Filtros Avançados -->
         <div x-show="showFilters" x-collapse>
-            <form method="GET" action="{{ ('invoices.index') }}">
+            <form method="GET" action="{{ route('invoices.index') }}">
                 <input type="hidden" name="search" value="{{ request('search') }}">
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">

@@ -526,7 +526,7 @@
 
         // Carregar dados
         function loadProducts() {
-            fetch('/api/products/active')
+            fetch('/api/products/active/{{ auth()->user()->company_id }}')
                 .then(response => response.json())
                 .then(data => {
                     products = data;
@@ -539,7 +539,7 @@
         }
 
         function loadServices() {
-            fetch('/api/services/active')
+            fetch('/api/services/active/{{ auth()->user()->company_id }}')
                 .then(response => response.json())
                 .then(data => {
                     services = data;

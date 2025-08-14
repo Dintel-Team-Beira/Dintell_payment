@@ -32,6 +32,7 @@ class InvoiceController extends Controller
     {
         $query = Invoice::with(['client', 'items', 'quote']);
 
+        // dd($request->all());
         // Filtros
         if ($request->filled('status')) {
             $query->where('status', $request->status);
