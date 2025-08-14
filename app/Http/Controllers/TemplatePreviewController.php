@@ -30,16 +30,13 @@ class TemplatePreviewController extends Controller
         $template = DocumentTemplate::findOrFail($templateId);
         $company = $template->company;
         
-        // return '<pre>'.print_r($template).'</pre>';
         // Dados fictícios ou reais dependendo do tipo
         if ($template->type === 'invoice') {
-            $invoice = Invoice::where('company_id', $company->id)->where('id',14)->first();//$this->createSampleInvoice($company);
-            // $html = $this->renderTemplate($template->html_template, compact('invoice', 'company'));
+            $invoice = Invoice::where('company_id', $company->id)->where('id',14)->first();
             $data = compact('invoice', 'company');
         } elseif ($template->type === 'quote') {
-            $quote = Quote::where('company_id', $company->id)->first();//::$this->createSampleQuote($company);
+            $quote = Quote::where('company_id', $company->id)->first();
             $data = compact('quote', 'company');
-            // $html = $this->renderTemplate($template->html_template, compact('quote', 'company'));
         }
 
         

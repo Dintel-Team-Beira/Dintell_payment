@@ -250,7 +250,7 @@
     downloadBtn.addEventListener('click', function() {
         const selectedTemplateId = templateSelect.value;
         if (selectedTemplateId) {
-            window.open(`/dintell/template-preview/preview/${selectedTemplateId}/download`, '_blank');
+            window.open(`/dintell/template-preview/download/${selectedTemplateId}`, '_blank');
         }
     });
 
