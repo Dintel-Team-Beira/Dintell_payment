@@ -415,7 +415,7 @@
                                 @elseif($invoice->due_date->isTomorrow())
                                     Vence amanhã
                                 @elseif($invoice->due_date->diffInDays() <= 7)
-                                    Vence em {{ $invoice->due_date->diffInDays() }} dias
+                                    Vence em {{ abs(number_format($invoice->due_date->diffInDays())) }} dias
                                 @else
                                     {{ $invoice->due_date->diffForHumans() }}
                                 @endif
