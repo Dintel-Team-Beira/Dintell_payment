@@ -53,6 +53,7 @@ class Company extends Model
         'created_by',
         'last_activity_at',
         'metadata',
+        'company_id', // Adicionar para multi-tenancy
     ];
 
     protected $casts = [

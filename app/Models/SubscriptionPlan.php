@@ -27,7 +27,8 @@ class SubscriptionPlan extends Model
         'max_bandwidth_gb',
         'color_theme',
         'trial_days',
-        'sort_order'
+        'sort_order',
+          'company_id', // Adicionar para multi-tenancy
     ];
 
     protected $casts = [
