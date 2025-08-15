@@ -263,3 +263,12 @@ Route::middleware(['auth:sanctum'])->prefix('api/support')->name('api.support.')
 // OU se você quiser manter como web routes (recomendado para este caso):
 // No arquivo routes/web.php
 
+// Adicionar no final do arquivo
+Route::middleware(['web', 'auth'])->prefix('api/support')->group(function () {
+    Route::get('/tickets', [App\Http\Controllers\SupportController::class, 'index']);
+    Route::get('/tickets/{ticket}', [App\Http\Controllers\SupportController::class, 'show']);
+    Route::post('/tickets', [App\Http\Controllers\SupportController::class, 'store']);
+    Route::post('/tickets/{ticket}/messages', [App\Http\Controllers\SupportController::class, 'sendMessage']);
+    Route::patch('/tickets/{ticket}/close', [App\Http\Controllers\SupportController::class, 'close']);
+    Route::post('/tickets/{ticket}/rate', [App\Http\Controllers\SupportController::class, 'rate']);
+});
