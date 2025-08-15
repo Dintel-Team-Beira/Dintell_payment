@@ -1,738 +1,711 @@
-{{-- resources/views/services/edit.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Editar Serviço')
+@section('title', 'Editar Serviço - ' . $service->name)
 
 @section('content')
-<div class="sm:px-6 lg:px-8">
+<div class="container px-4">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div class="mb-4 sm:mb-0">
                 <h1 class="text-3xl font-bold text-gray-900">Editar Serviço</h1>
-                <p class="mt-2 text-gray-600">Atualize as informações do serviço</p>
+                <p class="mt-2 text-gray-600">Atualize as informações do serviço "{{ $service->name }}"</p>
             </div>
-            <div class="flex gap-3">
-                <a href="{{ route('services.index') }}"
-                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    Voltar
-                </a>
+            <div class="flex space-x-3">
                 <a href="{{ route('services.show', $service) }}"
-                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-700 border border-green-200 rounded-md bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
                     Visualizar
                 </a>
+                <a href="{{ route('services.index') }}"
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Voltar à Lista
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Grid Principal -->
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <!-- Coluna Principal -->
-        <div class="space-y-8 lg:col-span-2">
-            <!-- Descrição -->
-            @if($service->description)
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Descrição</h3>
-                </div>
-                <div class="p-6">
-                    <p class="leading-relaxed text-gray-700">{{ $service->description }}</p>
-                </div>
-            </div>
-            @endif
+    <form action="{{ route('services.update', $service) }}" method="POST" id="serviceForm">
+        @csrf
+        @method('PUT')
 
-            <!-- Requisitos Técnicos -->
-            @if($service->requirements)
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <div class="p-2 mr-3 bg-orange-100 rounded-lg">
-                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900">Requisitos Técnicos</h3>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="prose-sm prose max-w-none">
-                        <p class="text-gray-700 whitespace-pre-line">{{ $service->requirements }}</p>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            <!-- Tags -->
-            @if($service->tags)
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Tags</h3>
-                </div>
-                <div class="p-6">
-                    <div class="flex flex-wrap gap-2">
-                        @foreach(explode(',', $service->tags) as $tag)
-                            <span class="inline-flex items-center px-3 py-1 text-sm font-medium text-indigo-800 bg-indigo-100 rounded-full">
-                                {{ trim($tag) }}
-                            </span>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            <!-- Estatísticas de Uso -->
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <div class="p-2 mr-3 bg-blue-100 rounded-lg">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900">Estatísticas de Uso</h3>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-blue-600">{{ $service->quote_items_count ?? 0 }}</div>
-                            <div class="text-sm text-gray-600">Vezes em Cotações</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-green-600">{{ $service->invoice_items_count ?? 0 }}</div>
-                            <div class="text-sm text-gray-600">Vezes Faturado</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="space-y-6">
-            <!-- Informações de Preço -->
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex items-center">
-                        <div class="p-2 mr-3 bg-green-100 rounded-lg">
-                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900">Preços</h3>
-                    </div>
-                </div>
-                <div class="p-6 space-y-4">
-                    @if($service->hourly_rate)
-                    <div class="flex items-center justify-between p-3 border border-green-200 rounded-lg bg-green-50">
+        <div class="grid grid-cols-1 gap-8 xl:grid-cols-3">
+            <!-- Coluna Principal -->
+            <div class="space-y-8 xl:col-span-2">
+                <!-- Informações Básicas -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+                    <div class="px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span class="text-sm font-medium text-green-800">Por Hora</span>
-                        </div>
-                        <span class="text-lg font-bold text-green-800">MT {{ number_format($service->hourly_rate, 2) }}</span>
-                    </div>
-                    @endif
-
-                    @if($service->fixed_price)
-                    <div class="flex items-center justify-between p-3 border border-blue-200 rounded-lg bg-blue-50">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-                            </svg>
-                            <span class="text-sm font-medium text-blue-800">Preço Fixo</span>
-                        </div>
-                        <span class="text-lg font-bold text-blue-800">MT {{ number_format($service->fixed_price, 2) }}</span>
-                    </div>
-                    @endif
-
-                    @if($service->estimated_hours)
-                    <div class="p-3 border border-gray-200 rounded-lg bg-gray-50">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-700">Horas Estimadas</span>
-                            <span class="text-sm font-bold text-gray-900">{{ $service->estimated_hours }}h</span>
-                        </div>
-                        @if($service->hourly_rate && $service->estimated_hours)
-                        <div class="pt-2 mt-2 border-t border-gray-200">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600">Custo Estimado</span>
-                                <span class="text-sm font-bold text-purple-600">MT {{ number_format($service->hourly_rate * $service->estimated_hours, 2) }}</span>
+                            <div class="p-2 mr-3 bg-green-100 rounded-lg">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Informações Básicas</h3>
+                                <p class="text-sm text-gray-600">Dados principais do serviço</p>
                             </div>
                         </div>
-                        @endif
                     </div>
-                    @endif
+                    <div class="p-6 space-y-6">
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            <div>
+                                <label for="name" class="block mb-2 text-sm font-medium text-gray-700">
+                                    Nome do Serviço *
+                                </label>
+                                <input type="text" name="name" id="name" required
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('name') border-red-300 @enderror"
+                                       value="{{ old('name', $service->name) }}"
+                                       placeholder="Digite o nome do serviço">
+                                @error('name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="code" class="block mb-2 text-sm font-medium text-gray-700">
+                                    Código do Serviço
+                                </label>
+                                <input type="text" name="code" id="code"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('code') border-red-300 @enderror"
+                                       value="{{ old('code', $service->code) }}"
+                                       placeholder="Código único (gerado automaticamente se vazio)">
+                                @error('code')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                                <p class="mt-1 text-xs text-gray-500">Deixe vazio para gerar automaticamente</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block mb-2 text-sm font-medium text-gray-700">
+                                Descrição
+                            </label>
+                            <textarea name="description" id="description" rows="4"
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('description') border-red-300 @enderror"
+                                      placeholder="Descrição detalhada do serviço">{{ old('description', $service->description) }}</textarea>
+                            @error('description')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            <div>
+                                <label for="category" class="block mb-2 text-sm font-medium text-gray-700">
+                                    Categoria *
+                                </label>
+                                <select name="category" id="category" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('category') border-red-300 @enderror">
+                                    <option value="">Selecione uma categoria</option>
+                                    @foreach(\App\Models\Service::getCategories() as $key => $label)
+                                        <option value="{{ $key }}" {{ old('category', $service->category) == $key ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('category')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="complexity_level" class="block mb-2 text-sm font-medium text-gray-700">
+                                    Nível de Complexidade
+                                </label>
+                                <select name="complexity_level" id="complexity_level"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('complexity_level') border-red-300 @enderror">
+                                    <option value="">Selecione o nível</option>
+                                    <option value="basic" {{ old('complexity_level', $service->complexity_level) == 'basic' ? 'selected' : '' }}>Básico</option>
+                                    <option value="intermediate" {{ old('complexity_level', $service->complexity_level) == 'intermediate' ? 'selected' : '' }}>Intermediário</option>
+                                    <option value="advanced" {{ old('complexity_level', $service->complexity_level) == 'advanced' ? 'selected' : '' }}>Avançado</option>
+                                    <option value="expert" {{ old('complexity_level', $service->complexity_level) == 'expert' ? 'selected' : '' }}>Especialista</option>
+                                </select>
+                                @error('complexity_level')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Preços e Tempo -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="p-2 mr-3 bg-blue-100 rounded-lg">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Preços e Tempo</h3>
+                                <p class="text-sm text-gray-600">Configurações de valores e estimativas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <!-- Tipo de Preço -->
+                        <div>
+                            <label class="block mb-3 text-sm font-medium text-gray-700">Tipo de Preço</label>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="pricing_type" value="fixed" class="text-green-600 focus:ring-green-500"
+                                           {{ old('pricing_type', $service->fixed_price > 0 ? 'fixed' : 'hourly') == 'fixed' ? 'checked' : '' }}>
+                                    <div class="ml-3">
+                                        <div class="text-sm font-medium text-gray-900">Preço Fixo</div>
+                                        <div class="text-xs text-gray-500">Valor único para todo o serviço</div>
+                                    </div>
+                                </label>
+                                <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="pricing_type" value="hourly" class="text-green-600 focus:ring-green-500"
+                                           {{ old('pricing_type', $service->fixed_price > 0 ? 'fixed' : 'hourly') == 'hourly' ? 'checked' : '' }}>
+                                    <div class="ml-3">
+                                        <div class="text-sm font-medium text-gray-900">Por Hora</div>
+                                        <div class="text-xs text-gray-500">Valor calculado por hora trabalhada</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                            <div id="fixed_price_field">
+                                <label for="fixed_price" class="block mb-2 text-sm font-medium text-gray-700">
+                                    Preço Fixo
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute text-gray-500 transform -translate-y-1/2 left-3 top-1/2">MT</span>
+                                    <input type="number" name="fixed_price" id="fixed_price" step="0.01" min="0"
+                                           class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('fixed_price') border-red-300 @enderror"
+                                           value="{{ old('fixed_price', $service->fixed_price) }}"
+                                           placeholder="0.00">
+                                </div>
+                                @error('fixed_price')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div id="hourly_rate_field">
+                                <label for="hourly_rate" class="block mb-2 text-sm font-medium text-gray-700">
+                                    Valor por Hora
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute text-gray-500 transform -translate-y-1/2 left-3 top-1/2">MT</span>
+                                    <input type="number" name="hourly_rate" id="hourly_rate" step="0.01" min="0"
+                                           class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('hourly_rate') border-red-300 @enderror"
+                                           value="{{ old('hourly_rate', $service->hourly_rate) }}"
+                                           placeholder="0.00">
+                                </div>
+                                @error('hourly_rate')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="estimated_hours" class="block mb-2 text-sm font-medium text-gray-700">
+                                    Horas Estimadas
+                                </label>
+                                <input type="number" name="estimated_hours" id="estimated_hours" step="0.5" min="0"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('estimated_hours') border-red-300 @enderror"
+                                       value="{{ old('estimated_hours', $service->estimated_hours) }}"
+                                       placeholder="0">
+                                @error('estimated_hours')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="tax_rate" class="block mb-2 text-sm font-medium text-gray-700">
+                                Taxa de IVA (%)
+                            </label>
+                            <input type="number" name="tax_rate" id="tax_rate" step="0.01" min="0" max="100"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('tax_rate') border-red-300 @enderror"
+                                   value="{{ old('tax_rate', $service->tax_rate ?? 16) }}"
+                                   placeholder="16.00">
+                            @error('tax_rate')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Calculadora de Valor -->
+                        <div class="p-4 rounded-lg bg-gray-50">
+                            <h4 class="mb-3 text-sm font-medium text-gray-700">Estimativa de Valor</h4>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div class="text-center">
+                                    <div class="text-lg font-bold text-green-600" id="total_estimate">0.00 MT</div>
+                                    <div class="text-xs text-gray-500">Valor Total Estimado</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-bold text-blue-600" id="effective_hourly">0.00 MT/h</div>
+                                    <div class="text-xs text-gray-500">Valor Efetivo/Hora</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-bold text-purple-600" id="tax_amount">0.00 MT</div>
+                                    <div class="text-xs text-gray-500">IVA</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requisitos e Entregáveis -->
+   <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center">
+            <div class="p-2 mr-3 bg-orange-100 rounded-lg">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
             </div>
-
-            <!-- Informações do Sistema -->
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Informações do Sistema</h3>
-                </div>
-                <div class="p-6 space-y-4">
-                    <div class="flex justify-between">
-                        <span class="text-sm text-gray-600">Criado em:</span>
-                        <span class="text-sm font-medium text-gray-900">{{ $service->created_at}}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-sm text-gray-600">Última atualização:</span>
-                        <span class="text-sm font-medium text-gray-900">{{ $service->updated_atcreated_at}}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-sm text-gray-600">ID do Sistema:</span>
-                        <span class="font-mono text-sm text-gray-900">#{{ $service->id }}</span>
-                    </div>
-                </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Requisitos e Entregáveis</h3>
+                <p class="text-sm text-gray-600">Especificações técnicas e resultados esperados</p>
             </div>
+        </div>
+    </div>
+    <div class="p-6 space-y-6">
+        <div>
+            <label for="requirements" class="block mb-2 text-sm font-medium text-gray-700">
+                Requisitos
+            </label>
+            <textarea name="requirements" id="requirements" rows="4"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('requirements') border-red-300 @enderror"
+                      placeholder="Liste os requisitos necessários para este serviço...">{{ old('requirements', is_string($service->requirements) ? $service->requirements : '') }}</textarea>
+            @error('requirements')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
 
-            <!-- Ações Rápidas -->
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Ações Rápidas</h3>
-                </div>
-                <div class="p-6 space-y-3">
-                    <a href="{{ route('quotes.create', ['service_id' => $service->id]) }}"
-                       class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        Nova Cotação
-                    </a>
-
-                    <button onclick="toggleStatus()"
-                            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium rounded-md
-                                {{ $service->is_active ? 'text-yellow-700 border-yellow-200 bg-yellow-50 hover:bg-yellow-100' : 'text-green-700 border-green-200 bg-green-50 hover:bg-green-100' }}">
-                        @if($service->is_active)
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"/>
-                            </svg>
-                            Desativar Serviço
-                        @else
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Ativar Serviço
-                        @endif
-                    </button>
-
-                    <button onclick="exportService()"
-                            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        Exportar Dados
-                    </button>
-
-                    @if(!$service->quote_items_count && !$service->invoice_items_count)
-                    <button onclick="deleteService()"
-                            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-red-700 border border-red-200 rounded-md bg-red-50 hover:bg-red-100">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                        Excluir Serviço
-                    </button>
-                    @endif
-                </div>
-            </div>
+        <div>
+            <label for="deliverables" class="block mb-2 text-sm font-medium text-gray-700">
+                Entregáveis
+            </label>
+            <textarea name="deliverables" id="deliverables" rows="4"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('deliverables') border-red-300 @enderror"
+                      placeholder="Descreva o que será entregue ao cliente...">{{ old('deliverables', is_string($service->deliverables) ? $service->deliverables : '') }}</textarea>
+            @error('deliverables')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
     </div>
 </div>
 
-<script>
-// Duplicar serviço
-function duplicateService() {
-    if (confirm('Deseja criar uma cópia deste serviço?')) {
-        fetch(`/servicos/{{ $service->id }}/duplicate`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = `/servicos/${data.service.id}/edit`;
-            } else {
-                alert('Erro ao duplicar serviço');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Erro ao duplicar serviço');
-        });
-    }
-}
 
-// Toggle status
-function toggleStatus() {
-    const currentStatus = {{ $service->is_active ? 'true' : 'false' }};
-    const action = currentStatus ? 'desativar' : 'ativar';
-
-    if (confirm(`Deseja ${action} este serviço?`)) {
-        fetch(`/api/services/{{ $service->id }}/toggle-status`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                is_active: !currentStatus
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Erro ao alterar status do serviço');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Erro ao alterar status do serviço');
-        });
-    }
-}
-
-// Exportar serviço
-function exportService() {
-    window.open(`/servicos/{{ $service->id }}/export`, '_blank');
-}
-
-// Deletar serviço
-function deleteService() {
-    if (confirm('Tem certeza que deseja excluir este serviço? Esta ação não pode ser desfeita.')) {
-        fetch(`/servicos/{{ $service->id }}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = '/servicos';
-            } else {
-                alert(data.message || 'Erro ao excluir serviço');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Erro ao excluir serviço');
-        });
-    }
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    // E para editar
-    if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
-        const activeElement = document.activeElement;
-        if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
-            window.location.href = '{{ route("services.edit", $service) }}';
-        }
-    }
-
-    // D para duplicar
-    if (e.key === 'd' && !e.ctrlKey && !e.metaKey) {
-        const activeElement = document.activeElement;
-        if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
-            duplicateService();
-        }
-    }
-});
-</script>
-
-<style>
-/* Hover effects */
-.hover\:scale-105:hover {
-    transform: scale(1.05);
-}
-
-/* Smooth transitions */
-* {
-    transition: all 0.2s ease-in-out;
-}
-
-/* Badge animations */
-.animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: .5;
-    }
-}
-</style>
-@endsection
-
-    <!-- Form Container -->
-    <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
-        <form id="serviceForm" action="{{ route('services.update', $service) }}" method="POST" class="space-y-6">
-            @csrf
-            @method('PUT')
-
-            <!-- Header do Form -->
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center">
-                    <div class="p-2 mr-3 bg-blue-100 rounded-lg">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Informações do Serviço</h3>
-                        <p class="text-sm text-gray-600">Atualize os dados do serviço</p>
-                    </div>
-                </div>
             </div>
 
-            <div class="px-6 pb-6 space-y-8">
-                <!-- Seção 1: Informações Básicas -->
-                <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <!-- Nome do Serviço -->
-                    <div class="lg:col-span-2">
-                        <label class="block mb-2 text-sm font-medium text-gray-700">
-                            Nome do Serviço *
-                        </label>
-                        <input type="text"
-                               name="name"
-                               id="service_name"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="Ex: Desenvolvimento de Sistema Web"
-                               value="{{ old('name', $service->name) }}"
-                               required>
-                        @error('name')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Código -->
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-700">
-                            Código do Serviço
-                        </label>
-                        <input type="text"
-                               name="code"
-                               id="service_code"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               value="{{ old('code', $service->code) }}">
-                        @error('code')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Categoria -->
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-700">
-                            Categoria *
-                        </label>
-                        <select name="category"
-                                id="service_category"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                required>
-                            <option value="">Selecione uma categoria</option>
-                            @foreach(App\Models\Service::getCategories() as $key => $category)
-                                <option value="{{ $key }}" {{ old('category', $service->category) == $key ? 'selected' : '' }}>
-                                    {{ $category }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('category')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <!-- Seção 2: Descrição -->
-                <div>
-                    <label class="block mb-2 text-sm font-medium text-gray-700">
-                        Descrição
-                    </label>
-                    <textarea name="description"
-                              id="service_description"
-                              rows="4"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Descreva detalhadamente o que este serviço inclui...">{{ old('description', $service->description) }}</textarea>
-                    @error('description')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Seção 3: Preços e Complexidade -->
-                <div class="pt-8 border-t border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="p-2 mr-3 bg-green-100 rounded-lg">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Preços e Complexidade</h3>
-                            <p class="text-sm text-gray-600">Configure os valores e nível de complexidade</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                        <!-- Preço por Hora -->
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">
-                                Preço por Hora (MT)
-                            </label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">MT</span>
-                                <input type="number"
-                                       name="hourly_rate"
-                                       id="hourly_rate"
-                                       class="w-full py-3 pl-12 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="0.00"
-                                       value="{{ old('hourly_rate', $service->hourly_rate) }}"
-                                       step="0.01"
-                                       min="0">
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Status e Ações -->
+                <div class="sticky bg-white border border-gray-200 shadow-sm rounded-xl top-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="p-2 mr-3 bg-indigo-100 rounded-lg">
+                                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
                             </div>
-                            @error('hourly_rate')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Preço Fixo -->
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">
-                                Preço Fixo (MT)
-                            </label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">MT</span>
-                                <input type="number"
-                                       name="fixed_price"
-                                       id="fixed_price"
-                                       class="w-full py-3 pl-12 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="0.00"
-                                       value="{{ old('fixed_price', $service->fixed_price) }}"
-                                       step="0.01"
-                                       min="0">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Status e Ações</h3>
+                                <p class="text-sm text-gray-600">Configure o status do serviço</p>
                             </div>
-                            @error('fixed_price')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <!-- Status Ativo -->
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="text-sm font-medium text-gray-700">Serviço Ativo</label>
+                                <p class="text-xs text-gray-500">Serviço disponível para contratação</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="is_active" value="1" class="sr-only peer" {{ old('is_active', $service->is_active) ? 'checked' : '' }}>
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                            </label>
                         </div>
 
-                        <!-- Complexidade -->
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">
-                                Nível de Complexidade *
-                            </label>
-                            <select name="complexity_level"
-                                    id="complexity_level"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required>
-                                @foreach(App\Models\Service::getComplexityLevels() as $key => $level)
-                                    <option value="{{ $key }}" {{ old('complexity_level', $service->complexity_level) == $key ? 'selected' : '' }}>
-                                        {{ $level }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('complexity_level')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                        <!-- Informações do Serviço -->
+                        <div class="pt-6 border-t border-gray-200">
+                            <h4 class="mb-4 text-sm font-medium text-gray-700">Informações</h4>
+                            <div class="space-y-3 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Criado em:</span>
+                                    <span class="text-gray-900">{{ $service->created_at->format('d/m/Y H:i') }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Atualizado em:</span>
+                                    <span class="text-gray-900">{{ $service->updated_at->format('d/m/Y H:i') }}</span>
+                                </div>
+                                @if($service->code)
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Código:</span>
+                                    <span class="font-mono text-gray-900">{{ $service->code }}</span>
+                                </div>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Seção 4: Configurações Adicionais -->
-                <div class="pt-8 border-t border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="p-2 mr-3 bg-purple-100 rounded-lg">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Configurações Adicionais</h3>
-                            <p class="text-sm text-gray-600">Definições opcionais para o serviço</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        <!-- Horas Estimadas -->
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">
-                                Horas Estimadas
-                            </label>
-                            <div class="relative">
-                                <input type="number"
-                                       name="estimated_hours"
-                                       id="estimated_hours"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="0"
-                                       value="{{ old('estimated_hours', $service->estimated_hours) }}"
-                                       step="0.5"
-                                       min="0">
-                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">horas</span>
-                            </div>
-                            @error('estimated_hours')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Status -->
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">
-                                Status
-                            </label>
-                            <div class="flex items-center space-x-6">
-                                <label class="flex items-center">
-                                    <input type="radio"
-                                           name="is_active"
-                                           value="1"
-                                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                                           {{ old('is_active', $service->is_active) == '1' ? 'checked' : '' }}>
-                                    <span class="flex items-center ml-2 text-sm text-gray-700">
-                                        <span class="w-2 h-2 mr-2 bg-green-400 rounded-full"></span>
-                                        Ativo
-                                    </span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio"
-                                           name="is_active"
-                                           value="0"
-                                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                                           {{ old('is_active', $service->is_active) == '0' ? 'checked' : '' }}>
-                                    <span class="flex items-center ml-2 text-sm text-gray-700">
-                                        <span class="w-2 h-2 mr-2 bg-gray-400 rounded-full"></span>
-                                        Inativo
-                                    </span>
-                                </label>
-                            </div>
-                            @error('is_active')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Seção 5: Requisitos e Tags -->
-                <div class="pt-8 border-t border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="p-2 mr-3 bg-orange-100 rounded-lg">
-                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Requisitos e Tags</h3>
-                            <p class="text-sm text-gray-600">Informações adicionais sobre o serviço</p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <!-- Requisitos -->
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">
-                                Requisitos Técnicos
-                            </label>
-                            <textarea name="requirements"
-                                      id="requirements"
-                                      rows="3"
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      placeholder="Liste os requisitos técnicos, habilidades necessárias, ferramentas, etc.">{{ old('requirements', $service->requirements) }}</textarea>
-                            @error('requirements')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Tags -->
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">
-                                Tags
-                                <span class="text-xs text-gray-500">(separadas por vírgula)</span>
-                            </label>
-                            <input type="text"
-                                   name="tags"
-                                   id="tags"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="Ex: php, laravel, react, api, frontend"
-                                   value="{{ old('tags', $service->tags) }}">
-                            @error('tags')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer do Form -->
-            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex items-center text-sm text-gray-600">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Última atualização: {{ $service->updated_at->format('d/m/Y H:i') }}
-                    </div>
-                    <div class="flex gap-3">
-                        <a href="{{ route('services.index') }}"
-                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            Cancelar
-                        </a>
-                        <button type="submit"
-                                id="submitButton"
-                                class="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <!-- Ações -->
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+                    <div class="p-6 space-y-3">
+                        <button type="submit" class="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-medium text-white transition-colors bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
                             Atualizar Serviço
                         </button>
+
+                        <a href="{{ route('services.show', $service) }}"
+                           class="inline-flex items-center justify-center w-full px-6 py-2 text-sm font-medium text-green-700 transition-colors border border-green-200 rounded-md bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Visualizar
+                        </a>
+
+                        @if(Route::has('services.duplicate'))
+                        <a href="{{ route('services.duplicate', $service) }}"
+                           class="inline-flex items-center justify-center w-full px-6 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            Duplicar
+                        </a>
+                        @endif
+
+                        <a href="{{ route('services.index') }}"
+                           class="inline-flex items-center justify-center w-full px-6 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Cancelar
+                        </a>
+                    </div>
+
+                    <div class="pt-6 mt-6 border-t border-gray-200">
+                        <div class="flex items-center justify-center text-xs text-gray-500">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Campos marcados com * são obrigatórios
+                        </div>
                     </div>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
+@push('scripts')
 <script>
-// Validação de preços
-function validatePrices() {
-    const hourlyRate = parseFloat(document.getElementById('hourly_rate').value) || 0;
-    const fixedPrice = parseFloat(document.getElementById('fixed_price').value) || 0;
+    document.addEventListener('DOMContentLoaded', function() {
+        const pricingTypeRadios = document.querySelectorAll('input[name="pricing_type"]');
+        const fixedPriceField = document.getElementById('fixed_price_field');
+        const hourlyRateField = document.getElementById('hourly_rate_field');
 
-    if (hourlyRate <= 0 && fixedPrice <= 0) {
-        alert('Você deve informar pelo menos um preço (por hora ou fixo)');
-        return false;
-    }
-    return true;
-}
+        const fixedPriceInput = document.getElementById('fixed_price');
+        const hourlyRateInput = document.getElementById('hourly_rate');
+        const estimatedHoursInput = document.getElementById('estimated_hours');
+        const taxRateInput = document.getElementById('tax_rate');
 
-// Form submission
-document.getElementById('serviceForm').addEventListener('submit', function(e) {
-    if (!validatePrices()) {
-        e.preventDefault();
-        return;
-    }
+        const totalEstimateDisplay = document.getElementById('total_estimate');
+        const effectiveHourlyDisplay = document.getElementById('effective_hourly');
+        const taxAmountDisplay = document.getElementById('tax_amount');
 
-    const submitButton = document.getElementById('submitButton');
-    const originalText = submitButton.innerHTML;
+        // Controle de visibilidade dos campos de preço
+        function togglePriceFields() {
+            const selectedType = document.querySelector('input[name="pricing_type"]:checked').value;
 
-    submitButton.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Atualizando...';
-    submitButton.disabled = true;
-});
+            if (selectedType === 'fixed') {
+                fixedPriceField.style.opacity = '1';
+                hourlyRateField.style.opacity = '0.5';
+                fixedPriceInput.required = true;
+                hourlyRateInput.required = false;
+            } else {
+                fixedPriceField.style.opacity = '0.5';
+                hourlyRateField.style.opacity = '1';
+                fixedPriceInput.required = false;
+                hourlyRateInput.required = true;
+            }
+
+            calculateEstimates();
+        }
+
+        // Calcular estimativas em tempo real
+        function calculateEstimates() {
+            const pricingType = document.querySelector('input[name="pricing_type"]:checked').value;
+            const fixedPrice = parseFloat(fixedPriceInput.value) || 0;
+            const hourlyRate = parseFloat(hourlyRateInput.value) || 0;
+            const estimatedHours = parseFloat(estimatedHoursInput.value) || 0;
+            const taxRate = parseFloat(taxRateInput.value) || 0;
+
+            let totalEstimate = 0;
+            let effectiveHourly = 0;
+
+            if (pricingType === 'fixed' && fixedPrice > 0) {
+                totalEstimate = fixedPrice;
+                effectiveHourly = estimatedHours > 0 ? fixedPrice / estimatedHours : 0;
+            } else if (pricingType === 'hourly' && hourlyRate > 0) {
+                totalEstimate = estimatedHours > 0 ? hourlyRate * estimatedHours : hourlyRate;
+                effectiveHourly = hourlyRate;
+            }
+
+            const taxAmount = totalEstimate * (taxRate / 100);
+            const totalWithTax = totalEstimate + taxAmount;
+
+            // Atualizar displays
+            totalEstimateDisplay.textContent = formatCurrency(totalWithTax);
+            effectiveHourlyDisplay.textContent = formatCurrency(effectiveHourly) + '/h';
+            taxAmountDisplay.textContent = formatCurrency(taxAmount);
+
+            // Cores baseadas no valor
+            if (totalEstimate < 1000) {
+                totalEstimateDisplay.className = 'text-lg font-bold text-red-600';
+            } else if (totalEstimate < 5000) {
+                totalEstimateDisplay.className = 'text-lg font-bold text-yellow-600';
+            } else {
+                totalEstimateDisplay.className = 'text-lg font-bold text-green-600';
+            }
+        }
+
+        // Event listeners
+        pricingTypeRadios.forEach(radio => {
+            radio.addEventListener('change', togglePriceFields);
+        });
+
+        [fixedPriceInput, hourlyRateInput, estimatedHoursInput, taxRateInput].forEach(input => {
+            input.addEventListener('input', calculateEstimates);
+        });
+
+        // Geração automática de código baseada no nome
+        const nameInput = document.getElementById('name');
+        const codeInput = document.getElementById('code');
+
+        nameInput.addEventListener('input', function() {
+            if (!codeInput.value) {
+                const name = this.value.trim();
+                if (name) {
+                    // Gerar código baseado no nome
+                    const code = name
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9\s]/g, '') // Remove caracteres especiais
+                        .replace(/\s+/g, '-') // Substitui espaços por hífens
+                        .substring(0, 20); // Limita a 20 caracteres
+
+                    codeInput.value = 'SRV-' + code;
+                }
+            }
+        });
+
+        // Validação do formulário
+        const form = document.getElementById('serviceForm');
+        form.addEventListener('submit', function(e) {
+            const name = document.getElementById('name').value.trim();
+            const category = document.getElementById('category').value;
+            const pricingType = document.querySelector('input[name="pricing_type"]:checked').value;
+            const fixedPrice = parseFloat(fixedPriceInput.value);
+            const hourlyRate = parseFloat(hourlyRateInput.value);
+
+            let hasErrors = false;
+
+            // Validar campos obrigatórios
+            if (!name) {
+                showFieldError('name', 'Nome do serviço é obrigatório');
+                hasErrors = true;
+            }
+
+            if (!category) {
+                showFieldError('category', 'Categoria é obrigatória');
+                hasErrors = true;
+            }
+
+            // Validar preços baseado no tipo selecionado
+            if (pricingType === 'fixed' && (!fixedPrice || fixedPrice <= 0)) {
+                showFieldError('fixed_price', 'Preço fixo deve ser maior que zero');
+                hasErrors = true;
+            }
+
+            if (pricingType === 'hourly' && (!hourlyRate || hourlyRate <= 0)) {
+                showFieldError('hourly_rate', 'Valor por hora deve ser maior que zero');
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
+                e.preventDefault();
+                showNotification('Corrija os erros antes de continuar', 'error');
+                return false;
+            }
+
+            // Mostrar loading
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Atualizando...';
+            submitButton.disabled = true;
+
+            // Restaurar botão em caso de erro
+            setTimeout(() => {
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }, 10000);
+        });
+
+        // Função para mostrar erro em campo específico
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            field.classList.add('border-red-300');
+
+            // Remover erro existente
+            const existingError = field.parentNode.querySelector('.field-error');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // Adicionar nova mensagem de erro
+            const errorElement = document.createElement('p');
+            errorElement.className = 'mt-1 text-sm text-red-600 field-error';
+            errorElement.textContent = message;
+            field.parentNode.appendChild(errorElement);
+
+            // Remover erro quando o campo for focado
+            field.addEventListener('focus', function() {
+                this.classList.remove('border-red-300');
+                const error = this.parentNode.querySelector('.field-error');
+                if (error) {
+                    error.remove();
+                }
+            });
+        }
+
+        // Função de notificação
+        function showNotification(message, type) {
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(message, type);
+            } else {
+                alert(message);
+            }
+        }
+
+        // Função para formatar moeda
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-MZ', {
+                style: 'currency',
+                currency: 'MZN',
+                minimumFractionDigits: 2
+            }).format(value).replace('MTn', 'MT');
+        }
+
+        // Inicialização
+        togglePriceFields();
+        calculateEstimates();
+    });
 </script>
-@endsection
+@endpush
 
+@push('styles')
+<style>
+    /* Transições suaves para campos de preço */
+    #fixed_price_field,
+    #hourly_rate_field {
+        transition: opacity 0.3s ease;
+    }
+
+    /* Estilo para radio buttons customizados */
+    input[type="radio"]:checked + div {
+        background-color: #f0fff4;
+        border-color: #10b981;
+    }
+
+    /* Animação para o switch toggle */
+    .peer:checked ~ .peer-checked\:after\:translate-x-full::after {
+        transform: translateX(100%);
+    }
+
+    /* Estilo para campos com erro */
+    .border-red-300 {
+        border-color: #fca5a5;
+    }
+
+    .border-red-300:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    /* Loading spinner */
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+
+    /* Hover effects */
+    .transition-colors {
+        transition-property: color, background-color, border-color;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+    }
+
+    /* Focus states */
+    .focus\:ring-2:focus {
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.5);
+    }
+
+    .focus\:border-transparent:focus {
+        border-color: transparent;
+    }
+
+    /* Cores para os valores calculados */
+    .text-red-600 {
+        color: #dc2626;
+    }
+
+    .text-yellow-600 {
+        color: #d97706;
+    }
+
+    .text-green-600 {
+        color: #16a34a;
+    }
+
+    /* Melhorias responsivas */
+    @media (max-width: 768px) {
+        .xl\:grid-cols-3 {
+            grid-template-columns: 1fr;
+        }
+
+        .xl\:col-span-2 {
+            grid-column: span 1;
+        }
+
+        .sticky {
+            position: static;
+        }
+
+        .md\:grid-cols-2 {
+            grid-template-columns: 1fr;
+        }
+
+        .md\:grid-cols-3 {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+@endpush
+@endsection
