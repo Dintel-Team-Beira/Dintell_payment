@@ -318,4 +318,22 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return !is_null($this->company_id) && $this->company !== null;
     }
+
+    public function supportTickets()
+{
+    return $this->hasMany(SupportTicket::class);
+}
+
+public function getUnreadSupportTicketsAttribute()
+{
+    return $this->supportTickets()
+                ->whereDoesntHave('views', function($query) {
+                    $query->where('user_id', $this->id);
+                })
+                ->whereHas('replies', function($query) {
+                    $query->where('user_id', '!=', $this->id)
+                          ->where('created_at', '>', $this->created_at);
+                })
+                ->count();
+}
 }
