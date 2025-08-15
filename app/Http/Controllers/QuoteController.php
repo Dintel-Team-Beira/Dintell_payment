@@ -400,7 +400,12 @@ class QuoteController extends Controller
             $company = auth()->user()->company;
             $template = DocumentTemplate::where('company_id', $company->id)->where('type', 'quote')->where('is_selected', true)->first();
             $data = compact('quote', 'company');
-            return DocumentTemplateHelper::downloadPdfDocument($template, $data);
+            return DocumentTemplateHelper::downloadPdfDocument($template, $data, [
+                'margin_top' => '250mm',
+                'margin_right' => '200mm',
+                'margin_bottom' => '250mm',
+                'margin_left' => '200mm',
+            ]);
 
             return $this->pdfService->downloadQuotePdf($quote);
         } catch (\Exception $e) {

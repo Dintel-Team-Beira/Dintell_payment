@@ -160,7 +160,7 @@ class TemplatePreviewController extends Controller
         // dd($companyId);
 
         // Desmarcar todos os outros templates como selecionados
-        DocumentTemplate::where('company_id', $companyId)
+        DocumentTemplate::where('company_id', $companyId)->where('type',$template->id)
             ->where('is_selected', true)
             ->update(['is_selected' => false]);
 
