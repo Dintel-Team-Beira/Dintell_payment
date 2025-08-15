@@ -376,7 +376,10 @@
             </main>
         </div>
     </div>
-  @include('components.support-popup')
+  {{-- @include('components.support-popup') --}}
+  @auth
+    <x-support-popup />
+@endauth
     @stack('scripts')
 
 
