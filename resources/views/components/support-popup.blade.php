@@ -836,6 +836,7 @@
 
 <script>
 // Support Popup JavaScript
+// Support Popup JavaScript - Versão Corrigida
 class SupportPopup {
     constructor() {
         this.isOpen = false;
@@ -922,10 +923,14 @@ class SupportPopup {
 
         const submitButton = form.querySelector('button[type="submit"]');
         const originalText = submitButton.textContent;
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-if (!csrfToken) {
-    throw new Error('CSRF token not found');
-}
+
+        // Verificar se o token CSRF existe
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!csrfToken) {
+            this.showErrorMessage('Erro de segurança: Token CSRF não encontrado. Recarregue a página.');
+            return;
+        }
+
         // Show loading state
         submitButton.innerHTML = '<div class="loading-spinner"></div> Enviando...';
         submitButton.disabled = true;
@@ -935,12 +940,23 @@ if (!csrfToken) {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
-             console.error('Response status:', response);
+
+            // Debug: verificar se a resposta é JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Resposta não é JSON:', text);
+                throw new Error('Resposta do servidor não é JSON válido');
+            }
+
             const result = await response.json();
-            if (result.success) {
+
+            if (response.ok && result.success) {
                 this.showSuccessMessage('Ticket criado com sucesso!', result.ticket_number);
                 form.reset();
                 this.loadUserTickets(); // Refresh tickets list
@@ -949,8 +965,13 @@ if (!csrfToken) {
             }
 
         } catch (error) {
-            console.error('Error submitting ticket:', error);
-            this.showErrorMessage('Erro ao criar ticket. Tente novamente.');
+            console.error('Erro ao enviar ticket:', error);
+
+            if (error.name === 'SyntaxError' && error.message.includes('JSON')) {
+                this.showErrorMessage('Erro de comunicação com o servidor. Verifique sua conexão e tente novamente.');
+            } else {
+                this.showErrorMessage(error.message || 'Erro ao criar ticket. Tente novamente.');
+            }
         } finally {
             submitButton.textContent = originalText;
             submitButton.disabled = false;
@@ -959,21 +980,40 @@ if (!csrfToken) {
 
     async loadUserTickets() {
         try {
-            const response = await fetch('/api/support/tickets/my');
+            const response = await fetch('/api/support/tickets/my', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            // Verificar se a resposta é JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.warn('Resposta não é JSON ao carregar tickets');
+                this.renderTickets([]); // Renderizar lista vazia
+                return;
+            }
+
             const result = await response.json();
 
             if (result.success) {
-                this.renderTickets(result.tickets);
+                this.renderTickets(result.tickets || []);
+            } else {
+                console.warn('Erro ao carregar tickets:', result.message);
+                this.renderTickets([]);
             }
         } catch (error) {
-            console.error('Error loading tickets:', error);
+            console.error('Erro ao carregar tickets:', error);
+            // Não mostrar erro para o usuário, apenas renderizar lista vazia
+            this.renderTickets([]);
         }
     }
 
     renderTickets(tickets) {
         const container = document.getElementById('ticketsList');
 
-        if (tickets.length === 0) {
+        if (!tickets || tickets.length === 0) {
             container.innerHTML = `
                 <div class="text-center" style="padding: 40px 20px; color: #6b7280;">
                     <svg style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;" viewBox="0 0 24 24" fill="currentColor">
@@ -1016,7 +1056,7 @@ if (!csrfToken) {
                 <h4>Sucesso! ✅</h4>
                 <p>${message}</p>
                 ${ticketNumber ? `<p><strong>Número do ticket: #${ticketNumber}</strong></p>` : ''}
-                <button class="btn-primary" onclick="supportPopup.showScreen('welcome'); location.reload();" style="margin-top: 16px;">
+                <button class="btn-primary" onclick="supportPopup.resetWelcomeScreen(); supportPopup.loadUserTickets();" style="margin-top: 16px;">
                     Ok, entendi
                 </button>
             </div>
@@ -1024,8 +1064,99 @@ if (!csrfToken) {
     }
 
     showErrorMessage(message) {
-        // You can implement a toast notification or modal here
-        alert(message);
+        // Criar um toast de erro
+        this.showToast(message, 'error');
+    }
+
+    showToast(message, type = 'info') {
+        // Remove existing toasts
+        const existingToasts = document.querySelectorAll('.support-toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `support-toast support-toast-${type}`;
+        toast.innerHTML = `
+            <div class="support-toast-content">
+                <div class="support-toast-icon">
+                    ${type === 'error' ?
+                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/></svg>' :
+                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.5,8L11,13.5L7.5,10L6,11.5L11,16.5Z"/></svg>'
+                    }
+                </div>
+                <div class="support-toast-message">${message}</div>
+                <button class="support-toast-close" onclick="this.parentElement.parentElement.remove()">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        // Add to document
+        document.body.appendChild(toast);
+
+        // Animate in
+        setTimeout(() => toast.classList.add('show'), 100);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    }
+
+    resetWelcomeScreen() {
+        const content = document.querySelector('#welcomeScreen .welcome-content');
+        content.innerHTML = `
+            <div class="welcome-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+            </div>
+            <h4>Olá! 👋</h4>
+            <p>Estamos aqui para ajudar você. Escolha uma das opções abaixo:</p>
+
+            <div class="support-options">
+                <button class="support-option" onclick="showTicketForm()">
+                    <div class="option-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                        </svg>
+                    </div>
+                    <div class="option-content">
+                        <h5>Criar Ticket</h5>
+                        <p>Reporte um problema ou solicite ajuda</p>
+                    </div>
+                </button>
+
+                <button class="support-option" onclick="showMyTickets()">
+                    <div class="option-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,19H5V5H19V19Z"/>
+                        </svg>
+                    </div>
+                    <div class="option-content">
+                        <h5>Meus Tickets</h5>
+                        <p>Veja seus tickets existentes</p>
+                    </div>
+                </button>
+
+                <button class="support-option" onclick="showFAQ()">
+                    <div class="option-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11,18H13V16H11V18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20C7.59,20 4,16.41 4,12C7.59,4 4,12A10,10 0 0,0 12,2Z"/>
+                        </svg>
+                    </div>
+                    <div class="option-content">
+                        <h5>FAQ</h5>
+                        <p>Perguntas frequentes</p>
+                    </div>
+                </button>
+            </div>
+        `;
     }
 
     getStatusLabel(status) {
@@ -1050,12 +1181,16 @@ if (!csrfToken) {
     }
 
     formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch (error) {
+            return 'Data inválida';
+        }
     }
 }
 
@@ -1063,27 +1198,40 @@ if (!csrfToken) {
 let supportPopup;
 
 document.addEventListener('DOMContentLoaded', function() {
-    supportPopup = new SupportPopup();
+    // Verificar se os elementos existem antes de inicializar
+    if (document.getElementById('supportPopup')) {
+        supportPopup = new SupportPopup();
+    }
 });
 
 // Global functions for onclick handlers
 function toggleSupportPopup() {
-    supportPopup.toggle();
+    if (supportPopup) {
+        supportPopup.toggle();
+    }
 }
 
 function showWelcomeScreen() {
-    supportPopup.showScreen('welcome');
+    if (supportPopup) {
+        supportPopup.showScreen('welcome');
+    }
 }
 
 function showTicketForm() {
-    supportPopup.showScreen('ticketForm');
+    if (supportPopup) {
+        supportPopup.showScreen('ticketForm');
+    }
 }
 
 function showMyTickets() {
-    supportPopup.showScreen('myTickets');
+    if (supportPopup) {
+        supportPopup.showScreen('myTickets');
+    }
 }
 
 function showFAQ() {
-    supportPopup.showScreen('faq');
+    if (supportPopup) {
+        supportPopup.showScreen('faq');
+    }
 }
 </script>

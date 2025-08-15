@@ -205,6 +205,7 @@ Route::get('services/stats', [ServiceController::class, 'stats'])->name('api.ser
 Route::get('services/{service}/calculate-price', [ServiceController::class, 'calculatePrice'])->name('api.services.calculate-price');
 Route::get('services/templates', [ServiceController::class, 'getTemplates'])->name('api.services.templates');
 Route::post('services/{service}/toggle-status', [ServiceController::class, 'toggleStatus'])->name('api.services.toggle-status');
+
 Route::get('/services/active', function() {
     return App\Models\Service::active()
         ->select('id', 'name', 'code', 'hourly_rate', 'fixed_price', 'estimated_hours', 'complexity_level', 'description')
@@ -244,3 +245,20 @@ Route::get('servicos/{any?}', [ServiceController::class, 'index'])
     Route::post('/tickets/{ticket}/quick-reply', [SupportController::class, 'addReply'])->name('tickets.quick-reply');
     Route::patch('/tickets/{ticket}/quick-close', [SupportController::class, 'close'])->name('tickets.quick-close');
 });
+// No arquivo routes/api.php (ou web.php se você quiser manter como web routes)
+
+Route::middleware(['auth:sanctum'])->prefix('api/support')->name('api.support.')->group(function () {
+    // API para o popup de suporte
+    Route::get('/tickets/my', [SupportController::class, 'myTickets'])->name('tickets.my');
+    Route::post('/tickets', [SupportController::class, 'store'])->name('tickets.store');
+    Route::get('/knowledge-base/search', [SupportController::class, 'searchKnowledgeBase'])->name('kb.search');
+    Route::get('/stats', [SupportController::class, 'getUserStats'])->name('stats');
+
+    // Quick actions
+    Route::post('/tickets/{ticket}/quick-reply', [SupportController::class, 'addReply'])->name('tickets.quick-reply');
+    Route::patch('/tickets/{ticket}/quick-close', [SupportController::class, 'close'])->name('tickets.quick-close');
+});
+
+// OU se você quiser manter como web routes (recomendado para este caso):
+// No arquivo routes/web.php
+
