@@ -42,18 +42,7 @@ Route::middleware(['auth'])->prefix('support')->name('support.')->group(function
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->prefix('api/support')->name('api.support.')->group(function () {
 
-    // API para o popup de suporte
-    Route::get('/tickets/my', [SupportController::class, 'myTickets'])->name('tickets.my');
-    Route::post('/tickets', [SupportController::class, 'store'])->name('tickets.store');
-    Route::get('/knowledge-base/search', [SupportController::class, 'searchKnowledgeBase'])->name('kb.search');
-    Route::get('/stats', [SupportController::class, 'getUserStats'])->name('stats');
-
-    // Quick actions
-    Route::post('/tickets/{ticket}/quick-reply', [SupportController::class, 'addReply'])->name('tickets.quick-reply');
-    Route::patch('/tickets/{ticket}/quick-close', [SupportController::class, 'close'])->name('tickets.quick-close');
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -108,15 +97,15 @@ Route::middleware(['auth'])->prefix('api/support')->name('api.support.')->group(
 });
 
 // Admin Support Routes
-Route::middleware(['auth'])->prefix('admin/support')->name('admin.support.')->group(function () {
-    Route::get('/', [AdminSupportController::class, 'index'])->name('index');
-    Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
-    Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
-    Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
-    Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
-    Route::patch('/tickets/{ticket}/assign', [AdminSupportController::class, 'assignTicket'])->name('tickets.assign');
-    Route::get('/reports', [AdminSupportController::class, 'reports'])->name('reports');
-});
+// Route::middleware(['auth'])->prefix('admin/support')->name('admin.support.')->group(function () {
+//     Route::get('/', [AdminSupportController::class, 'index'])->name('index');
+//     Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
+//     Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
+//     Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
+//     Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
+//     Route::patch('/tickets/{ticket}/assign', [AdminSupportController::class, 'assignTicket'])->name('tickets.assign');
+//     Route::get('/reports', [AdminSupportController::class, 'reports'])->name('reports');
+// });
 
 /*
 |--------------------------------------------------------------------------
