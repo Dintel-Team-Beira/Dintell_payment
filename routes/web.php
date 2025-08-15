@@ -494,10 +494,6 @@ Route::prefix('dintell')->group(function () {
         Route::post('/{creditNote}/duplicate', [CreditNoteController::class, 'duplicate'])->name('duplicate');
     });
 
-
-
-
-
     // Configurações da Empresa
     Route::prefix('configuracoes')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
@@ -575,9 +571,6 @@ Route::prefix('dintell')->group(function () {
         Route::get('/export/{type}', [DashboardController::class, 'exportReport'])->name('export');
     });
 
-
-
-
     // Template preview
     // Route::get('template-preview/{type}',[TemplatePreviewController::class,'show'])->name('template-preview');
     Route::get('template-preview/list/{type}',[TemplatePreviewController::class,'list'])->name('template-preview.list');
@@ -616,6 +609,7 @@ Route::middleware(['auth', TenantMiddleware::class])->group(function () {
     // });
 
 });
+
 
 /*
 |--------------------------------------------------------------------------
