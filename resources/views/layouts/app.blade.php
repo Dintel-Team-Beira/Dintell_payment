@@ -379,7 +379,8 @@
   {{-- @include('components.support-popup') --}}
   @auth
     <x-support-popup />
-@endauth
+@endauth 
+
     @stack('scripts')
 
 
