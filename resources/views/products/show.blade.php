@@ -3,9 +3,9 @@
 @section('title', 'Produto: ' . $product->name)
 
 @section('content')
-<div class=" py-8 ">
+<div class="py-8 ">
     <!-- Breadcrumb -->
-    {{-- <nav class="flex mb-8" aria-label="Breadcrumb">
+    <nav class="flex mb-8" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-3">
             <li class="inline-flex items-center">
                 <a href="{{ route('dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
@@ -34,7 +34,7 @@
                 </div>
             </li>
         </ol>
-    </nav> --}}
+    </nav>
 
     <!-- Header com ações -->
     <div class="flex flex-col justify-between mb-8 sm:flex-row sm:items-center">
@@ -43,7 +43,7 @@
             <p class="mt-2 text-lg text-gray-600">{{ $product->code }}</p>
         </div>
         <div class="flex flex-col gap-3 mt-4 sm:flex-row sm:mt-0">
-            <button type="button" 
+            <button type="button"
                     onclick="printProduct()"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover-lift hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@
                 </svg>
                 Imprimir
             </button>
-            <button type="button" 
+            <button type="button"
                     onclick="duplicateProduct({{ $product->id }})"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover-lift hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@
                 </svg>
                 Duplicar
             </button>
-            <a href="{{ route('products.edit', $product) }}" 
+            <a href="{{ route('products.edit', $product) }}"
                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover-lift hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -132,7 +132,7 @@
                     @if($product->description)
                         <div class="mt-6">
                             <label class="block text-sm font-medium text-gray-700">Descrição</label>
-                            <div class="mt-2 p-4 bg-gray-50 rounded-lg">
+                            <div class="p-4 mt-2 rounded-lg bg-gray-50">
                                 <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ $product->description }}</p>
                             </div>
                         </div>
@@ -165,7 +165,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         @if($product->cost > 0)
                             <div class="p-4 border border-blue-200 rounded-lg bg-blue-50">
                                 <div class="flex items-center justify-between">
@@ -180,7 +180,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="p-4 border border-purple-200 rounded-lg bg-purple-50">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -196,7 +196,7 @@
                                 </div>
                             </div>
                         @else
-                            <div class="md:col-span-2 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <div class="p-4 border border-gray-200 rounded-lg md:col-span-2 bg-gray-50">
                                 <div class="text-center">
                                     <svg class="w-8 h-8 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -207,9 +207,9 @@
                             </div>
                         @endif
                     </div>
-                    
+
                     @if($product->tax_rate > 0)
-                        <div class="mt-4 p-4 border border-yellow-200 rounded-lg bg-yellow-50">
+                        <div class="p-4 mt-4 border border-yellow-200 rounded-lg bg-yellow-50">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
@@ -239,12 +239,12 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                 </svg>
                             </div>
-                            <div class="ml-3 flex-1">
+                            <div class="flex-1 ml-3">
                                 <p class="text-sm font-medium text-gray-900">Produto criado</p>
                                 <p class="text-xs text-gray-500">{{ $product->created_at->diffForHumans() }}</p>
                             </div>
                         </div>
-                        
+
                         @if($product->updated_at != $product->created_at)
                             <div class="flex items-center p-3 border border-gray-200 rounded-lg">
                                 <div class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
@@ -252,7 +252,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </div>
-                                <div class="ml-3 flex-1">
+                                <div class="flex-1 ml-3">
                                     <p class="text-sm font-medium text-gray-900">Produto atualizado</p>
                                     <p class="text-xs text-gray-500">{{ $product->updated_at->diffForHumans() }}</p>
                                 </div>
@@ -273,19 +273,19 @@
                 <div class="p-6">
                     @if($product->image)
                         <div class="relative group">
-                            <img src="{{ asset('storage/' . $product->image) }}" 
-                                 alt="{{ $product->name }}" 
-                                 class="w-full h-64 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                            <img src="{{ asset('storage/' . $product->image) }}"
+                                 alt="{{ $product->name }}"
+                                 class="object-cover w-full h-64 transition-opacity border border-gray-200 rounded-lg cursor-pointer hover:opacity-90"
                                  onclick="openImageModal('{{ asset('storage/' . $product->image) }}', '{{ $product->name }}')">
-                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 rounded-lg flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="absolute inset-0 flex items-center justify-center transition-all duration-200 bg-black bg-opacity-0 rounded-lg group-hover:bg-opacity-10">
+                                <svg class="w-8 h-8 text-white transition-opacity opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                 </svg>
                             </div>
                         </div>
                     @else
-                        <div class="flex items-center justify-center w-full h-64 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
+                        <div class="flex items-center justify-center w-full h-64 bg-gray-100 border-2 border-gray-300 border-dashed rounded-lg">
                             <div class="text-center">
                                 <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -323,21 +323,21 @@
                     <!-- Status do Estoque -->
                     <div class="flex items-center justify-center">
                         @if($product->stock_status == 'in_stock')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <span class="inline-flex items-center px-3 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-full">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                                 Estoque Normal
                             </span>
                         @elseif($product->stock_status == 'low_stock')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                            <span class="inline-flex items-center px-3 py-1 text-sm font-medium text-yellow-800 bg-yellow-100 rounded-full">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5l-6.928-12c-.77-.833-2.734-.833-3.464 0L2.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                                 </svg>
                                 Estoque Baixo
                             </span>
                         @else
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                            <span class="inline-flex items-center px-3 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-full">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
@@ -348,20 +348,20 @@
 
                     <!-- Detalhes do Estoque -->
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                        <div class="flex items-center justify-between py-2 border-b border-gray-100">
                             <span class="text-sm text-gray-600">Estoque Mínimo:</span>
                             <span class="text-sm font-medium text-gray-900">{{ $product->min_stock_level }} {{ $product->unit }}</span>
                         </div>
-                        
+
                         @if($product->weight)
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
                                 <span class="text-sm text-gray-600">Peso:</span>
                                 <span class="text-sm font-medium text-gray-900">{{ $product->weight }} kg</span>
                             </div>
                         @endif
-                        
+
                         @if($product->dimensions)
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
                                 <span class="text-sm text-gray-600">Dimensões:</span>
                                 <span class="text-sm font-medium text-gray-900">{{ $product->dimensions }}</span>
                             </div>
@@ -369,9 +369,9 @@
                     </div>
 
                     <!-- Ação de Ajuste -->
-                    <button type="button" 
+                    <button type="button"
                             onclick="adjustStock({{ $product->id }}, '{{ $product->name }}')"
-                            class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover-lift hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover-lift hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v4a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
                         </svg>
@@ -409,17 +409,17 @@
 
                     {{-- <button type="button"
                             onclick="generateQRCode()"
-                            class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-purple-700 border border-purple-200 rounded-md bg-purple-50 hover-lift hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-purple-700 border border-purple-200 rounded-md bg-purple-50 hover-lift hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                         </svg>
                         Gerar QR Code
                     </button> --}}
 
-                    <div class="border-t border-gray-200 pt-3">
+                    <div class="pt-3 border-t border-gray-200">
                         <button type="button"
                                 onclick="deleteProduct({{ $product->id }}, '{{ $product->name }}')"
-                                class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-red-700 border border-red-200 rounded-md bg-red-50 hover-lift hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-red-700 border border-red-200 rounded-md bg-red-50 hover-lift hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
@@ -457,9 +457,9 @@
     <div id="imageModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75" onclick="closeImageModal()"></div>
-            
+
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            
+
             <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900" id="imageModalTitle">Imagem do Produto</h3>
@@ -470,7 +470,7 @@
                     </button>
                 </div>
                 <div class="px-6 py-4">
-                    <img id="imageModalImg" src="" alt="" class="w-full h-auto max-h-96 object-contain rounded-lg">
+                    <img id="imageModalImg" src="" alt="" class="object-contain w-full h-auto rounded-lg max-h-96">
                 </div>
             </div>
         </div>
@@ -566,9 +566,9 @@
     {{-- <div id="qrModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75" onclick="closeQRModal()"></div>
-            
+
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            
+
             <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">QR Code do Produto</h3>
@@ -582,11 +582,11 @@
                     <div id="qrCodeContainer" class="flex justify-center mb-4">
                         <!-- QR Code será gerado aqui -->
                     </div>
-                    <p class="text-sm text-gray-600 mb-4">{{ $product->name }}</p>
+                    <p class="mb-4 text-sm text-gray-600">{{ $product->name }}</p>
                     <p class="text-xs text-gray-500">Código: {{ $product->code }}</p>
-                    <button type="button" 
+                    <button type="button"
                             onclick="downloadQRCode()"
-                            class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100">
+                            class="inline-flex items-center px-4 py-2 mt-4 text-sm font-medium text-blue-700 border border-blue-200 rounded-md bg-blue-50 hover:bg-blue-100">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
@@ -625,18 +625,18 @@
     .no-print {
         display: none !important;
     }
-    
+
     body {
         font-size: 12pt;
         line-height: 1.4;
     }
-    
+
     .print-title {
         font-size: 18pt;
         font-weight: bold;
         margin-bottom: 20pt;
     }
-    
+
     .print-section {
         margin-bottom: 15pt;
         page-break-inside: avoid;
@@ -699,11 +699,11 @@ function closeStockModal() {
 function generateQRCode() {
     const modal = document.getElementById('qrModal');
     const container = document.getElementById('qrCodeContainer');
-    
+
     if (!qrCodeGenerated) {
         // Limpar container
         container.innerHTML = '';
-        
+
         // Gerar QR Code
         const canvas = document.createElement('canvas');
         QRCode.toCanvas(canvas, `{{ route('products.show', $product) }}`, {
@@ -723,7 +723,7 @@ function generateQRCode() {
             qrCodeGenerated = true;
         });
     }
-    
+
     modal.classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
 }
@@ -791,7 +791,7 @@ function toggleStatus(id, status) {
             hideLoading();
             if (data.success) {
                 console.log(data);
-                
+
                 showNotification('Status alterado com sucesso!', 'success');
                 setTimeout(() => location.reload(), 1500);
             } else {
@@ -838,11 +838,11 @@ function deleteProduct(id, name) {
 // Formulário de ajuste de estoque
 document.getElementById('stockForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(this);
     const submitButton = this.querySelector('button[type="submit"]');
     const originalText = submitButton.innerHTML;
-    
+
     submitButton.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Processando...';
     submitButton.disabled = true;
 
@@ -877,7 +877,7 @@ document.getElementById('stockForm').addEventListener('submit', function(e) {
 function printProduct() {
     // Criar janela de impressão
     const printWindow = window.open('', '_blank');
-    
+
     const printContent = `
         <!DOCTYPE html>
         <html>
@@ -905,7 +905,7 @@ function printProduct() {
                 <p>Código: {{ $product->code }}</p>
                 <p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
             </div>
-            
+
             <div class="section">
                 <h3>Informações Básicas</h3>
                 <div class="info-grid">
@@ -937,7 +937,7 @@ function printProduct() {
                 </div>
                 @endif
             </div>
-            
+
             <div class="section">
                 <h3>Informações Financeiras</h3>
                 <div class="info-grid">
@@ -963,7 +963,7 @@ function printProduct() {
                     @endif
                 </div>
             </div>
-            
+
             <div class="section">
                 <h3>Controle de Estoque</h3>
                 <div class="info-grid">
@@ -997,7 +997,7 @@ function printProduct() {
                     @endif
                 </div>
             </div>
-            
+
             @if($product->company)
             <div class="section">
                 <h3>Empresa</h3>
@@ -1007,7 +1007,7 @@ function printProduct() {
                 </div>
             </div>
             @endif
-            
+
             <div class="section">
                 <h3>Datas</h3>
                 <div class="info-grid">
@@ -1026,10 +1026,10 @@ function printProduct() {
         </body>
         </html>
     `;
-    
+
     printWindow.document.write(printContent);
     printWindow.document.close();
-    
+
     // Aguardar carregamento e imprimir
     printWindow.onload = function() {
         printWindow.focus();
@@ -1108,12 +1108,12 @@ function showLoading() {
         loadingOverlay.id = 'loadingOverlay';
         loadingOverlay.className = 'fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50';
         loadingOverlay.innerHTML = `
-            <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
-                <svg class="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+            <div class="flex items-center p-6 space-x-4 bg-white rounded-lg">
+                <svg class="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span class="text-gray-700 font-medium">Processando...</span>
+                <span class="font-medium text-gray-700">Processando...</span>
             </div>
         `;
         document.body.appendChild(loadingOverlay);
@@ -1136,13 +1136,13 @@ document.addEventListener('keydown', function(e) {
         closeStockModal();
         closeQRModal();
     }
-    
+
     // Ctrl+P para imprimir
     if (e.ctrlKey && e.key === 'p') {
         e.preventDefault();
         printProduct();
     }
-    
+
     // Ctrl+E para editar
     if (e.ctrlKey && e.key === 'e') {
         e.preventDefault();
