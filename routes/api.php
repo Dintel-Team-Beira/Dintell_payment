@@ -11,6 +11,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 
 // API pública para verificação de domínios
@@ -229,3 +230,17 @@ Route::get('/services/active', function() {
 Route::get('servicos/{any?}', [ServiceController::class, 'index'])
     ->where('any', '.*')
     ->name('services.index.fallback');
+
+
+    Route::prefix('api/support')->name('api.support.')->group(function () {
+
+    // API para o popup de suporte
+    Route::get('/tickets/my', [SupportController::class, 'myTickets'])->name('tickets.my');
+    Route::post('/tickets', [SupportController::class, 'store'])->name('tickets.store');
+    Route::get('/knowledge-base/search', [SupportController::class, 'searchKnowledgeBase'])->name('kb.search');
+    Route::get('/stats', [SupportController::class, 'getUserStats'])->name('stats');
+
+    // Quick actions
+    Route::post('/tickets/{ticket}/quick-reply', [SupportController::class, 'addReply'])->name('tickets.quick-reply');
+    Route::patch('/tickets/{ticket}/quick-close', [SupportController::class, 'close'])->name('tickets.quick-close');
+});
