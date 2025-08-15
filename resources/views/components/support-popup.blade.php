@@ -1,5 +1,8 @@
+{{-- resources/views/components/support-popup.blade.php --}}
+@props(['position' => 'bottom-right'])
+
 <!-- Support Popup Component -->
-<div id="supportPopup" class="support-popup">
+<div id="supportPopup" class="support-popup {{ $position }}">
     <!-- Floating Button -->
     <div id="supportButton" class="support-button" onclick="toggleSupportPopup()">
         <div class="support-button-content">
@@ -103,41 +106,55 @@
                 </div>
 
                 <form id="supportTicketForm" class="ticket-form">
+                    @csrf
                     <div class="form-group">
-                        <label for="ticketCategory">Categoria</label>
+                        <label for="ticketCategory">Categoria <span class="text-red-500">*</span></label>
                         <select id="ticketCategory" name="category" required>
                             <option value="">Selecione uma categoria</option>
                             <option value="technical">Problema Técnico</option>
                             <option value="billing">Cobrança/Faturação</option>
                             <option value="general">Geral</option>
-                            <option value="feature_request">Solicitação de Funcionalidade</option>
-                            <option value="bug_report">Relatar Bug</option>
+                            <option value="feature">Solicitação de Funcionalidade</option>
+                            <option value="bug">Relatar Bug</option>
                         </select>
+                        <div class="error-message" id="categoryError"></div>
                     </div>
 
                     <div class="form-group">
-                        <label for="ticketPriority">Prioridade</label>
+                        <label for="ticketPriority">Prioridade <span class="text-red-500">*</span></label>
                         <select id="ticketPriority" name="priority" required>
                             <option value="low">Baixa</option>
-                            <option value="medium" selected>Média</option>
+                            <option value="normal" selected>Normal</option>
                             <option value="high">Alta</option>
                             <option value="urgent">Urgente</option>
                         </select>
+                        <div class="error-message" id="priorityError"></div>
                     </div>
 
                     <div class="form-group">
-                        <label for="ticketSubject">Assunto</label>
-                        <input type="text" id="ticketSubject" name="subject" placeholder="Descreva brevemente o problema" required>
+                        <label for="ticketSubject">Assunto <span class="text-red-500">*</span></label>
+                        <input type="text" id="ticketSubject" name="subject" placeholder="Descreva brevemente o problema" required maxlength="255">
+                        <div class="error-message" id="subjectError"></div>
                     </div>
 
                     <div class="form-group">
-                        <label for="ticketDescription">Descrição</label>
-                        <textarea id="ticketDescription" name="description" rows="4" placeholder="Descreva detalhadamente o problema ou sua solicitação" required></textarea>
+                        <label for="ticketDescription">Descrição <span class="text-red-500">*</span></label>
+                        <textarea id="ticketDescription" name="description" rows="4" placeholder="Descreva detalhadamente o problema ou sua solicitação" required minlength="10"></textarea>
+                        <div class="error-message" id="descriptionError"></div>
                     </div>
 
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" onclick="showWelcomeScreen()">Cancelar</button>
-                        <button type="submit" class="btn-primary">Criar Ticket</button>
+                        <button type="submit" class="btn-primary">
+                            <span class="btn-text">Criar Ticket</span>
+                            <span class="btn-loading" style="display: none;">
+                                <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <path d="M9 12l2 2 4-4"></path>
+                                </svg>
+                                Enviando...
+                            </span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -154,7 +171,10 @@
                 </div>
 
                 <div id="ticketsList" class="tickets-list">
-                    <!-- Tickets will be loaded here -->
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <p>Carregando tickets...</p>
+                    </div>
                 </div>
             </div>
 
@@ -182,6 +202,10 @@
                         <h5>Como posso acompanhar meus pagamentos?</h5>
                         <p>No dashboard principal, você encontra um resumo dos pagamentos. Para mais detalhes, acesse "Relatórios" > "Financeiro".</p>
                     </div>
+                    <div class="faq-item">
+                        <h5>Como adicionar novos usuários?</h5>
+                        <p>Acesse "Configurações" > "Usuários" > "Adicionar Usuário". Preencha os dados e defina as permissões.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -193,14 +217,23 @@
     </div>
 </div>
 
+{{-- @push('styles') --}}
 <style>
 /* Support Popup Styles */
 .support-popup {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
     z-index: 9999;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.support-popup.bottom-right {
+    bottom: 20px;
+    right: 20px;
+}
+
+.support-popup.bottom-left {
+    bottom: 20px;
+    left: 20px;
 }
 
 /* Floating Button */
@@ -303,6 +336,11 @@
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+.support-popup.bottom-left .support-panel {
+    left: 0;
+    right: auto;
+}
+
 .support-panel.active {
     opacity: 1;
     visibility: visible;
@@ -391,8 +429,8 @@
 /* Content Area */
 .support-content {
     position: relative;
-    max-height: 450px; /* Adjust to fit within .support-panel's max-height minus header and footer */
-    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: 450px;
+    overflow-y: auto;
 }
 
 .support-screen {
@@ -406,8 +444,8 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 24px;
     min-height: 400px;
-    max-height: 450px; /* Match .support-content to prevent clipping */
-    overflow-y: auto; /* Enable scrolling for each screen */
+    max-height: 450px;
+    overflow-y: auto;
 }
 
 .support-screen.active {
@@ -415,10 +453,6 @@
     opacity: 1;
     visibility: visible;
     transform: translateX(0);
-}}
-
-.support-screen.slide-out {
-    transform: translateX(-100%);
 }
 
 /* Welcome Screen */
@@ -597,6 +631,17 @@
     min-height: 80px;
 }
 
+.error-message {
+    color: #dc2626;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+}
+
+.error-message.show {
+    display: block;
+}
+
 .form-actions {
     display: flex;
     gap: 12px;
@@ -613,6 +658,7 @@
     transition: all 0.2s ease;
     border: none;
     flex: 1;
+    position: relative;
 }
 
 .btn-primary {
@@ -620,9 +666,15 @@
     color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .btn-secondary {
@@ -635,6 +687,12 @@
     background: #e5e7eb;
 }
 
+.btn-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* Tickets List */
 .tickets-list {
     display: flex;
@@ -642,6 +700,30 @@
     gap: 12px;
     max-height: 350px;
     overflow-y: auto;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 12px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .ticket-item {
@@ -660,7 +742,7 @@
 
 .ticket-header {
     display: flex;
-    justify-content: between;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
 }
@@ -735,49 +817,98 @@
     color: #6b7280;
 }
 
-/* Loading State */
-.loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
+/* Status Colors */
+.status-open { background: #dcfce7; color: #166534; }
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-resolved { background: #f3e8ff; color: #7c3aed; }
+.status-closed { background: #f3f4f6; color: #374151; }
+
+/* Toast Notification */
+.support-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.loading-spinner {
+.support-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.support-toast-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+}
+
+.support-toast-error .support-toast-content {
+    border-left: 4px solid #ef4444;
+    background: #fef2f2;
+}
+
+.support-toast-success .support-toast-content {
+    border-left: 4px solid #10b981;
+    background: #f0fdf4;
+}
+
+.support-toast-icon {
     width: 20px;
     height: 20px;
-    border: 2px solid #e5e7eb;
-    border-top: 2px solid #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.support-toast-error .support-toast-icon {
+    color: #ef4444;
 }
 
-/* Success Message */
-.success-message {
-    padding: 20px;
-    text-align: center;
+.support-toast-success .support-toast-icon {
+    color: #10b981;
 }
 
-.success-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 16px;
+.support-toast-icon svg {
+    width: 100%;
+    height: 100%;
 }
 
-.success-icon svg {
-    width: 24px;
-    height: 24px;
-    color: white;
+.support-toast-message {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #1f2937;
+    margin-right: 8px;
+}
+
+.support-toast-close {
+    background: none;
+    border: none;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.support-toast-close:hover {
+    color: #374151;
+}
+
+.support-toast-close svg {
+    width: 100%;
+    height: 100%;
 }
 
 /* Responsive */
@@ -787,26 +918,29 @@
         right: 20px;
         left: 20px;
     }
+
+    .support-popup.bottom-left .support-panel {
+        left: 20px;
+        right: 20px;
+    }
+
+    .support-toast {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        transform: translateY(-100%);
+    }
+
+    .support-toast.show {
+        transform: translateY(0);
+    }
 }
 
-/* Status Colors */
-.status-open { background: #dcfce7; color: #166534; }
-.status-pending { background: #fef3c7; color: #92400e; }
-.status-in-progress { background: #dbeafe; color: #1e40af; }
-.status-resolved { background: #f3e8ff; color: #7c3aed; }
-.status-closed { background: #f3f4f6; color: #374151; }
-
-/* Priority Colors */
-.priority-low { background: #f3f4f6; color: #374151; }
-.priority-medium { background: #dbeafe; color: #1e40af; }
-.priority-high { background: #fed7aa; color: #c2410c; }
-.priority-urgent { background: #fecaca; color: #dc2626; }
-
 /* Animations */
-@keyframes slideInUp {
+@keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
@@ -814,29 +948,14 @@
     }
 }
 
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.animate-slide-in-up {
-    animation: slideInUp 0.3s ease-out;
-}
-
-.animate-slide-in-right {
-    animation: slideInRight 0.3s ease-out;
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
 }
 </style>
+{{-- @endpush --}}
 
+@push('scripts')
 <script>
-// Support Popup JavaScript
-// Support Popup JavaScript - Versão Corrigida
 class SupportPopup {
     constructor() {
         this.isOpen = false;
@@ -851,15 +970,18 @@ class SupportPopup {
 
     bindEvents() {
         // Form submission
-        document.getElementById('supportTicketForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.submitTicket();
-        });
+        const form = document.getElementById('supportTicketForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.submitTicket();
+            });
+        }
 
         // Close popup when clicking outside
         document.addEventListener('click', (e) => {
             const popup = document.getElementById('supportPopup');
-            if (!popup.contains(e.target) && this.isOpen) {
+            if (popup && !popup.contains(e.target) && this.isOpen) {
                 this.close();
             }
         });
@@ -884,21 +1006,23 @@ class SupportPopup {
         const button = document.getElementById('supportButton');
         const panel = document.getElementById('supportPanel');
 
-        button.classList.add('active');
-        panel.classList.add('active');
-        this.isOpen = true;
-
-        // Reset to welcome screen
-        this.showScreen('welcome');
+        if (button && panel) {
+            button.classList.add('active');
+            panel.classList.add('active');
+            this.isOpen = true;
+            this.showScreen('welcome');
+        }
     }
 
     close() {
         const button = document.getElementById('supportButton');
         const panel = document.getElementById('supportPanel');
 
-        button.classList.remove('active');
-        panel.classList.remove('active');
-        this.isOpen = false;
+        if (button && panel) {
+            button.classList.remove('active');
+            panel.classList.remove('active');
+            this.isOpen = false;
+        }
     }
 
     showScreen(screenName) {
@@ -913,6 +1037,11 @@ class SupportPopup {
             setTimeout(() => {
                 targetScreen.classList.add('active');
                 this.currentScreen = screenName;
+
+                // Load tickets if switching to my tickets screen
+                if (screenName === 'myTickets') {
+                    this.loadUserTickets();
+                }
             }, 150);
         }
     }
@@ -921,18 +1050,21 @@ class SupportPopup {
         const form = document.getElementById('supportTicketForm');
         const formData = new FormData(form);
 
-        const submitButton = form.querySelector('button[type="submit"]');
-        const originalText = submitButton.textContent;
+        // Clear previous errors
+        this.clearFormErrors();
 
-        // Verificar se o token CSRF existe
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        if (!csrfToken) {
-            this.showErrorMessage('Erro de segurança: Token CSRF não encontrado. Recarregue a página.');
+        // Validate form
+        if (!this.validateForm(formData)) {
             return;
         }
 
+        const submitButton = form.querySelector('button[type="submit"]');
+        const btnText = submitButton.querySelector('.btn-text');
+        const btnLoading = submitButton.querySelector('.btn-loading');
+
         // Show loading state
-        submitButton.innerHTML = '<div class="loading-spinner"></div> Enviando...';
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'flex';
         submitButton.disabled = true;
 
         try {
@@ -940,45 +1072,111 @@ class SupportPopup {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
 
-            // Debug: verificar se a resposta é JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Resposta não é JSON:', text);
-                throw new Error('Resposta do servidor não é JSON válido');
-            }
-
             const result = await response.json();
 
             if (response.ok && result.success) {
-                this.showSuccessMessage('Ticket criado com sucesso!', result.ticket_number);
+                this.showSuccessMessage('Ticket criado com sucesso!', result.ticket_number || result.data?.ticket_number);
                 form.reset();
-                this.loadUserTickets(); // Refresh tickets list
+                // Reload tickets list for next time
+                setTimeout(() => this.loadUserTickets(), 1000);
             } else {
-                throw new Error(result.message || 'Erro ao criar ticket');
+                if (result.errors) {
+                    this.showFormErrors(result.errors);
+                } else {
+                    throw new Error(result.message || 'Erro ao criar ticket');
+                }
             }
 
         } catch (error) {
             console.error('Erro ao enviar ticket:', error);
-
-            if (error.name === 'SyntaxError' && error.message.includes('JSON')) {
-                this.showErrorMessage('Erro de comunicação com o servidor. Verifique sua conexão e tente novamente.');
-            } else {
-                this.showErrorMessage(error.message || 'Erro ao criar ticket. Tente novamente.');
-            }
+            this.showToast(error.message || 'Erro ao criar ticket. Tente novamente.', 'error');
         } finally {
-            submitButton.textContent = originalText;
+            // Reset button state
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
             submitButton.disabled = false;
         }
     }
 
+    validateForm(formData) {
+        let isValid = true;
+        const category = formData.get('category');
+        const priority = formData.get('priority');
+        const subject = formData.get('subject');
+        const description = formData.get('description');
+
+        if (!category) {
+            this.showFieldError('categoryError', 'Por favor, selecione uma categoria.');
+            isValid = false;
+        }
+
+        if (!priority) {
+            this.showFieldError('priorityError', 'Por favor, selecione uma prioridade.');
+            isValid = false;
+        }
+
+        if (!subject || subject.trim().length < 3) {
+            this.showFieldError('subjectError', 'O assunto deve ter pelo menos 3 caracteres.');
+            isValid = false;
+        }
+
+        if (!description || description.trim().length < 10) {
+            this.showFieldError('descriptionError', 'A descrição deve ter pelo menos 10 caracteres.');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    showFieldError(fieldId, message) {
+        const errorElement = document.getElementById(fieldId);
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+    }
+
+    clearFormErrors() {
+        document.querySelectorAll('.error-message').forEach(error => {
+            error.classList.remove('show');
+            error.textContent = '';
+        });
+    }
+
+    showFormErrors(errors) {
+        const fieldMap = {
+            'category': 'categoryError',
+            'priority': 'priorityError',
+            'subject': 'subjectError',
+            'description': 'descriptionError'
+        };
+
+        Object.keys(errors).forEach(field => {
+            const errorId = fieldMap[field];
+            if (errorId && errors[field][0]) {
+                this.showFieldError(errorId, errors[field][0]);
+            }
+        });
+    }
+
     async loadUserTickets() {
+        const container = document.getElementById('ticketsList');
+        if (!container) return;
+
+        // Show loading
+        container.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Carregando tickets...</p>
+            </div>
+        `;
+
         try {
             const response = await fetch('/api/support/tickets/my', {
                 headers: {
@@ -987,75 +1185,86 @@ class SupportPopup {
                 }
             });
 
-            // Verificar se a resposta é JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                console.warn('Resposta não é JSON ao carregar tickets');
-                this.renderTickets([]); // Renderizar lista vazia
-                return;
+            if (!response.ok) {
+                throw new Error('Erro ao carregar tickets');
             }
 
             const result = await response.json();
 
             if (result.success) {
-                this.renderTickets(result.tickets || []);
+                this.renderTickets(result.tickets || result.data || []);
             } else {
-                console.warn('Erro ao carregar tickets:', result.message);
-                this.renderTickets([]);
+                throw new Error(result.message || 'Erro ao carregar tickets');
             }
+
         } catch (error) {
             console.error('Erro ao carregar tickets:', error);
-            // Não mostrar erro para o usuário, apenas renderizar lista vazia
-            this.renderTickets([]);
+            container.innerHTML = `
+                <div class="loading-container">
+                    <svg style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; color: #ef4444;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+                    </svg>
+                    <p>Erro ao carregar tickets</p>
+                    <button onclick="supportPopup.loadUserTickets()" class="btn-secondary" style="margin-top: 12px; padding: 8px 16px;">
+                        Tentar novamente
+                    </button>
+                </div>
+            `;
         }
     }
 
     renderTickets(tickets) {
         const container = document.getElementById('ticketsList');
+        if (!container) return;
 
         if (!tickets || tickets.length === 0) {
             container.innerHTML = `
-                <div class="text-center" style="padding: 40px 20px; color: #6b7280;">
-                    <svg style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;" viewBox="0 0 24 24" fill="currentColor">
+                <div class="loading-container">
+                    <svg style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                     </svg>
                     <p>Você ainda não possui tickets de suporte.</p>
+                    <button onclick="showTicketForm()" class="btn-primary" style="margin-top: 12px; padding: 8px 16px;">
+                        Criar primeiro ticket
+                    </button>
                 </div>
             `;
             return;
         }
 
         container.innerHTML = tickets.map(ticket => `
-            <div class="ticket-item" onclick="supportPopup.viewTicket('${ticket.id}')">
+            <div class="ticket-item animate-fade-in" onclick="supportPopup.viewTicket('${ticket.id}')">
                 <div class="ticket-header">
-                    <span class="ticket-number">#${ticket.ticket_number}</span>
-                    <span class="ticket-status status-${ticket.status}">${this.getStatusLabel(ticket.status)}</span>
+                    <span class="ticket-number">#${ticket.ticket_number || ticket.id}</span>
+                    <span class="ticket-status status-${ticket.status || 'open'}">${this.getStatusLabel(ticket.status || 'open')}</span>
                 </div>
-                <div class="ticket-subject">${ticket.subject}</div>
+                <div class="ticket-subject">${ticket.subject || 'Sem assunto'}</div>
                 <div class="ticket-meta">
-                    ${this.formatDate(ticket.created_at)} • Prioridade: ${this.getPriorityLabel(ticket.priority)}
+                    ${this.formatDate(ticket.created_at)} • Prioridade: ${this.getPriorityLabel(ticket.priority || 'normal')}
                 </div>
             </div>
         `).join('');
     }
 
     viewTicket(ticketId) {
-        // Redirect to full ticket view or open modal
-        window.open(`/support/tickets/${ticketId}`, '_blank');
+        // For now, just show a message. In a real app, this would open the ticket details
+        this.showToast('Em breve: visualização completa do ticket', 'info');
     }
 
     showSuccessMessage(message, ticketNumber = null) {
         const content = document.querySelector('#welcomeScreen .welcome-content');
+        if (!content) return;
+
         content.innerHTML = `
-            <div class="success-message animate-slide-in-up">
-                <div class="success-icon">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
+            <div class="success-message animate-fade-in" style="text-align: center;">
+                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                    <svg style="width: 24px; height: 24px; color: white;" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"/>
                     </svg>
                 </div>
-                <h4>Sucesso! ✅</h4>
-                <p>${message}</p>
-                ${ticketNumber ? `<p><strong>Número do ticket: #${ticketNumber}</strong></p>` : ''}
+                <h4 style="color: #065f46; margin-bottom: 8px;">Sucesso! ✅</h4>
+                <p style="color: #047857; margin-bottom: 16px;">${message}</p>
+                ${ticketNumber ? `<p style="color: #047857; font-weight: 600; margin-bottom: 16px;">Número do ticket: #${ticketNumber}</p>` : ''}
                 <button class="btn-primary" onclick="supportPopup.resetWelcomeScreen(); supportPopup.loadUserTickets();" style="margin-top: 16px;">
                     Ok, entendi
                 </button>
@@ -1063,53 +1272,10 @@ class SupportPopup {
         `;
     }
 
-    showErrorMessage(message) {
-        // Criar um toast de erro
-        this.showToast(message, 'error');
-    }
-
-    showToast(message, type = 'info') {
-        // Remove existing toasts
-        const existingToasts = document.querySelectorAll('.support-toast');
-        existingToasts.forEach(toast => toast.remove());
-
-        // Create toast element
-        const toast = document.createElement('div');
-        toast.className = `support-toast support-toast-${type}`;
-        toast.innerHTML = `
-            <div class="support-toast-content">
-                <div class="support-toast-icon">
-                    ${type === 'error' ?
-                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/></svg>' :
-                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.5,8L11,13.5L7.5,10L6,11.5L11,16.5Z"/></svg>'
-                    }
-                </div>
-                <div class="support-toast-message">${message}</div>
-                <button class="support-toast-close" onclick="this.parentElement.parentElement.remove()">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-                    </svg>
-                </button>
-            </div>
-        `;
-
-        // Add to document
-        document.body.appendChild(toast);
-
-        // Animate in
-        setTimeout(() => toast.classList.add('show'), 100);
-
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, 5000);
-    }
-
     resetWelcomeScreen() {
         const content = document.querySelector('#welcomeScreen .welcome-content');
+        if (!content) return;
+
         content.innerHTML = `
             <div class="welcome-icon">
                 <svg viewBox="0 0 24 24" fill="currentColor">
@@ -1159,11 +1325,52 @@ class SupportPopup {
         `;
     }
 
+    showToast(message, type = 'info') {
+        // Remove existing toasts
+        const existingToasts = document.querySelectorAll('.support-toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `support-toast support-toast-${type}`;
+        toast.innerHTML = `
+            <div class="support-toast-content">
+                <div class="support-toast-icon">
+                    ${type === 'error' ?
+                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/></svg>' :
+                        type === 'success' ?
+                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.5,8L11,13.5L7.5,10L6,11.5L11,16.5Z"/></svg>' :
+                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>'
+                    }
+                </div>
+                <div class="support-toast-message">${message}</div>
+                <button class="support-toast-close" onclick="this.parentElement.parentElement.remove()">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        // Add to document
+        document.body.appendChild(toast);
+
+        // Animate in
+        setTimeout(() => toast.classList.add('show'), 100);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    }
+
     getStatusLabel(status) {
         const labels = {
             'open': 'Aberto',
             'pending': 'Pendente',
-            'in_progress': 'Em Andamento',
             'resolved': 'Resolvido',
             'closed': 'Fechado'
         };
@@ -1173,7 +1380,7 @@ class SupportPopup {
     getPriorityLabel(priority) {
         const labels = {
             'low': 'Baixa',
-            'medium': 'Média',
+            'normal': 'Normal',
             'high': 'Alta',
             'urgent': 'Urgente'
         };
@@ -1198,7 +1405,7 @@ class SupportPopup {
 let supportPopup;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar se os elementos existem antes de inicializar
+    // Check if support popup exists before initializing
     if (document.getElementById('supportPopup')) {
         supportPopup = new SupportPopup();
     }
@@ -1235,3 +1442,4 @@ function showFAQ() {
     }
 }
 </script>
+@endpush
