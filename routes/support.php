@@ -97,23 +97,13 @@ Route::middleware(['auth'])->prefix('api/support')->name('api.support.')->group(
 });
 
 // Admin Support Routes
-// Route::middleware(['auth'])->prefix('admin/support')->name('admin.support.')->group(function () {
-//     Route::get('/', [AdminSupportController::class, 'index'])->name('index');
-//     Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
-//     Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
-//     Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
-//     Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
-//     Route::patch('/tickets/{ticket}/assign', [AdminSupportController::class, 'assignTicket'])->name('tickets.assign');
-//     Route::get('/reports', [AdminSupportController::class, 'reports'])->name('reports');
-// });
+Route::middleware(['auth'])->prefix('admin/support')->name('admin.support.')->group(function () {
+    Route::get('/', [AdminSupportController::class, 'index'])->name('index');
+    Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
+    Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
+    Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
+    Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
+    Route::patch('/tickets/{ticket}/assign', [AdminSupportController::class, 'assignTicket'])->name('tickets.assign');
+    Route::get('/reports', [AdminSupportController::class, 'reports'])->name('reports');
+});
 
-/*
-|--------------------------------------------------------------------------
-| Middleware de permissões admin (adicionar ao Kernel.php)
-|--------------------------------------------------------------------------
-*/
-
-// Adicionar ao arquivo app/Http/Kernel.php na seção $routeMiddleware:
-/*
-'admin' => \App\Http\Middleware\AdminMiddleware::class,
-*/
