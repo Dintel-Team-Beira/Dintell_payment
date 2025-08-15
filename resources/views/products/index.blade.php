@@ -3,7 +3,7 @@
 @section('title', 'Gerenciamento de Produtos')
 
 @section('content')
-<div class=" py-8 ">
+<div class="px-4 py-8 sm:px-6 lg:px-8">
     <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -64,7 +64,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-500">Produtos Ativos</p>
-                    <p class="text-2xl font-semibold text-gray-900">{{ \App\Models\Product::where('company_id',auth()->user()->company_id)->active()->count() }}</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ \App\Models\Product::active()->count() }}</p>
                 </div>
             </div>
         </div>
@@ -867,7 +867,7 @@ function deleteProduct(id, name) {
 
 function toggleStatus(id, status) {
     showLoading();
-    fetch(`/api/products/${id}/toggle-status`, {
+    fetch(`/api/products/${id}/toggle-status-id`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
