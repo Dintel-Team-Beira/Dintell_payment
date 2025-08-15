@@ -116,6 +116,7 @@ Route::prefix('products')->group(function () {
     Route::post('/bulk-delete', [ProductController::class, 'bulkDelete']);
     Route::post('/bulk-deactivate', [ProductController::class, 'bulkDeactivate']);
     Route::post('/{product}/toggle-status', [ProductController::class, 'toggleStatus']);
+    Route::post('/{id}/toggle-status-id', [ProductController::class, 'toggleStatusById']);
 });
 
 // Rotas para serviços

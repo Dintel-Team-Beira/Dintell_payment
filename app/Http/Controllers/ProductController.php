@@ -235,6 +235,16 @@ class ProductController extends Controller
             'message' => 'Status do produto alterado com sucesso!'
         ]);
     }
+    public function toggleStatusById(Request $request, $id): JsonResponse
+    {
+        $product = Product::findOrFail($id);
+        $product->update(['is_active' => $request->get('is_active', true)]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $request->is_active==true?'verd':'nao'.'Status do produto alterado com sucesso!'.$product->is_active
+        ]);
+    }
 
     /**
      * Produtos com estoque baixo

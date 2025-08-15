@@ -5,7 +5,7 @@
 @section('content')
 <div class=" py-8 ">
     <!-- Breadcrumb -->
-    <nav class="flex mb-8" aria-label="Breadcrumb">
+    {{-- <nav class="flex mb-8" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-3">
             <li class="inline-flex items-center">
                 <a href="{{ route('dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
@@ -34,7 +34,7 @@
                 </div>
             </li>
         </ol>
-    </nav>
+    </nav> --}}
 
     <!-- Header com ações -->
     <div class="flex flex-col justify-between mb-8 sm:flex-row sm:items-center">
@@ -112,13 +112,13 @@
                             <label class="block text-sm font-medium text-gray-700">Status</label>
                             <p class="mt-1">
                                 @if($product->is_active)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <div class="w-2 h-2 mr-1 bg-green-500 rounded-full"></div>
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-600">
+                                        {{-- <div class="w-2 h-2 mr-1 bg-green-500 rounded-full"></div> --}}
                                         Ativo
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        <div class="w-2 h-2 mr-1 bg-gray-500 rounded-full"></div>
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-600">
+                                        {{-- <div class="w-2 h-2 mr-1 bg-gray-500 rounded-full"></div> --}}
                                         Inativo
                                     </span>
                                 @endif
@@ -407,14 +407,14 @@
                         @endif
                     </button>
 
-                    <button type="button"
+                    {{-- <button type="button"
                             onclick="generateQRCode()"
                             class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-purple-700 border border-purple-200 rounded-md bg-purple-50 hover-lift hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                         </svg>
                         Gerar QR Code
-                    </button>
+                    </button> --}}
 
                     <div class="border-t border-gray-200 pt-3">
                         <button type="button"
@@ -430,7 +430,7 @@
             </div>
 
             <!-- Empresa -->
-            @if($product->company)
+            {{-- @if($product->company)
                 <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900">Empresa</h3>
@@ -449,7 +449,7 @@
                         </div>
                     </div>
                 </div>
-            @endif
+            @endif --}}
         </div>
     </div>
 
@@ -563,7 +563,7 @@
     </div>
 
     <!-- Modal de QR Code -->
-    <div id="qrModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    {{-- <div id="qrModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75" onclick="closeQRModal()"></div>
             
@@ -595,7 +595,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 </div>
 
 @section('styles')
@@ -658,7 +658,7 @@
 </style>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
 <script>
 // Variáveis globais
@@ -778,18 +778,20 @@ function toggleStatus(id, status) {
     const statusText = status === 'true' ? 'ativar' : 'desativar';
     if (confirm(`Tem certeza que deseja ${statusText} este produto?`)) {
         showLoading();
-        fetch(`/api/products/${id}/toggle-status`, {
+        fetch(`/api/products/${id}/toggle-status-id`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ is_active: status === 'true' })
+            body: JSON.stringify({ is_active: status  })
         })
         .then(response => response.json())
         .then(data => {
             hideLoading();
             if (data.success) {
+                console.log(data);
+                
                 showNotification('Status alterado com sucesso!', 'success');
                 setTimeout(() => location.reload(), 1500);
             } else {
@@ -885,7 +887,7 @@ function printProduct() {
             <style>
                 body { font-family: Arial, sans-serif; margin: 20px; }
                 .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
-                .section { margin-bottom: 20px; }
+                .push { margin-bottom: 20px; }
                 .section h3 { background-color: #f5f5f5; padding: 10px; margin: 0 0 10px 0; }
                 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
                 .info-item { margin-bottom: 10px; }
@@ -1153,5 +1155,5 @@ document.addEventListener('DOMContentLoaded', function() {
     // Adicionar qualquer inicialização de tooltips ou outros componentes
 });
 </script>
-@endsection
+@endpush
 @endsection
