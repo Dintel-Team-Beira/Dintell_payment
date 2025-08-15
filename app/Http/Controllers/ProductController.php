@@ -123,6 +123,8 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
+        // dd($product);
+        // $product = $pr
         return view('products.show', compact('product'));
     }
 
