@@ -311,6 +311,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    pointer-events: auto; /* Garante que o botão seja sempre clicável */
 }
 
 .support-popup.expanded .support-button { display: none; }
@@ -373,6 +374,7 @@
 }
 
 /* Popup Panel */
+/* Popup Panel */
 .support-panel {
     position: absolute;
     bottom: 80px;
@@ -388,10 +390,16 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     border: 1px solid rgba(0, 0, 0, 0.05);
+    pointer-events: none; /* Desativa cliques quando o painel está fechado */
 }
 
 .support-popup.bottom-left .support-panel { left: 0; right: auto; }
-.support-panel.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+.support-panel.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto; /* Reativa cliques quando o painel está aberto */
+}
 
 /* Header */
 .support-header {
