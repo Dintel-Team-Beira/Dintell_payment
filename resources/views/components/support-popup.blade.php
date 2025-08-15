@@ -217,7 +217,7 @@
     </div>
 </div>
 
-{{-- @push('styles') --}}
+@push('styles')
 <style>
 /* Support Popup Styles */
 .support-popup {
@@ -952,7 +952,7 @@
     animation: fadeIn 0.3s ease-out;
 }
 </style>
-{{-- @endpush --}}
+@endpush
 
 @push('scripts')
 <script>
