@@ -141,6 +141,7 @@ class ServiceController extends Controller
      */
     public function edit(Service $service)
     {
+        // dd($service);
         return view('services.edit', compact('service'));
     }
 

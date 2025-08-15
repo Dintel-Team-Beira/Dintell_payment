@@ -15,28 +15,33 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $period = $request->get('period', 30);
+
+        $company_id = auth()->user()->company_id;
+        
+        // dd($company_id);
+        $period = $request->get('period', 90);
         $startDate = Carbon::now()->subDays($period);
 
         // Estatísticas gerais
         $stats = [
-            'total_clients' => Client::count(),
-            'active_clients' => Client::where('status', 'active')->count(),
-            'total_subscriptions' => Subscription::count(),
-            'active_subscriptions' => Subscription::where('status', 'active')->count(),
-            'suspended_subscriptions' => Subscription::where('status', 'suspended')->count(),
-            'expired_subscriptions' => Subscription::whereNotNull('ends_at')
+            'total_clients' => Client::where('company_id',$company_id)->count(),
+            'active_clients' => Client::where('status', 'active')->where('company_id',$company_id)->count(),
+            'total_subscriptions' => Subscription::where('company_id',$company_id)->count(),
+            'active_subscriptions' => Subscription::where('status', 'active')->where('company_id',$company_id)->count(),
+            'suspended_subscriptions' => Subscription::where('status', 'suspended')->where('company_id',$company_id)->count(),
+            'expired_subscriptions' => Subscription::whereNotNull('ends_at')->where('company_id',$company_id)
                                                 ->where('ends_at', '<', now())
                                                 ->count(),
-            'trial_subscriptions' => Subscription::where('status', 'trial')->count(),
-            'monthly_revenue' => Subscription::where('last_payment_date', '>=', now()->startOfMonth())
+            'trial_subscriptions' => Subscription::where('status', 'trial')->where('company_id',$company_id)->count(),
+            'monthly_revenue' => Subscription::where('last_payment_date', '>=', now()->startOfMonth())->where('company_id',$company_id)
                                            ->sum('amount_paid'),
-            'total_revenue' => Subscription::sum('total_revenue'),
+            'total_revenue' => Subscription::where('company_id',$company_id)->sum('total_revenue'),
             'expiring_soon' => Subscription::where('ends_at', '<=', now()->addDays(7))
+            ->where('company_id',$company_id)
                                          ->where('ends_at', '>', now())
                                          ->where('status', 'active')
                                          ->count(),
-            'failed_payments' => Subscription::where('payment_failures', '>', 0)->count()
+            'failed_payments' => Subscription::where('payment_failures', '>', 0)->where('company_id',$company_id)->count()
         ];
 
         // Gráfico de receita (CORRIGIDO)
@@ -47,6 +52,7 @@ class DashboardController extends Controller
             )
             ->where('last_payment_date', '>=', $startDate)
             ->whereNotNull('last_payment_date')
+            ->where('company_id',$company_id)
             ->groupBy(DB::raw('DATE(last_payment_date)'))
             ->orderBy('date')
             ->get();
@@ -58,6 +64,7 @@ class DashboardController extends Controller
             )
             ->where('created_at', '>=', $startDate)
             ->groupBy(DB::raw('DATE(created_at)'))
+            ->where('company_id',$company_id)
             ->orderBy('date')
             ->get();
 
@@ -69,6 +76,7 @@ class DashboardController extends Controller
             )
             ->where('created_at', '>=', $startDate)
             ->groupBy(DB::raw('DATE(created_at)'))
+            ->where('company_id',$company_id)
             ->orderBy('date')
             ->get();
 
@@ -77,6 +85,7 @@ class DashboardController extends Controller
                            ->withCount('subscriptions')
                            ->having('subscriptions_sum_total_revenue', '>', 0)
                            ->orderByDesc('subscriptions_sum_total_revenue')
+                           ->where('company_id',$company_id)
                            ->limit(10)
                            ->get()
                            ->map(function($client) {
@@ -89,6 +98,7 @@ class DashboardController extends Controller
             ->where('ends_at', '<=', now()->addDays(7))
             ->where('ends_at', '>', now())
             ->where('status', 'active')
+            ->where('company_id',$company_id)
             ->orderBy('ends_at')
             ->limit(10)
             ->get();
@@ -100,6 +110,7 @@ class DashboardController extends Controller
         $planDistribution = SubscriptionPlan::withCount(['subscriptions' => function($query) {
                 $query->where('status', 'active');
             }])
+            ->where('company_id',$company_id)
             ->get()
             ->filter(function($plan) {
                 return $plan->subscriptions_count > 0;
@@ -120,11 +131,13 @@ class DashboardController extends Controller
 
     private function getRecentActivity()
     {
+                $company_id = auth()->user()->company_id;
         $activities = collect();
 
         // Novas subscrições
         $newSubscriptions = Subscription::with(['client', 'plan'])
             ->where('created_at', '>=', now()->subDays(7))
+            ->where('company_id',$company_id)
             ->latest()
             ->limit(5)
             ->get()
@@ -141,6 +154,7 @@ class DashboardController extends Controller
         // Pagamentos recebidos
         $payments = Subscription::with(['client', 'plan'])
             ->whereNotNull('last_payment_date')
+            ->where('company_id',$company_id)
             ->where('last_payment_date', '>=', now()->subDays(7))
             ->latest('last_payment_date')
             ->limit(5)
@@ -160,6 +174,7 @@ class DashboardController extends Controller
             ->where('status', 'suspended')
             ->where('suspended_at', '>=', now()->subDays(7))
             ->latest('suspended_at')
+            ->where('company_id',$company_id)
             ->limit(5)
             ->get()
             ->map(function ($sub) {
