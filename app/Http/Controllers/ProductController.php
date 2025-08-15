@@ -54,7 +54,7 @@ class ProductController extends Controller
             $query->where('price', '<=', $request->get('price_max'));
         }
 
-        $products = $query->orderBy('name')->paginate(20);
+        $products = $query->where('company_id',auth()->user()->company_id)->orderBy('name')->paginate(20);
 
         return view('products.index', compact('products'));
     }
@@ -123,6 +123,8 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
+        // dd($product);
+        // $product = $pr
         return view('products.show', compact('product'));
     }
 
