@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DocumentTemplateHelper;
 use App\Models\Quote;
 use App\Models\QuoteItem;
 use App\Models\Client;
@@ -9,6 +10,7 @@ use App\Models\Product;
 use App\Models\Service;
 use App\Models\BillingSetting;
 use App\Models\Company;
+use App\Models\DocumentTemplate;
 use App\Models\User;
 use App\Services\BillingCalculatorService;
 use App\Services\InvoicePdfService;
@@ -49,11 +51,11 @@ class QuoteController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('quote_number', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('client', function($clientQuery) use ($request) {
-                      $clientQuery->where('name', 'like', '%' . $request->search . '%');
-                  });
+                    ->orWhereHas('client', function ($clientQuery) use ($request) {
+                        $clientQuery->where('name', 'like', '%' . $request->search . '%');
+                    });
             });
         }
 
@@ -136,8 +138,7 @@ class QuoteController extends Controller
 
             // dd(route('dintell.quotes.show', $quote->id));
             // dd($quote);
-            return redirect()->route('quotes.show',$quote)->with('success', 'Cotação criada com sucesso!');
-
+            return redirect()->route('quotes.show', $quote)->with('success', 'Cotação criada com sucesso!');
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -225,7 +226,6 @@ class QuoteController extends Controller
 
             return redirect()->route('quotes.show', $quote)
                 ->with('success', 'Cotação atualizada com sucesso!');
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -251,7 +251,6 @@ class QuoteController extends Controller
 
             return redirect()->route('quotes.index')
                 ->with('success', 'Cotação excluída com sucesso!');
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -275,7 +274,6 @@ class QuoteController extends Controller
 
             return redirect()->route('invoices.show', $invoice)
                 ->with('success', 'Cotação convertida em fatura com sucesso!');
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -284,7 +282,7 @@ class QuoteController extends Controller
     }
 
 
-        /**
+    /**
      * Converter cotação para fatura (atualizado)
      */
     // public function convertToInvoice(Quote $quote)
@@ -375,7 +373,6 @@ class QuoteController extends Controller
 
             return redirect()->route('quotes.edit', $newQuote)
                 ->with('success', 'Cotação duplicada com sucesso!');
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -394,14 +391,17 @@ class QuoteController extends Controller
     //     }
     // }
 
-     /**
+    /**
      * Download PDF da cotação
      */
     public function downloadPdf(Quote $quote)
     {
         try {
+            $company = auth()->user()->company;
+            $template = DocumentTemplate::where('company_id', $company->id)->where('type', 'quote')->where('is_selected', true)->first();
+            $data = compact('quote', 'company');
+            return DocumentTemplateHelper::downloadPdfDocument($template, $data);
 
-            // dd(Company::findOrFail(auth()->user()->company_id));
             return $this->pdfService->downloadQuotePdf($quote);
         } catch (\Exception $e) {
             return response()->json([
@@ -412,7 +412,7 @@ class QuoteController extends Controller
     }
 
 
-     /**
+    /**
      * Preview do PDF (retorna base64 para modal)
      */
     public function previewPdf(Quote $quote)
@@ -434,7 +434,7 @@ class QuoteController extends Controller
     }
 
 
-     /**
+    /**
      * Stream PDF para visualização no navegador
      */
     public function viewPdf(Quote $quote)
@@ -467,7 +467,6 @@ class QuoteController extends Controller
             ]);
 
             return back()->with('success', 'Cotação enviada por email com sucesso!');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Erro ao enviar email: ' . $e->getMessage());
         }
@@ -479,33 +478,38 @@ class QuoteController extends Controller
 
         try {
             $company_id = User::findOrFail($user_id)->company->id;
-        $query = Product::where('is_active', true)->where('company_id', $company_id);
+            $query = Product::where('is_active', true)->where('company_id', $company_id);
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
 
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
+            if ($request->filled('category')) {
+                $query->where('category', $request->category);
+            }
 
-        $products = $query->select([
-            'id', 'name', 'code', 'description', 'price', 'category',
-            'stock_quantity', 'tax_rate', 'image'
-        ])->orderBy('name')->get();
-                return response()->json($products);
+            $products = $query->select([
+                'id',
+                'name',
+                'code',
+                'description',
+                'price',
+                'category',
+                'stock_quantity',
+                'tax_rate',
+                'image'
+            ])->orderBy('name')->get();
+            return response()->json($products);
         } catch (\Throwable $th) {
             //throw $th;
-            return response()->json(['error' => 'Erro ao buscar produtos: ' . $th->getMessage().'user campany =>'.auth()->user()], 500);
+            return response()->json(['error' => 'Erro ao buscar produtos: ' . $th->getMessage() . 'user campany =>' . auth()->user()], 500);
             // dd($th->getMessage());
         }
-
-
     }
 
     public function getActiveServices(Request $request, $user_id)
@@ -514,29 +518,37 @@ class QuoteController extends Controller
             $company_id = User::findOrFail($user_id)->company->id;
             $query = Service::where('is_active', true)->where('company_id', $company_id);
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
 
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
+            if ($request->filled('category')) {
+                $query->where('category', $request->category);
+            }
 
-        if ($request->filled('complexity')) {
-            $query->where('complexity_level', $request->complexity);
-        }
+            if ($request->filled('complexity')) {
+                $query->where('complexity_level', $request->complexity);
+            }
 
-        $services = $query->select([
-            'id', 'name', 'code', 'description', 'hourly_rate', 'fixed_price',
-            'category', 'complexity_level', 'estimated_hours', 'tax_rate'
-        ])->orderBy('name')->get();
+            $services = $query->select([
+                'id',
+                'name',
+                'code',
+                'description',
+                'hourly_rate',
+                'fixed_price',
+                'category',
+                'complexity_level',
+                'estimated_hours',
+                'tax_rate'
+            ])->orderBy('name')->get();
 
-        return response()->json($services);
+            return response()->json($services);
         } catch (\Throwable $th) {
             //throw $th;
         }
@@ -579,7 +591,7 @@ class QuoteController extends Controller
             'tax_rate' => $itemData['tax_rate'] ?? 0,
             'company_id' => auth()->user()->company_id
         ]);
-//    $quoteItem['company_id'] = auth()->user()->company->id;
+        //    $quoteItem['company_id'] = auth()->user()->company->id;
         // Buscar dados adicionais do produto/serviço
         if ($itemData['type'] === 'product') {
             $product = Product::find($itemData['item_id']);
