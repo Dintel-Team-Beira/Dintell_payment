@@ -391,7 +391,8 @@
 /* Content Area */
 .support-content {
     position: relative;
-    overflow: hidden;
+    max-height: 450px; /* Adjust to fit within .support-panel's max-height minus header and footer */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .support-screen {
@@ -405,6 +406,8 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 24px;
     min-height: 400px;
+    max-height: 450px; /* Match .support-content to prevent clipping */
+    overflow-y: auto; /* Enable scrolling for each screen */
 }
 
 .support-screen.active {
@@ -412,7 +415,7 @@
     opacity: 1;
     visibility: visible;
     transform: translateX(0);
-}
+}}
 
 .support-screen.slide-out {
     transform: translateX(-100%);
@@ -919,7 +922,10 @@ class SupportPopup {
 
         const submitButton = form.querySelector('button[type="submit"]');
         const originalText = submitButton.textContent;
-
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+if (!csrfToken) {
+    throw new Error('CSRF token not found');
+}
         // Show loading state
         submitButton.innerHTML = '<div class="loading-spinner"></div> Enviando...';
         submitButton.disabled = true;
@@ -932,9 +938,8 @@ class SupportPopup {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
             });
-
+             console.error('Response status:', response);
             const result = await response.json();
-
             if (result.success) {
                 this.showSuccessMessage('Ticket criado com sucesso!', result.ticket_number);
                 form.reset();
