@@ -1,4 +1,3 @@
-{{-- resources/views/components/support-popup.blade.php --}}
 @props(['position' => 'bottom-right'])
 
 <!-- Support Popup Component -->
@@ -34,15 +33,22 @@
                     </p>
                 </div>
             </div>
-            <button class="support-minimize" onclick="toggleSupportPopup()">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 13H5v-2h14v2z"/>
-                </svg>
-            </button>
+            <div class="support-header-actions">
+                <button id="expandButton" class="support-expand" onclick="toggleExpand()" title="Expandir para tela cheia">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                    </svg>
+                </button>
+                <button class="support-minimize" onclick="toggleSupportPopup()">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13H5v-2h14v2z"/>
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <!-- Content Area -->
-        <div class="support-content">
+        <div class="support-content" id="supportContent">
             <!-- Welcome Screen -->
             <div id="welcomeScreen" class="support-screen active">
                 <div class="welcome-content">
@@ -145,12 +151,12 @@
 
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" onclick="showWelcomeScreen()">Cancelar</button>
-                        <button type="submit" class="btn-primary">
+                        <button type="submit" class="btn-primary" id="submitTicketBtn">
                             <span class="btn-text">Criar Ticket</span>
-                            <span class="btn-loading" style="display: none;">
+                            <span class="btn-loading">
                                 <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    <path d="M9 12l2 2 4-4"></path>
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                                 Enviando...
                             </span>
@@ -174,6 +180,42 @@
                     <div class="loading-container">
                         <div class="loading-spinner"></div>
                         <p>Carregando tickets...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticket Chat -->
+            <div id="ticketChatScreen" class="support-screen">
+                <div class="screen-header">
+                    <button class="back-button" onclick="showMyTickets()">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
+                        </svg>
+                    </button>
+                    <div class="ticket-chat-header">
+                        <h4 id="chatTicketTitle">Ticket #123</h4>
+                        <span id="chatTicketStatus" class="ticket-status">Aberto</span>
+                    </div>
+                </div>
+
+                <div class="ticket-chat-container">
+                    <div id="chatMessages" class="chat-messages">
+                        <!-- Messages will be loaded here -->
+                    </div>
+
+                    <div id="chatReplyForm" class="chat-reply-form">
+                        <form id="replyForm">
+                            @csrf
+                            <div class="reply-input-container">
+                                <textarea id="replyMessage" name="message" placeholder="Digite sua resposta..." required minlength="5"></textarea>
+                                <button type="submit" class="send-button">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="error-message" id="replyError"></div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -217,23 +259,42 @@
     </div>
 </div>
 
-@push('styles')
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
 <style>
-/* Support Popup Styles */
+    /* Global Styles */
 .support-popup {
     position: fixed;
     z-index: 9999;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: all 0.3s ease;
 }
 
-.support-popup.bottom-right {
-    bottom: 20px;
-    right: 20px;
+.support-popup.bottom-right { bottom: 20px; right: 20px; }
+.support-popup.bottom-left { bottom: 20px; left: 20px; }
+
+/* Expanded State */
+.support-popup.expanded {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
 }
 
-.support-popup.bottom-left {
-    bottom: 20px;
-    left: 20px;
+.support-popup.expanded .support-panel {
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    bottom: 0;
+    right: 0;
+    transform: none;
+}
+
+.support-popup.expanded .support-content {
+    max-height: calc(100vh - 140px);
 }
 
 /* Floating Button */
@@ -251,6 +312,8 @@
     justify-content: center;
     overflow: hidden;
 }
+
+.support-popup.expanded .support-button { display: none; }
 
 .support-button:hover {
     transform: translateY(-2px);
@@ -304,18 +367,9 @@
 }
 
 @keyframes pulse {
-    0% {
-        transform: scale(1);
-        opacity: 0.7;
-    }
-    70% {
-        transform: scale(1.4);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(1.4);
-        opacity: 0;
-    }
+    0% { transform: scale(1); opacity: 0.7; }
+    70% { transform: scale(1.4); opacity: 0; }
+    100% { transform: scale(1.4); opacity: 0; }
 }
 
 /* Popup Panel */
@@ -336,16 +390,8 @@
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.support-popup.bottom-left .support-panel {
-    left: 0;
-    right: auto;
-}
-
-.support-panel.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-}
+.support-popup.bottom-left .support-panel { left: 0; right: auto; }
+.support-panel.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
 
 /* Header */
 .support-header {
@@ -363,6 +409,11 @@
     gap: 12px;
 }
 
+.support-header-actions {
+    display: flex;
+    gap: 8px;
+}
+
 .support-avatar {
     width: 40px;
     height: 40px;
@@ -373,11 +424,7 @@
     justify-content: center;
 }
 
-.support-avatar svg {
-    width: 20px;
-    height: 20px;
-    color: white;
-}
+.support-avatar svg { width: 20px; height: 20px; color: white; }
 
 .support-info h3 {
     margin: 0;
@@ -407,6 +454,7 @@
     50% { opacity: 0.5; }
 }
 
+.support-expand,
 .support-minimize {
     background: none;
     border: none;
@@ -417,14 +465,11 @@
     transition: background 0.2s ease;
 }
 
-.support-minimize:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
+.support-expand:hover,
+.support-minimize:hover { background: rgba(255, 255, 255, 0.1); }
 
-.support-minimize svg {
-    width: 16px;
-    height: 16px;
-}
+.support-expand svg,
+.support-minimize svg { width: 16px; height: 16px; }
 
 /* Content Area */
 .support-content {
@@ -456,9 +501,7 @@
 }
 
 /* Welcome Screen */
-.welcome-content {
-    text-align: center;
-}
+.welcome-content { text-align: center; }
 
 .welcome-icon {
     width: 60px;
@@ -471,11 +514,7 @@
     margin: 0 auto 20px;
 }
 
-.welcome-icon svg {
-    width: 24px;
-    height: 24px;
-    color: white;
-}
+.welcome-icon svg { width: 24px; height: 24px; color: white; }
 
 .welcome-content h4 {
     margin: 0 0 8px 0;
@@ -528,11 +567,7 @@
     flex-shrink: 0;
 }
 
-.option-icon svg {
-    width: 20px;
-    height: 20px;
-    color: white;
-}
+.option-icon svg { width: 20px; height: 20px; color: white; }
 
 .option-content h5 {
     margin: 0 0 4px 0;
@@ -558,6 +593,13 @@
     border-bottom: 1px solid #e5e7eb;
 }
 
+.ticket-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
 .back-button {
     background: #f3f4f6;
     border: none;
@@ -571,15 +613,8 @@
     transition: all 0.2s ease;
 }
 
-.back-button:hover {
-    background: #e5e7eb;
-}
-
-.back-button svg {
-    width: 16px;
-    height: 16px;
-    color: #374151;
-}
+.back-button:hover { background: #e5e7eb; }
+.back-button svg { width: 16px; height: 16px; color: #374151; }
 
 .screen-header h4 {
     margin: 0;
@@ -626,10 +661,7 @@
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-group textarea {
-    resize: vertical;
-    min-height: 80px;
-}
+.form-group textarea { resize: vertical; min-height: 80px; }
 
 .error-message {
     color: #dc2626;
@@ -638,9 +670,7 @@
     display: none;
 }
 
-.error-message.show {
-    display: block;
-}
+.error-message.show { display: block; }
 
 .form-actions {
     display: flex;
@@ -683,15 +713,16 @@
     border: 1px solid #d1d5db;
 }
 
-.btn-secondary:hover {
-    background: #e5e7eb;
-}
+.btn-secondary:hover { background: #e5e7eb; }
 
 .btn-loading {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 8px;
 }
+
+.btn-loading.show { display: flex; }
+.btn-text.hide { display: none; }
 
 /* Tickets List */
 .tickets-list {
@@ -700,30 +731,6 @@
     gap: 12px;
     max-height: 350px;
     overflow-y: auto;
-}
-
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    color: #6b7280;
-}
-
-.loading-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #e5e7eb;
-    border-top: 2px solid #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 12px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 .ticket-item {
@@ -738,6 +745,7 @@
 .ticket-item:hover {
     background: #f3f4f6;
     border-color: #667eea;
+    transform: translateY(-1px);
 }
 
 .ticket-header {
@@ -772,6 +780,137 @@
     font-size: 12px;
     color: #6b7280;
 }
+
+/* Chat Styles */
+.ticket-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 80px);
+    min-height: 300px;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #f8fafc;
+    max-height: 300px;
+}
+
+.support-popup.expanded .chat-messages { max-height: calc(100vh - 300px); }
+
+.chat-message {
+    display: flex;
+    gap: 12px;
+    animation: fadeInUp 0.3s ease;
+}
+
+.chat-message.admin { flex-direction: row; }
+.chat-message.user { flex-direction: row-reverse; }
+
+.message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.message-avatar.admin { background: #8b5cf6; color: white; }
+.message-avatar.user { background: #3b82f6; color: white; }
+
+.message-content {
+    flex: 1;
+    max-width: 70%;
+}
+
+.message-bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+.message-bubble.admin {
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+}
+
+.message-bubble.user {
+    background: #3b82f6;
+    color: white;
+}
+
+.message-time {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+.chat-reply-form {
+    padding: 16px;
+    border-top: 1px solid #e5e7eb;
+    background: white;
+}
+
+.reply-input-container {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.reply-input-container textarea {
+    flex: 1;
+    min-height: 40px;
+    max-height: 120px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 20px;
+    resize: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.reply-input-container textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.send-button {
+    width: 40px;
+    height: 40px;
+    background: #667eea;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.send-button:hover {
+    background: #5a67d8;
+    transform: scale(1.05);
+}
+
+.send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.send-button svg { width: 18px; height: 18px; }
 
 /* FAQ */
 .faq-content {
@@ -818,97 +957,87 @@
 }
 
 /* Status Colors */
-.status-open { background: #dcfce7; color: #166534; }
-.status-pending { background: #fef3c7; color: #92400e; }
-.status-resolved { background: #f3e8ff; color: #7c3aed; }
+.status-open { background: #fef2f2; color: #991b1b; }
+.status-pending { background: #fffbeb; color: #92400e; }
+.status-resolved { background: #f0fdf4; color: #166534; }
 .status-closed { background: #f3f4f6; color: #374151; }
 
-/* Toast Notification */
-.support-toast {
+/* Toast Notifications */
+.toast-container {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 10000;
-    max-width: 400px;
-    opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.support-toast.show {
+.toast {
+    max-width: 400px;
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #667eea;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+}
+
+.toast.show {
     opacity: 1;
     transform: translateX(0);
 }
 
-.support-toast-content {
+.toast.success { border-left-color: #10b981; }
+.toast.error { border-left-color: #ef4444; }
+.toast.warning { border-left-color: #f59e0b; }
+
+.toast-content {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    padding: 16px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e5e7eb;
 }
 
-.support-toast-error .support-toast-content {
-    border-left: 4px solid #ef4444;
-    background: #fef2f2;
-}
+.toast-icon { width: 20px; height: 20px; flex-shrink: 0; }
 
-.support-toast-success .support-toast-content {
-    border-left: 4px solid #10b981;
-    background: #f0fdf4;
-}
-
-.support-toast-icon {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.support-toast-error .support-toast-icon {
-    color: #ef4444;
-}
-
-.support-toast-success .support-toast-icon {
-    color: #10b981;
-}
-
-.support-toast-icon svg {
-    width: 100%;
-    height: 100%;
-}
-
-.support-toast-message {
+.toast-message {
     flex: 1;
     font-size: 14px;
-    line-height: 1.5;
-    color: #1f2937;
-    margin-right: 8px;
+    color: #374151;
 }
 
-.support-toast-close {
+.toast-close {
     background: none;
     border: none;
     width: 20px;
     height: 20px;
     cursor: pointer;
-    color: #6b7280;
-    transition: color 0.2s ease;
-    flex-shrink: 0;
+    color: #9ca3af;
     padding: 0;
 }
 
-.support-toast-close:hover {
-    color: #374151;
+.toast-close:hover { color: #6b7280; }
+
+/* Loading Spinner */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #6b7280;
 }
 
-.support-toast-close svg {
-    width: 100%;
-    height: 100%;
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 12px;
 }
 
 /* Responsive */
@@ -923,51 +1052,61 @@
         left: 20px;
         right: 20px;
     }
-
-    .support-toast {
-        right: 10px;
-        left: 10px;
-        max-width: none;
-        transform: translateY(-100%);
-    }
-
-    .support-toast.show {
-        transform: translateY(0);
-    }
 }
 
 /* Animations */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+.animate-spin { animation: spin 1s linear infinite; }
+
+/* Scrollbar */
+.support-content::-webkit-scrollbar,
+.chat-messages::-webkit-scrollbar { width: 6px; }
+
+.support-content::-webkit-scrollbar-track,
+.chat-messages::-webkit-scrollbar-track { background: #f1f5f9; }
+
+.support-content::-webkit-scrollbar-thumb,
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
 }
+
+.support-content::-webkit-scrollbar-thumb:hover,
+.chat-messages::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 </style>
-@endpush
 
-@push('scripts')
 <script>
 class SupportPopup {
     constructor() {
         this.isOpen = false;
+        this.isExpanded = false;
         this.currentScreen = 'welcome';
+        this.currentTicketId = null;
         this.init();
     }
 
+    // Initialize event listeners and load initial data
     init() {
         this.bindEvents();
         this.loadUserTickets();
     }
 
+    // Bind all event listeners
     bindEvents() {
         // Form submission
         const form = document.getElementById('supportTicketForm');
@@ -978,34 +1117,50 @@ class SupportPopup {
             });
         }
 
-        // Close popup when clicking outside
+        // Reply form submission
+        const replyForm = document.getElementById('replyForm');
+        if (replyForm) {
+            replyForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.submitReply();
+            });
+        }
+
+        // Auto-resize reply textarea
+        const replyTextarea = document.getElementById('replyMessage');
+        if (replyTextarea) {
+            replyTextarea.addEventListener('input', this.autoResizeTextarea.bind(this));
+        }
+
+        // Close popup when clicking outside (except in expanded mode)
         document.addEventListener('click', (e) => {
             const popup = document.getElementById('supportPopup');
-            if (popup && !popup.contains(e.target) && this.isOpen) {
+            if (popup && !popup.contains(e.target) && this.isOpen && !this.isExpanded) {
                 this.close();
             }
         });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.isOpen) {
-                this.close();
+            if (e.key === 'Escape') {
+                if (this.isExpanded) {
+                    this.toggleExpand();
+                } else if (this.isOpen) {
+                    this.close();
+                }
             }
         });
     }
 
+    // Toggle popup visibility
     toggle() {
-        if (this.isOpen) {
-            this.close();
-        } else {
-            this.open();
-        }
+        this.isOpen ? this.close() : this.open();
     }
 
+    // Open popup
     open() {
         const button = document.getElementById('supportButton');
         const panel = document.getElementById('supportPanel');
-
         if (button && panel) {
             button.classList.add('active');
             panel.classList.add('active');
@@ -1014,31 +1169,44 @@ class SupportPopup {
         }
     }
 
+    // Close popup
     close() {
         const button = document.getElementById('supportButton');
         const panel = document.getElementById('supportPanel');
-
-        if (button && panel) {
+        const popup = document.getElementById('supportPopup');
+        if (button && panel && popup) {
             button.classList.remove('active');
             panel.classList.remove('active');
+            popup.classList.remove('expanded');
             this.isOpen = false;
+            this.isExpanded = false;
         }
     }
 
+    // Toggle expanded mode
+    toggleExpand() {
+        const popup = document.getElementById('supportPopup');
+        if (popup) {
+            this.isExpanded = !this.isExpanded;
+            popup.classList.toggle('expanded', this.isExpanded);
+            const content = document.getElementById('supportContent');
+            if (content) {
+                content.style.maxHeight = this.isExpanded ? 'calc(100vh - 140px)' : '450px';
+            }
+        }
+    }
+
+    // Show specific screen
     showScreen(screenName) {
-        // Hide all screens
         document.querySelectorAll('.support-screen').forEach(screen => {
             screen.classList.remove('active');
         });
 
-        // Show target screen
         const targetScreen = document.getElementById(screenName + 'Screen');
         if (targetScreen) {
             setTimeout(() => {
                 targetScreen.classList.add('active');
                 this.currentScreen = screenName;
-
-                // Load tickets if switching to my tickets screen
                 if (screenName === 'myTickets') {
                     this.loadUserTickets();
                 }
@@ -1046,25 +1214,19 @@ class SupportPopup {
         }
     }
 
+    // Submit ticket form
     async submitTicket() {
         const form = document.getElementById('supportTicketForm');
         const formData = new FormData(form);
-
-        // Clear previous errors
-        this.clearFormErrors();
-
-        // Validate form
-        if (!this.validateForm(formData)) {
-            return;
-        }
-
-        const submitButton = form.querySelector('button[type="submit"]');
+        const submitButton = document.getElementById('submitTicketBtn');
         const btnText = submitButton.querySelector('.btn-text');
         const btnLoading = submitButton.querySelector('.btn-loading');
 
-        // Show loading state
-        btnText.style.display = 'none';
-        btnLoading.style.display = 'flex';
+        this.clearFormErrors();
+        if (!this.validateTicketForm(formData)) return;
+
+        btnText.classList.add('hide');
+        btnLoading.classList.add('show');
         submitButton.disabled = true;
 
         try {
@@ -1078,12 +1240,12 @@ class SupportPopup {
                 }
             });
 
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
 
-            if (response.ok && result.success) {
+            if (result.success) {
                 this.showSuccessMessage('Ticket criado com sucesso!', result.ticket_number || result.data?.ticket_number);
                 form.reset();
-                // Reload tickets list for next time
                 setTimeout(() => this.loadUserTickets(), 1000);
             } else {
                 if (result.errors) {
@@ -1092,19 +1254,62 @@ class SupportPopup {
                     throw new Error(result.message || 'Erro ao criar ticket');
                 }
             }
-
         } catch (error) {
             console.error('Erro ao enviar ticket:', error);
             this.showToast(error.message || 'Erro ao criar ticket. Tente novamente.', 'error');
         } finally {
-            // Reset button state
-            btnText.style.display = 'inline';
-            btnLoading.style.display = 'none';
+            btnText.classList.remove('hide');
+            btnLoading.classList.remove('show');
             submitButton.disabled = false;
         }
     }
 
-    validateForm(formData) {
+    // Submit reply to ticket
+    async submitReply() {
+        if (!this.currentTicketId) return;
+
+        const form = document.getElementById('replyForm');
+        const formData = new FormData(form);
+        const message = formData.get('message')?.trim();
+        const sendButton = form.querySelector('.send-button');
+
+        if (!message || message.length < 5) {
+            this.showFieldError('replyError', 'A mensagem deve ter pelo menos 5 caracteres.');
+            return;
+        }
+
+        sendButton.disabled = true;
+
+        try {
+            const response = await fetch(`/api/support/tickets/${this.currentTicketId}/reply`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                form.reset();
+                this.loadTicketChat(this.currentTicketId);
+                this.showToast('Resposta enviada com sucesso!', 'success');
+            } else {
+                throw new Error(result.message || 'Erro ao enviar resposta');
+            }
+        } catch (error) {
+            console.error('Erro ao enviar resposta:', error);
+            this.showToast(error.message || 'Erro ao enviar resposta', 'error');
+        } finally {
+            sendButton.disabled = false;
+        }
+    }
+
+    // Validate ticket form
+    validateTicketForm(formData) {
         let isValid = true;
         const category = formData.get('category');
         const priority = formData.get('priority');
@@ -1115,25 +1320,22 @@ class SupportPopup {
             this.showFieldError('categoryError', 'Por favor, selecione uma categoria.');
             isValid = false;
         }
-
         if (!priority) {
             this.showFieldError('priorityError', 'Por favor, selecione uma prioridade.');
             isValid = false;
         }
-
         if (!subject || subject.trim().length < 3) {
             this.showFieldError('subjectError', 'O assunto deve ter pelo menos 3 caracteres.');
             isValid = false;
         }
-
         if (!description || description.trim().length < 10) {
             this.showFieldError('descriptionError', 'A descrição deve ter pelo menos 10 caracteres.');
             isValid = false;
         }
-
         return isValid;
     }
 
+    // Show field error
     showFieldError(fieldId, message) {
         const errorElement = document.getElementById(fieldId);
         if (errorElement) {
@@ -1142,6 +1344,7 @@ class SupportPopup {
         }
     }
 
+    // Clear form errors
     clearFormErrors() {
         document.querySelectorAll('.error-message').forEach(error => {
             error.classList.remove('show');
@@ -1149,6 +1352,7 @@ class SupportPopup {
         });
     }
 
+    // Show form errors
     showFormErrors(errors) {
         const fieldMap = {
             'category': 'categoryError',
@@ -1165,11 +1369,11 @@ class SupportPopup {
         });
     }
 
+    // Load user tickets
     async loadUserTickets() {
         const container = document.getElementById('ticketsList');
         if (!container) return;
 
-        // Show loading
         container.innerHTML = `
             <div class="loading-container">
                 <div class="loading-spinner"></div>
@@ -1185,10 +1389,7 @@ class SupportPopup {
                 }
             });
 
-            if (!response.ok) {
-                throw new Error('Erro ao carregar tickets');
-            }
-
+            if (!response.ok) throw new Error('Erro ao carregar tickets');
             const result = await response.json();
 
             if (result.success) {
@@ -1196,23 +1397,22 @@ class SupportPopup {
             } else {
                 throw new Error(result.message || 'Erro ao carregar tickets');
             }
-
         } catch (error) {
             console.error('Erro ao carregar tickets:', error);
             container.innerHTML = `
                 <div class="loading-container">
-                    <svg style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; color: #ef4444;" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
-                    </svg>
-                    <p>Erro ao carregar tickets</p>
-                    <button onclick="supportPopup.loadUserTickets()" class="btn-secondary" style="margin-top: 12px; padding: 8px 16px;">
-                        Tentar novamente
-                    </button>
+                    <div style="color: #ef4444; text-align: center;">
+                        <p>Erro ao carregar tickets</p>
+                        <button onclick="supportPopup.loadUserTickets()" class="btn-secondary" style="margin-top: 12px; padding: 8px 16px;">
+                            Tentar novamente
+                        </button>
+                    </div>
                 </div>
             `;
         }
     }
 
+    // Render tickets list
     renderTickets(tickets) {
         const container = document.getElementById('ticketsList');
         if (!container) return;
@@ -1220,20 +1420,19 @@ class SupportPopup {
         if (!tickets || tickets.length === 0) {
             container.innerHTML = `
                 <div class="loading-container">
-                    <svg style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                    </svg>
-                    <p>Você ainda não possui tickets de suporte.</p>
-                    <button onclick="showTicketForm()" class="btn-primary" style="margin-top: 12px; padding: 8px 16px;">
-                        Criar primeiro ticket
-                    </button>
+                    <div style="text-align: center; color: #6b7280;">
+                        <p>Você ainda não possui tickets de suporte.</p>
+                        <button onclick="showTicketForm()" class="btn-primary" style="margin-top: 12px; padding: 8px 16px;">
+                            Criar primeiro ticket
+                        </button>
+                    </div>
                 </div>
             `;
             return;
         }
 
         container.innerHTML = tickets.map(ticket => `
-            <div class="ticket-item animate-fade-in" onclick="supportPopup.viewTicket('${ticket.id}')">
+            <div class="ticket-item animate-fade-in" onclick="supportPopup.openTicketChat('${ticket.id}')">
                 <div class="ticket-header">
                     <span class="ticket-number">#${ticket.ticket_number || ticket.id}</span>
                     <span class="ticket-status status-${ticket.status || 'open'}">${this.getStatusLabel(ticket.status || 'open')}</span>
@@ -1246,11 +1445,113 @@ class SupportPopup {
         `).join('');
     }
 
-    viewTicket(ticketId) {
-        // For now, just show a message. In a real app, this would open the ticket details
-        this.showToast('Em breve: visualização completa do ticket', 'info');
+    // Open ticket chat
+    async openTicketChat(ticketId) {
+        this.currentTicketId = ticketId;
+        this.showScreen('ticketChat');
+        await this.loadTicketChat(ticketId);
     }
 
+    // Load ticket chat
+    async loadTicketChat(ticketId) {
+        const chatContainer = document.getElementById('chatMessages');
+        const titleElement = document.getElementById('chatTicketTitle');
+        const statusElement = document.getElementById('chatTicketStatus');
+        if (!chatContainer) return;
+
+        chatContainer.innerHTML = `
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Carregando conversa...</p>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`/api/support/tickets/${ticketId}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) throw new Error('Erro ao carregar ticket');
+            const result = await response.json();
+
+            if (result.success && result.ticket) {
+                const ticket = result.ticket;
+                if (titleElement) {
+                    titleElement.textContent = `Ticket #${ticket.ticket_number || ticket.id}`;
+                }
+                if (statusElement) {
+                    statusElement.textContent = this.getStatusLabel(ticket.status);
+                    statusElement.className = `ticket-status status-${ticket.status}`;
+                }
+                this.renderChatMessages(ticket, chatContainer);
+            } else {
+                throw new Error(result.message || 'Erro ao carregar ticket');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar chat:', error);
+            chatContainer.innerHTML = `
+                <div class="loading-container">
+                    <div style="color: #ef4444; text-align: center;">
+                        <p>Erro ao carregar conversa</p>
+                        <button onclick="supportPopup.loadTicketChat('${ticketId}')" class="btn-secondary" style="margin-top: 12px; padding: 8px 16px;">
+                            Tentar novamente
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // Render chat messages
+    renderChatMessages(ticket, container) {
+        const messages = [{
+            id: 'original',
+            message: ticket.description,
+            user: ticket.user || { name: 'Você' },
+            created_at: ticket.created_at,
+            is_admin: false
+        }];
+
+        if (ticket.replies && ticket.replies.length > 0) {
+            messages.push(...ticket.replies);
+        }
+
+        if (messages.length === 0) {
+            container.innerHTML = '<div class="loading-container"><p>Nenhuma mensagem ainda.</p></div>';
+            return;
+        }
+
+        container.innerHTML = messages.map(message => {
+            const isAdmin = message.is_admin || false;
+            const userName = message.user?.name || 'Usuário';
+            const userInitial = userName.charAt(0).toUpperCase();
+            return `
+                <div class="chat-message ${isAdmin ? 'admin' : 'user'}">
+                    <div class="message-avatar ${isAdmin ? 'admin' : 'user'}">${userInitial}</div>
+                    <div class="message-content">
+                        <div class="message-bubble ${isAdmin ? 'admin' : 'user'}">${message.message.replace(/\n/g, '<br>')}</div>
+                        <div class="message-time">${userName} • ${this.formatDate(message.created_at)}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        setTimeout(() => {
+            container.scrollTop = container.scrollHeight;
+        }, 100);
+    }
+
+    // Auto-resize textarea
+    autoResizeTextarea(e) {
+        const textarea = e.target;
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    }
+
+    // Show success message
     showSuccessMessage(message, ticketNumber = null) {
         const content = document.querySelector('#welcomeScreen .welcome-content');
         if (!content) return;
@@ -1272,6 +1573,7 @@ class SupportPopup {
         `;
     }
 
+    // Reset welcome screen
     resetWelcomeScreen() {
         const content = document.querySelector('#welcomeScreen .welcome-content');
         if (!content) return;
@@ -1284,7 +1586,6 @@ class SupportPopup {
             </div>
             <h4>Olá! 👋</h4>
             <p>Estamos aqui para ajudar você. Escolha uma das opções abaixo:</p>
-
             <div class="support-options">
                 <button class="support-option" onclick="showTicketForm()">
                     <div class="option-icon">
@@ -1297,7 +1598,6 @@ class SupportPopup {
                         <p>Reporte um problema ou solicite ajuda</p>
                     </div>
                 </button>
-
                 <button class="support-option" onclick="showMyTickets()">
                     <div class="option-icon">
                         <svg viewBox="0 0 24 24" fill="currentColor">
@@ -1309,11 +1609,10 @@ class SupportPopup {
                         <p>Veja seus tickets existentes</p>
                     </div>
                 </button>
-
                 <button class="support-option" onclick="showFAQ()">
                     <div class="option-icon">
                         <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M11,18H13V16H11V18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20C7.59,20 4,16.41 4,12C7.59,4 4,12A10,10 0 0,0 12,2Z"/>
+                            <path d="M11,18H13V16H11V18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
                         </svg>
                     </div>
                     <div class="option-content">
@@ -1325,121 +1624,90 @@ class SupportPopup {
         `;
     }
 
-    showToast(message, type = 'info') {
-        // Remove existing toasts
-        const existingToasts = document.querySelectorAll('.support-toast');
-        existingToasts.forEach(toast => toast.remove());
-
-        // Create toast element
-        const toast = document.createElement('div');
-        toast.className = `support-toast support-toast-${type}`;
-        toast.innerHTML = `
-            <div class="support-toast-content">
-                <div class="support-toast-icon">
-                    ${type === 'error' ?
-                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/></svg>' :
-                        type === 'success' ?
-                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.5,8L11,13.5L7.5,10L6,11.5L11,16.5Z"/></svg>' :
-                        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>'
-                    }
-                </div>
-                <div class="support-toast-message">${message}</div>
-                <button class="support-toast-close" onclick="this.parentElement.parentElement.remove()">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-                    </svg>
-                </button>
-            </div>
-        `;
-
-        // Add to document
-        document.body.appendChild(toast);
-
-        // Animate in
-        setTimeout(() => toast.classList.add('show'), 100);
-
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, 5000);
-    }
-
+    // Utility methods (assumed implementations)
     getStatusLabel(status) {
-        const labels = {
-            'open': 'Aberto',
-            'pending': 'Pendente',
-            'resolved': 'Resolvido',
-            'closed': 'Fechado'
+        const statusMap = {
+            open: 'Aberto',
+            pending: 'Pendente',
+            resolved: 'Resolvido',
+            closed: 'Fechado'
         };
-        return labels[status] || status;
+        return statusMap[status] || 'Aberto';
     }
 
     getPriorityLabel(priority) {
-        const labels = {
-            'low': 'Baixa',
-            'normal': 'Normal',
-            'high': 'Alta',
-            'urgent': 'Urgente'
+        const priorityMap = {
+            low: 'Baixa',
+            normal: 'Normal',
+            high: 'Alta',
+            urgent: 'Urgente'
         };
-        return labels[priority] || priority;
+        return priorityMap[priority] || 'Normal';
     }
 
-    formatDate(dateString) {
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        } catch (error) {
-            return 'Data inválida';
-        }
+    formatDate(date) {
+        return new Date(date).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // Show toast notification
+    showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type} show`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <div class="toast-message">${message}</div>
+                <button class="toast-close">&times;</button>
+            </div>
+        `;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+
+        toast.querySelector('.toast-close').addEventListener('click', () => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        });
     }
 }
 
-// Initialize support popup
-let supportPopup;
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if support popup exists before initializing
-    if (document.getElementById('supportPopup')) {
-        supportPopup = new SupportPopup();
-    }
-});
-
-// Global functions for onclick handlers
+// Global functions for HTML onclick events
 function toggleSupportPopup() {
-    if (supportPopup) {
-        supportPopup.toggle();
-    }
+    window.supportPopup.toggle();
+}
+
+function toggleExpand() {
+    window.supportPopup.toggleExpand();
 }
 
 function showWelcomeScreen() {
-    if (supportPopup) {
-        supportPopup.showScreen('welcome');
-    }
+    window.supportPopup.showScreen('welcome');
 }
 
 function showTicketForm() {
-    if (supportPopup) {
-        supportPopup.showScreen('ticketForm');
-    }
+    window.supportPopup.showScreen('ticketForm');
 }
 
 function showMyTickets() {
-    if (supportPopup) {
-        supportPopup.showScreen('myTickets');
-    }
+    window.supportPopup.showScreen('myTickets');
 }
 
 function showFAQ() {
-    if (supportPopup) {
-        supportPopup.showScreen('faq');
-    }
+    window.supportPopup.showScreen('faq');
 }
+
+// Initialize popup
+window.supportPopup = new SupportPopup();
+
 </script>
-@endpush
