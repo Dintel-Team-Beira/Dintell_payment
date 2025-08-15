@@ -355,12 +355,12 @@
                                                 </svg>
                                                 Duplicar
                                             </button>
-                                            <button type="button" onclick="adjustStock({{ $product->id }}, '{{ $product->name }}')" class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            {{-- <button type="button" onclick="adjustStock({{ $product->id }}, '{{ $product->name }}')" class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v4a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
                                                 </svg>
                                                 Ajustar Estoque
-                                            </button>
+                                            </button> --}}
                                             <div class="border-t border-gray-100"></div>
                                             <button type="button" onclick="toggleStatus({{ $product->id }}, {{ $product->is_active ? 'false' : 'true' }})" class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 @if($product->is_active)
