@@ -247,12 +247,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         // Suporte
-        Route::prefix('support')->name('support.')->group(function () {
-            Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
-            Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
-            Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
-            Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
-        });
+        // Route::prefix('support')->name('support.')->group(function () {
+        //     Route::get('/tickets', [AdminSupportController::class, 'tickets'])->name('tickets');
+        //     Route::get('/tickets/{ticket}', [AdminSupportController::class, 'showTicket'])->name('tickets.show');
+        //     Route::post('/tickets/{ticket}/reply', [AdminSupportController::class, 'replyTicket'])->name('tickets.reply');
+        //     Route::patch('/tickets/{ticket}/status', [AdminSupportController::class, 'updateTicketStatus'])->name('tickets.status');
+        // });
 
         // Documentação e Ajuda
         Route::prefix('help')->name('help.')->group(function () {
