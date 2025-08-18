@@ -35,12 +35,28 @@ class TemplatePreviewController extends Controller
         $company = $template->company;
 
         // Dados fictícios ou reais dependendo do tipo
-        if ($template->type === 'invoice') {
-            $invoice = Invoice::where('company_id', $company->id)->first();
-            $data = compact('invoice', 'company');
-        } elseif ($template->type === 'quote') {
-            $quote = Quote::where('company_id', $company->id)->first();
-            $data = compact('quote', 'company');
+        // if ($template->type === 'invoice') {
+        //     $invoice = Invoice::where('company_id', $company->id)->first();
+        //     $data = compact('invoice', 'company');
+        // } elseif ($template->type === 'quote') {
+        //     $quote = Quote::where('company_id', $company->id)->first();
+        //     $data = compact('quote', 'company');
+        // }
+
+        $data=['company'=>$company];
+        switch($template->type){
+            case 'invoice':
+                $data['invoice'] = Invoice::where('company_id', $company->id)->first();
+                break;
+            case 'quote':
+                $data['quote'] = Quote::where('company_id', $company->id)->first();
+                break;
+            case 'credit':
+                 $data['creditNote'] = Invoice::where('company_id', $company->id)->where('document_type', Invoice::TYPE_CREDIT_NOTE)->first();
+                break;
+            case 'debit':
+                $data['debitNote'] = Invoice::where('company_id', $company->id)->where('document_type', Invoice::TYPE_CREDIT_NOTE)->first();
+                break;
         }
 
 
@@ -160,7 +176,7 @@ class TemplatePreviewController extends Controller
         // dd($companyId);
 
         // Desmarcar todos os outros templates como selecionados
-        DocumentTemplate::where('company_id', $companyId)->where('type',$template->id)
+        DocumentTemplate::where('company_id', $companyId)->where('type',$template->type)
             ->where('is_selected', true)
             ->update(['is_selected' => false]);
 

@@ -361,7 +361,6 @@
                 <div class="company-details">
                     <strong>Contribuinte Nº:</strong> {{ $company->tax_number}}<br>
                     {{ $company->address }}<br>
-                    {{-- {{ config('company.address_beira', 'Av. Secundária nº 456, 1º Andar') }}<br> --}}
                     {{ $company->country }}<br>
                     {{ $company->phone}} | {{$company->email }} 
                 </div>
@@ -378,21 +377,12 @@
             </div>
         </div>
     </div>
-
     <div class="document-header">
         <div class="original-label">Original</div>
         <div class="document-title">
             Nota de Crédito Nº {{ $creditNote->invoice_number }}
-            {{-- <span class="status-badge status-processed">PROCESSADA</span> --}}
         </div>
     </div>
-
-    <!-- Credit Note Alert -->
-    {{-- <div class="credit-alert">
-        <h3>📋 DOCUMENTO DE CRÉDITO</h3>
-        <p>Este documento representa um crédito a favor do cliente no valor abaixo especificado.</p>
-    </div> --}}
-
     <!-- Related Invoice (if exists) -->
     @if($creditNote->relatedInvoice)
     <div class="related-invoice">
@@ -404,13 +394,11 @@
         </p>
     </div>
     @endif
-
     <!-- Adjustment Reason -->
     <div class="adjustment-reason">
         <h4>MOTIVO DO AJUSTE</h4>
         <p>{{ $creditNote->adjustment_reason }}</p>
     </div>
-
     <table class="document-details no-break">
         <tr>
             <td class="label">V/Nº CONTRIB.</td>
@@ -436,7 +424,6 @@
             </td>
         </tr>
     </table>
-
     <table class="items-table no-break">
         <thead>
             <tr>
@@ -475,7 +462,6 @@
             @endforeach
         </tbody>
     </table>
-
     <div class="clearfix summary-row no-break">
         <div class="iva-summary">
             <div class="section-title">QUADRO RESUMO DO IVA</div>
@@ -537,7 +523,6 @@
             </table>
         </div>
     </div>
-
     @if($creditNote->notes)
     <div class="observations">
         OBSERVAÇÕES: {{ $creditNote->notes }}

@@ -14,6 +14,8 @@
                     <option value="">Selecione o tipo</option>
                     <option value="invoice">Fatura</option>
                     <option value="quote">Cotação</option>
+                    <option value="credit">Nota de Crédito</option>
+                    <option value="debit">Nota de Débito</option>
                 </select>
             </div>
 
