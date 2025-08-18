@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DocumentTemplateHelper;
 use App\Models\Invoice;
 use App\Models\Client;
 use App\Models\BillingSetting;
+use App\Models\DocumentTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -153,13 +155,18 @@ class CreditNoteController extends Controller
         $settings = BillingSetting::getSettings();
         $company = auth()->user()->company;
         
-
+        $template = DocumentTemplate::where('company_id', $company->id)->where('type','credit')->where('is_selected',true)->first();
+        return DocumentTemplateHelper::downloadPdfDocument($template, compact('creditNote', 'settings', 'company'));
+        
+        
+        /*
         $pdf = app('dompdf.wrapper');
         $pdf->loadView('pdfs.credit-notes', compact('creditNote', 'settings', 'company'));
 
         $filename = 'nota-credito-' . $creditNote->invoice_number . '.pdf';
 
         return $pdf->download($filename);
+        */
     }
 
     public function sendByEmail(Request $request, Invoice $creditNote)
