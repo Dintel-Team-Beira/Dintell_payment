@@ -6,15 +6,16 @@ use App\Helpers\DocumentTemplateHelper;
 use App\Models\DocumentTemplate;
 use App\Models\Invoice;
 use App\Models\Quote;
-use Dompdf\Dompdf;
-use Dompdf\Options;
+use App\Models\CreditNote;
+use App\Models\DebitNote;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Blade;
+use Illuminate\Http\Response;
 
 class TemplatePreviewController extends Controller
 {
-
-
+    /**
+     * Listar templates por tipo
+     */
     public function list($type)
     {
         $companyId = auth()->user()->company_id;
@@ -28,155 +29,184 @@ class TemplatePreviewController extends Controller
         return response()->json($templates);
     }
 
-    //
+    /**
+     * 🆕 Visualizar template como HTML (otimizado)
+     */
     public function show($templateId)
     {
         $template = DocumentTemplate::findOrFail($templateId);
-        $company = $template->company;
+        $data = $this->getTemplateData($template);
 
-        // Dados fictícios ou reais dependendo do tipo
-        // if ($template->type === 'invoice') {
-        //     $invoice = Invoice::where('company_id', $company->id)->first();
-        //     $data = compact('invoice', 'company');
-        // } elseif ($template->type === 'quote') {
-        //     $quote = Quote::where('company_id', $company->id)->first();
-        //     $data = compact('quote', 'company');
-        // }
-
-        $data=['company'=>$company];
-        switch($template->type){
-            case 'invoice':
-                $data['invoice'] = Invoice::where('company_id', $company->id)->first();
-                break;
-            case 'quote':
-                $data['quote'] = Quote::where('company_id', $company->id)->first();
-                break;
-            case 'credit':
-                 $data['creditNote'] = Invoice::where('company_id', $company->id)->where('document_type', Invoice::TYPE_CREDIT_NOTE)->first();
-                break;
-            case 'debit':
-                $data['debitNote'] = Invoice::where('company_id', $company->id)->where('document_type', Invoice::TYPE_CREDIT_NOTE)->first();
-                break;
-        }
-
-
-        $html = Blade::render($template->html_template, $data);
-
-        // Aplicar CSS se existir
-        if ($template->css_styles) {
-            $cssStyles = $template->css_styles;
-            $html = "<style>{$cssStyles}</style>" . $html;
-        }
-
-        return response($html)->header('Content-Type', 'text/html');
+        return DocumentTemplateHelper::previewInBrowser($template, $data);
     }
 
-    private function renderTemplate($htmlTemplate, $data)
-    {
-        // Método simples de substituição de variáveis
-        // Em produção, você pode usar Blade::render() ou similar
-        extract($data);
-        // dd($data);
-
-
-        ob_start();
-        eval('?>' . $htmlTemplate);
-        return ob_get_clean();
-    }
-
+    /**
+     * 🆕 Download do template como PDF (otimizado)
+     */
     public function download($templateId)
     {
-        /*
-        BAIXAR EM HTML
         $template = DocumentTemplate::findOrFail($templateId);
-        $html = $this->show($templateId)->getContent();
+        $data = $this->getTemplateData($template);
 
-        $fileName = "{$template->name}.html";
-        return response($html, 200, [
-            'Content-Type' => 'text/html',
-            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
-        ]);
-        */
-
-
-        // BAIXAR EM PDF
-        $template = DocumentTemplate::findOrFail($templateId);
-        $company = $template->company;
-        if ($template->type === 'invoice') {
-            $invoice = Invoice::with(['client', 'items'])->where('company_id', $company->id)->first();
-            if (!$invoice) {
-                $invoice = $this->createSampleInvoice($company);
-            }
-            $data = compact('invoice', 'company');
-        } elseif ($template->type === 'quote') {
-            $quote = Quote::with(['client', 'items'])->where('company_id', $company->id)->first();
-            if (!$quote) {
-                $quote = $this->createSampleQuote($company);
-            }
-            $data = compact('quote', 'company');
-        }
-
-        // Opções customizadas (opcional)
+        // 📄 USAR O HELPER PARA PDF com nome personalizado
         $options = [
+            'filename' => $this->generateFileName($template, $data),
+            'enable_cache' => true,
+             'for_pdf' => true, 
+            'enable_logging' => false,
             'paper_size' => 'A4',
-            'orientation' => 'portrait',
-            'file_prefix' => $company->name,
-            'include_timestamp' => true,
-            'timestamp_format' => 'Y-m-d'
+            'orientation' => 'portrait'
         ];
-        // return DocumentTemplateHelper::quickDownload($template, $data);
-        return DocumentTemplateHelper::downloadPdfDocument($template, $data, [
-    'enable_cache' => true,
-    'enable_logging' => false,
-    'paper_size' => 'A4',
-    'orientation' => 'portrait'
-]);
-        // DocumentTemplateHelper::validateTemplate($template);
-        // return DocumentTemplateHelper::downloadPdfDocument($template, $data, $options);
-        // Renderizar template
-        // $html = Blade::render($template->html_template, $data);
-        // if ($template->css_styles) {
-        //     $cssStyles =  $template->css_styles;
-        //     $html = "<style>{$cssStyles}</style>" . $html;
-        // }
-        // // Configurar dompdf
-        // $options = new Options();
-        // $options->set('defaultFont', 'DejaVu Sans');
-        // $options->set('isRemoteEnabled', true);
-        // $options->set('isHtml5ParserEnabled', true);
-        // $options->set('chroot', public_path());
 
-        // $dompdf = new Dompdf($options);
-
-        // // Carregar HTML
-        // $dompdf->loadHtml($html);
-
-        // // Definir tamanho e orientação
-        // $dompdf->setPaper('A4', 'portrait');
-
-        // // Renderizar PDF
-        // $dompdf->render();
-
-        // // Nome do arquivo
-        // $fileName = $template->name . '_' . now()->format('Y-m-d') . '.pdf';
-
-        // // Download
-        // return response($dompdf->output(), 200, [
-        //     'Content-Type' => 'application/pdf',
-        //     'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
-        //     'Cache-Control' => 'no-cache, must-revalidate',
-        //     'Pragma' => 'no-cache'
-        // ]);
+        return DocumentTemplateHelper::downloadPdfDocument($template, $data, $options);
     }
 
+    /**
+     * 🆕 Método unificado para buscar dados do template
+     */
+    private function getTemplateData(DocumentTemplate $template): array
+    {
+        $company = $template->company;
+        $data = ['company' => $company];
+
+        switch ($template->type) {
+            case 'invoice':
+                $invoice = Invoice::with(['client', 'items'])
+                    ->where('company_id', $company->id)
+                    ->first();
+                
+                if (!$invoice) {
+                    $invoice = $this->createSampleInvoice($company);
+                }
+                $data['invoice'] = $invoice;
+                break;
+
+            case 'quote':
+                $quote = Quote::with(['client', 'items'])
+                    ->where('company_id', $company->id)
+                    ->first();
+                
+                if (!$quote) {
+                    $quote = $this->createSampleQuote($company);
+                }
+                $data['quote'] = $quote;
+                break;
+
+            case 'credit_note':
+            case 'credit': // Manter compatibilidade
+                $creditNote = $this->getCreditNote($company->id);
+                if (!$creditNote) {
+                    $creditNote = $this->createSampleCreditNote($company);
+                }
+                $data['creditNote'] = $creditNote;
+                break;
+
+            case 'debit_note':
+            case 'debit': // Manter compatibilidade
+                $debitNote = $this->getDebitNote($company->id);
+                if (!$debitNote) {
+                    $debitNote = $this->createSampleDebitNote($company);
+                }
+                $data['debitNote'] = $debitNote;
+                break;
+
+            default:
+                // Para tipos não mapeados, retornar apenas company
+                break;
+        }
+
+        return $data;
+    }
+
+    /**
+     * 🆕 Buscar Credit Note (flexível para diferentes models)
+     */
+    private function getCreditNote($companyId)
+    {
+        // Opção 2: Se usa Invoice com document_type
+        return Invoice::with(['client', 'items'])
+            ->where('company_id', $companyId)
+            ->where('document_type', Invoice::TYPE_CREDIT_NOTE)
+            ->first();
+    }
+
+    /**
+     * 🆕 Buscar Debit Note (flexível para diferentes models)
+     */
+    private function getDebitNote($companyId)
+    {
+        // Opção 2: Se usa Invoice com document_type
+        return Invoice::with(['client', 'items'])
+            ->where('company_id', $companyId)
+            ->where('document_type', Invoice::TYPE_DEBIT_NOTE)
+            ->first();
+    }
+
+    /**
+     * 🆕 Gerar nome do arquivo baseado no template e dados
+     */
+    private function generateFileName(DocumentTemplate $template, array $data): string
+    {
+        $prefix = ucfirst($template->type);
+        $companyName = $data['company']->name ?? 'Template';
+        $timestamp = now()->format('Y-m-d');
+
+        // Sanitizar nome da empresa
+        $safeName = preg_replace('/[^a-zA-Z0-9\-_]/', '_', $companyName);
+        
+        return "{$prefix}_{$safeName}_{$timestamp}";
+    }
+
+    /**
+     * 🆕 API para obter apenas o HTML (útil para modais/AJAX)
+     */
+    public function getHtml($templateId)
+    {
+        $template = DocumentTemplate::findOrFail($templateId);
+        $data = $this->getTemplateData($template);
+
+        $html = DocumentTemplateHelper::renderHtmlForBrowser($template, $data);
+        
+        return response()->json([
+            'success' => true,
+            'html' => $html,
+            'template_name' => $template->name
+        ]);
+    }
+
+    /**
+     * 🆕 Preview com opções (útil para diferentes formatos)
+     */
+    public function preview($templateId, Request $request)
+    {
+        $template = DocumentTemplate::findOrFail($templateId);
+        $data = $this->getTemplateData($template);
+        
+        $format = $request->get('format', 'html'); // html ou pdf
+
+        switch ($format) {
+            case 'pdf':
+                return DocumentTemplateHelper::downloadPdfDocument($template, $data, [
+                    'filename' => $this->generateFileName($template, $data)
+                ]);
+                
+            case 'html':
+            default:
+                return DocumentTemplateHelper::previewInBrowser($template, $data);
+        }
+    }
+
+    /**
+     * Selecionar template (mantido como estava)
+     */
     public function selectTemplate(Request $request, $idTemplate)
     {
         $template = DocumentTemplate::findOrFail($idTemplate);
         $companyId = auth()->user()->company_id;
-        // dd($companyId);
 
         // Desmarcar todos os outros templates como selecionados
-        DocumentTemplate::where('company_id', $companyId)->where('type',$template->type)
+        DocumentTemplate::where('company_id', $companyId)
+            ->where('type', $template->type)
             ->where('is_selected', true)
             ->update(['is_selected' => false]);
 
@@ -185,5 +215,162 @@ class TemplatePreviewController extends Controller
         $template->save();
 
         return response()->json(['message' => 'Template selecionado com sucesso.']);
+    }
+
+    /**
+     * 🆕 Validar template antes do uso
+     */
+    public function validator($templateId)
+    {
+        try {
+            $template = DocumentTemplate::findOrFail($templateId);
+            $data = $this->getTemplateData($template);
+
+            // Tentar renderizar para verificar erros
+            $html = DocumentTemplateHelper::renderHtmlForBrowser($template, $data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Template válido',
+                'template_name' => $template->name
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro no template: ' . $e->getMessage(),
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    // 🔧 MÉTODOS DE SAMPLE DATA (você pode manter os existentes)
+    
+    /**
+     * Criar invoice de exemplo (implementar conforme sua necessidade)
+     */
+    private function createSampleInvoice($company)
+    {
+        // Implementar criação de dados de exemplo
+        // ou retornar um objeto mock
+        return (object)[
+            'invoice_number' => 'INV-SAMPLE-001',
+            'invoice_date' => now(),
+            'due_date' => now()->addDays(30),
+            'subtotal' => 1000.00,
+            'tax_amount' => 170.00,
+            'total' => 1170.00,
+            'client' => (object)[
+                'name' => 'Cliente de Exemplo',
+                'email' => 'cliente@exemplo.com',
+                'phone' => '+258 84 123 4567',
+                'nuit' => '123456789',
+                'address' => 'Maputo, Moçambique'
+            ],
+            'items' => [
+                (object)[
+                    'description' => 'Produto/Serviço de Exemplo',
+                    'quantity' => 1,
+                    'unit_price' => 1000.00,
+                    'tax_rate' => 17.00
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Criar quote de exemplo
+     */
+    private function createSampleQuote($company)
+    {
+        return (object)[
+            'quote_number' => 'COT-SAMPLE-001',
+            'quote_date' => now(),
+            'valid_until' => now()->addDays(30),
+            'subtotal' => 1000.00,
+            'tax_amount' => 170.00,
+            'total' => 1170.00,
+            'client' => (object)[
+                'name' => 'Cliente de Exemplo',
+                'email' => 'cliente@exemplo.com',
+                'phone' => '+258 84 123 4567',
+                'nuit' => '123456789',
+                'address' => 'Maputo, Moçambique'
+            ],
+            'items' => [
+                (object)[
+                    'description' => 'Produto/Serviço de Exemplo',
+                    'quantity' => 1,
+                    'unit_price' => 1000.00,
+                    'tax_rate' => 17.00
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Criar credit note de exemplo
+     */
+    private function createSampleCreditNote($company)
+    {
+        return (object)[
+            'credit_note_number' => 'CN-SAMPLE-001',
+            'invoice_date' => now(),
+            'subtotal' => 1000.00,
+            'tax_amount' => 170.00,
+            'total' => 1170.00,
+            'adjustment_reason' => 'Devolução de mercadoria',
+            'client' => (object)[
+                'name' => 'Cliente de Exemplo',
+                'email' => 'cliente@exemplo.com',
+                'phone' => '+258 84 123 4567',
+                'nuit' => '123456789',
+                'address' => 'Maputo, Moçambique'
+            ],
+            'items' => [
+                (object)[
+                    'description' => 'Devolução - Produto/Serviço',
+                    'quantity' => 1,
+                    'unit_price' => 1000.00,
+                    'tax_rate' => 17.00
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Criar debit note de exemplo
+     */
+    private function createSampleDebitNote($company)
+    {
+        return (object)[
+            'invoice_number' => 'DN-SAMPLE-001', // Para nota de débito
+            'invoice_date' => now(),
+            'due_date' => now()->addDays(30),
+            'subtotal' => 500.00,
+            'tax_amount' => 85.00,
+            'total' => 585.00,
+            'adjustment_reason' => 'Cobrança adicional por serviços extras',
+            'client' => (object)[
+                'name' => 'Cliente de Exemplo',
+                'email' => 'cliente@exemplo.com',
+                'phone' => '+258 84 123 4567',
+                'nuit' => '123456789',
+                'address' => 'Maputo, Moçambique'
+            ],
+            'relatedInvoice' => (object)[
+                'invoice_number' => 'INV-2024-001',
+                'invoice_date' => now()->subDays(10),
+                'total' => 2000.00
+            ],
+            'items' => [
+                (object)[
+                    'description' => 'Cobrança adicional',
+                    'quantity' => 1,
+                    'unit_price' => 500.00,
+                    'tax_rate' => 17.00
+                ]
+            ]
+        ];
     }
 }
