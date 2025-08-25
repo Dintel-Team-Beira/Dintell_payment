@@ -1,225 +1,303 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full bg-gray-50">
+<html lang="pt-BR">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>SFS Admin - Sistema de Faturação e Subscrição</title>
 
-    <title>Admin Login - {{ config('app.name', 'SFS Admin') }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
+        }
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+        .login-card {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-field {
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-login {
+            transition: all 0.3s ease;
+            background-size: 200% auto;
+            background-image: linear-gradient(to right, #1e40af 0%, #1e40af 51%, #1d4ed8 100%);
+        }
+
+        .btn-login:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<body class="h-full">
-    <div class="flex flex-col justify-center min-h-full py-12 sm:px-6 lg:px-8">
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <!-- Logo -->
-            <div class="flex justify-center">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-3">
-                        <h1 class="text-2xl font-bold text-gray-900">SFS Admin</h1>
-                    </div>
-                </div>
-            </div>
 
-            <h2 class="mt-6 text-3xl font-bold tracking-tight text-center text-gray-900">
-                Acesso Administrativo
-            </h2>
-            <p class="mt-2 text-sm text-center text-gray-600">
-                Faça login para acessar o painel administrativo do SaaS
-            </p>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md p-8 bg-white rounded-lg shadow-sm login-card animate__animated animate__fadeIn">
+
+        <!-- Logo -->
+        <div class="mb-8 text-center animate__animated animate__fadeInDown">
+
+           <img src="{{ asset('main.webp') }}" alt="Dintell Lgo" class="">
         </div>
 
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">
-
-                <!-- Flash Messages -->
-                @if(session('success'))
-                <div class="p-4 mb-4 rounded-md bg-green-50">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="w-5 h-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L8.23 10.71a.75.75 0 00-1.214.882l1.33 1.832a.75.75 0 001.096.074l3.865-5.407z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                @if(session('error'))
-                <div class="p-4 mb-4 rounded-md bg-red-50">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="w-5 h-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                <form class="space-y-6" method="POST" action="{{ route('admin.login.submit') }}">
-                    @csrf
-
-                    <div>
-                        <label for="email" class="block text-sm font-medium leading-6 text-gray-900">
-                            Email
-                        </label>
-                        <div class="mt-2">
-                            <input id="email"
-                                   name="email"
-                                   type="email"
-                                   autocomplete="email"
-                                   required
-                                   value="arnaldo.tomo@dintell.co.mz"
-                                   class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 @error('email') ring-red-500 @enderror"
-                                   placeholder="seu.email@empresa.com">
-                        </div>
-                        @error('email')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label for="password" class="block text-sm font-medium leading-6 text-gray-900">
-                            Senha
-                        </label>
-                        <div class="mt-2">
-                            <input id="password"
-                                   name="password"
-                                   type="password"
-                                   value="Admin@123"
-                                   autocomplete="current-password"
-                                   required
-                                   class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 @error('password') ring-red-500 @enderror"
-                                   placeholder="••••••••">
-                        </div>
-                        @error('password')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <input id="remember"
-                                   name="remember"
-                                   type="checkbox"
-                                   class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-600">
-                            <label for="remember" class="block ml-3 text-sm leading-6 text-gray-900">
-                                Lembrar-me
-                            </label>
-                        </div>
-
-                        <div class="text-sm leading-6">
-                            <a href="#" class="font-semibold text-blue-600 hover:text-blue-500">
-                                Esqueceu a senha?
-                            </a>
-                        </div>
-                    </div>
-
-                    <div>
-                        <button type="submit"
-                                class="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                                id="loginButton">
-                            <span class="login-text">Entrar</span>
-                            <svg class="hidden w-5 h-5 mr-3 -ml-1 text-white login-spinner animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Divider -->
-                <div class="mt-6">
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-300" />
-                        </div>
-                        <div class="relative flex justify-center text-sm font-medium leading-6">
-                            <span class="px-6 text-gray-900 bg-white">Ou</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Link para área do cliente -->
-                <div class="mt-6">
-                    <a href="{{ route('login') }}"
-                       class="flex w-full justify-center rounded-md bg-white px-3 py-1.5 text-sm font-semibold leading-6 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                        </svg>
-                        Acessar como Cliente
-                    </a>
+        <!-- Mensagens de Status/Sessão -->
+        @if(session('success'))
+            <div class="p-4 mb-6 text-green-700 bg-green-100 rounded-lg animate__animated animate__fadeIn">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L8.23 10.71a.75.75 0 00-1.214.882l1.33 1.832a.75.75 0 001.096.074l3.865-5.407z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ session('success') }}
                 </div>
             </div>
+        @endif
 
-            <!-- Footer -->
-            <div class="mt-8 text-center">
-                <p class="text-xs text-gray-500">
-                    {{ config('app.name') }} Admin Panel v{{ config('app.version', '1.0') }}
-                </p>
-                <p class="mt-1 text-xs text-gray-500">
-                    © {{ date('Y') }} Todos os direitos reservados
-                </p>
+        @if(session('error'))
+            <div class="p-4 mb-6 text-red-700 bg-red-100 rounded-lg animate__animated animate__fadeIn">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ session('error') }}
+                </div>
             </div>
+        @endif
+
+        <!-- Formulário -->
+        <form method="POST" action="{{ route('admin.login.submit') }}" class="space-y-5" id="adminLoginForm">
+            @csrf
+
+            <!-- Email -->
+            <div class="animate__animated animate__fadeIn animate__delay-1s">
+                <label for="email" class="block mb-1 text-sm font-medium text-gray-700">
+                    Email de Administrador
+                </label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="arnaldo.tomo@dintell.co.mz"
+                    required
+                    autofocus
+                    autocomplete="email"
+                    class="w-full px-4 py-3 transition border border-gray-300 rounded-lg outline-none input-field focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror"
+                    placeholder="admin@sfs.co.mz">
+                @error('email')
+                    <p class="mt-1 text-sm text-red-600 animate__animated animate__fadeIn">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Senha -->
+            <div class="animate__animated animate__fadeIn animate__delay-2s">
+                <label for="password" class="block mb-1 text-sm font-medium text-gray-700">
+                    Senha
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value="Admin@123"
+                    required
+                    autocomplete="current-password"
+                    class="w-full px-4 py-3 transition border border-gray-300 rounded-lg outline-none input-field focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('password') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror"
+                    placeholder="Digite sua senha">
+                @error('password')
+                    <p class="mt-1 text-sm text-red-600 animate__animated animate__fadeIn">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Lembrar de mim -->
+            <div class="flex items-center justify-between animate__animated animate__fadeIn animate__delay-2s">
+                <div class="flex items-center">
+                    <input
+                        type="checkbox"
+                        id="remember"
+                        name="remember"
+                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="remember" class="block ml-2 text-sm text-gray-700">
+                        Lembrar de mim
+                    </label>
+                </div>
+
+
+            </div>
+
+            <!-- Botão de Login -->
+            <div class="animate__animated animate__fadeInUp animate__delay-2s">
+                <button
+                    type="submit"
+                    id="loginButton"
+                    class="w-full px-4 py-3 font-medium text-white transition duration-200 rounded-lg btn-login hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed">
+                    <span id="buttonText">Acessar Painel Administrativo</span>
+                    <div id="buttonLoading" class="flex items-center justify-center hidden">
+                        <div class="mr-2 loading-spinner"></div>
+                        Autenticando...
+                    </div>
+                </button>
+            </div>
+        </form>
+
+        <!-- Divider -->
+        <div class="mt-6 animate__animated animate__fadeIn animate__delay-3s">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-6 text-gray-900 bg-white">Ou</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Link para área do cliente -->
+        <div class="mt-6 animate__animated animate__fadeIn animate__delay-3s">
+            <a href="{{ route('login') }}"
+               class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-gray-900 transition-colors duration-200 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                Acessar como Cliente
+            </a>
+        </div>
+
+        <!-- Rodapé -->
+        <div class="mt-6 text-xs text-center text-gray-500 animate__animated animate__fadeIn animate__delay-4s">
+            <p class="mb-1">
+                Ao continuar, você confirma que leu nossos
+                <a href="#" class="text-blue-600 hover:underline">Termos & Condições</a>
+                e
+                <a href="#" class="text-blue-600 hover:underline">Política de Privacidade</a>
+            </p>
+
         </div>
     </div>
 
     <script>
-        // Loading state no formulário
-        document.querySelector('form').addEventListener('submit', function() {
-            const button = document.getElementById('loginButton');
-            const text = button.querySelector('.login-text');
-            const spinner = button.querySelector('.login-spinner');
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('adminLoginForm');
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            const loginButton = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoading = document.getElementById('buttonLoading');
 
-            button.disabled = true;
-            text.textContent = 'Entrando...';
-            spinner.classList.remove('hidden');
-        });
-
-        // Auto-focus no campo email
-        document.getElementById('email').focus();
-
-        // Validação em tempo real
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-
-        emailInput.addEventListener('blur', function() {
-            if (this.value && !this.value.includes('@')) {
-                this.classList.add('ring-red-500');
-            } else {
-                this.classList.remove('ring-red-500');
+            // Efeito de digitação no campo de email (similar ao exemplo)
+            if (emailField.value === '') {
+                const emailText = 'admin@sfs.co.mz';
+                let i = 0;
+                const typingEffect = setInterval(() => {
+                    if (i < emailText.length) {
+                        emailField.value += emailText.charAt(i);
+                        i++;
+                    } else {
+                        clearInterval(typingEffect);
+                    }
+                }, 100);
             }
-        });
 
-        passwordInput.addEventListener('input', function() {
-            if (this.value.length > 0 && this.value.length < 6) {
-                this.classList.add('ring-yellow-500');
-                this.classList.remove('ring-red-500');
-            } else if (this.value.length >= 6) {
-                this.classList.remove('ring-yellow-500', 'ring-red-500');
-                this.classList.add('ring-green-500');
-            } else {
-                this.classList.remove('ring-yellow-500', 'ring-green-500');
-            }
+            // Submissão do formulário com loading state
+            form.addEventListener('submit', function(e) {
+                // Mostrar loading state
+                loginButton.disabled = true;
+                buttonText.classList.add('hidden');
+                buttonLoading.classList.remove('hidden');
+                buttonLoading.classList.add('flex');
+
+                // Em um cenário real, o formulário seria enviado normalmente
+                // Para demonstração, vou simular um delay
+                setTimeout(() => {
+                    // Resetar o botão após um tempo (para demo)
+                    loginButton.disabled = false;
+                    buttonText.classList.remove('hidden');
+                    buttonLoading.classList.add('hidden');
+                    buttonLoading.classList.remove('flex');
+                }, 3000);
+            });
+
+            // Validação visual em tempo real
+            emailField.addEventListener('blur', function() {
+                if (this.value && !this.value.includes('@')) {
+                    this.classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                    this.classList.remove('border-gray-300', 'focus:ring-blue-500', 'focus:border-blue-500');
+                } else {
+                    this.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                    this.classList.add('border-gray-300', 'focus:ring-blue-500', 'focus:border-blue-500');
+                }
+            });
+
+            passwordField.addEventListener('input', function() {
+                if (this.value.length > 0 && this.value.length < 6) {
+                    this.classList.add('border-yellow-500', 'focus:ring-yellow-500', 'focus:border-yellow-500');
+                    this.classList.remove('border-gray-300', 'focus:ring-blue-500', 'focus:border-blue-500', 'border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                } else if (this.value.length >= 6) {
+                    this.classList.remove('border-yellow-500', 'focus:ring-yellow-500', 'focus:border-yellow-500', 'border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                    this.classList.add('border-green-500', 'focus:ring-green-500', 'focus:border-green-500');
+                } else {
+                    this.classList.remove('border-yellow-500', 'focus:ring-yellow-500', 'focus:border-yellow-500', 'border-green-500', 'focus:ring-green-500', 'focus:border-green-500');
+                    this.classList.add('border-gray-300', 'focus:ring-blue-500', 'focus:border-blue-500');
+                }
+            });
+
+            // Auto-focus no campo email
+            emailField.focus();
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + Enter para submeter
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+
+            // Remover mensagens de erro quando o usuário começar a digitar
+            [emailField, passwordField].forEach(field => {
+                field.addEventListener('input', function() {
+                    const errorMessage = this.parentElement.querySelector('.text-red-600');
+                    if (errorMessage) {
+                        errorMessage.style.opacity = '0';
+                        setTimeout(() => {
+                            if (errorMessage) {
+                                errorMessage.remove();
+                            }
+                        }, 300);
+                    }
+                });
+            });
+
+            console.log('🔐 SFS Admin Login - Sub360 Style Loaded');
+            console.log('📧 Default credentials: arnaldo.tomo@dintell.co.mz');
         });
     </script>
 </body>
