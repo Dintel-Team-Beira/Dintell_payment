@@ -35,7 +35,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Alpine.js -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script> --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+      
+    </style>
 </head>
 
 <body class="font-sans antialiased bg-gray-50" x-data="sidebarData()">
@@ -53,7 +58,7 @@
             'translate-x-0': sidebarOpen || !isMobile,
             '-translate-x-full': !sidebarOpen && isMobile,
             'w-64': !collapsed,
-            'w-64': collapsed && !isMobile
+            'w-28': collapsed && !isMobile
         }"
             class="fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out lg:static lg:translate-x-0"
             x-cloak>
