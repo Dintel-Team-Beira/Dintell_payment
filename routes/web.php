@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\CompaniesController as AdminCompaniesController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\LogsController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\TemplatePreviewController;
 
 /*
@@ -67,7 +68,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('login', [AdminAuthController::class, 'login'])->name('login.submit');
     });
 
-        // Rotas para AdminActivity
+    // Rotas para AdminActivity
     Route::prefix('activities')->name('activities.')->group(function () {
         Route::get('/', [AdminActivitiesController::class, 'index'])->name('index');
         Route::get('/dashboard', [AdminActivitiesController::class, 'dashboard'])->name('dashboard');
@@ -176,6 +177,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{invoice}/view-pdf', [InvoiceController::class, 'viewPdf'])->name('view-pdf');
             Route::get('/{invoice}/print', [InvoiceController::class, 'print'])->name('print');
         });
+
 
         // Relatórios Administrativos
         Route::prefix('reports')->name('reports.')->group(function () {
@@ -435,6 +437,20 @@ Route::prefix('dintell')->group(function () {
         // Relatórios por tipo de documento
         Route::get('/by-type/{type}', [InvoiceController::class, 'indexByType'])
             ->name('by-type');
+
+        // Para recibos
+        Route::post('/{invoice}/generate-receipt', [InvoiceController::class, 'generateReceipt'])->name('generate-receipt');
+        Route::get('/{invoice}/receipts', [InvoiceController::class, 'receipts'])->name('receipts');
+    });
+
+    Route::prefix('receipts')->name('receipts.')->group(function () {
+        Route::get('/', [ReceiptController::class, 'index'])->name('index');
+        Route::get('/{receipt}', [ReceiptController::class, 'show'])->name('show');
+        Route::post('/{receipt}/cancel', [ReceiptController::class, 'cancel'])->name('cancel');
+        Route::get('/{receipt}/download-pdf', [ReceiptController::class, 'downloadPdf'])->name('download-pdf');
+        Route::post('/{receipt}/duplicate', [ReceiptController::class, 'duplicate'])->name('duplicate');
+        Route::get('/export', [ReceiptController::class, 'export'])->name('export');
+        Route::get('/api/stats', [ReceiptController::class, 'stats'])->name('api.stats');
     });
 
 
@@ -573,13 +589,11 @@ Route::prefix('dintell')->group(function () {
 
     // Template preview
     // Route::get('template-preview/{type}',[TemplatePreviewController::class,'show'])->name('template-preview');
-    Route::get('template-preview/list/{type}',[TemplatePreviewController::class,'list'])->name('template-preview.list');
-    Route::get('template-preview/preview/{templateId}',[TemplatePreviewController::class,'show'])->name('template-preview');
-    Route::get('template-preview/download/{templateId}',[TemplatePreviewController::class,'download'])->name('template-preview.download');
+    Route::get('template-preview/list/{type}', [TemplatePreviewController::class, 'list'])->name('template-preview.list');
+    Route::get('template-preview/preview/{templateId}', [TemplatePreviewController::class, 'show'])->name('template-preview');
+    Route::get('template-preview/download/{templateId}', [TemplatePreviewController::class, 'download'])->name('template-preview.download');
     Route::post('template-preview/select/{idTemplate}', [TemplatePreviewController::class, 'selectTemplate'])
         ->name('template-preview.select');
-
-
 });
 
 /*

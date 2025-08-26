@@ -10,6 +10,7 @@ use App\Models\Client;
 use App\Models\Quote;
 use App\Models\BillingSetting;
 use App\Models\DocumentTemplate;
+use App\Models\Receipt;
 use App\Services\BillingCalculatorService;
 use App\Services\InvoicePdfService;
 use App\Services\ReceiptService;
@@ -498,74 +499,68 @@ class InvoiceController extends Controller
         }
     }
 
-    /*
+
+    // public function markAsPaid(Request $request, Invoice $invoice)
+    // {
+    //     $request->validate([
+    //         'amount' => 'nullable|numeric|min:0.01|max:' . $invoice->remaining_amount
+    //     ]);
+
+    //     try {
+    //         $amount = $request->amount ?? $invoice->remaining_amount;
+    //         $invoice->markAsPaid($amount);
+
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'success' => true,
+    //                 'message' => 'Pagamento registrado com sucesso!'
+    //             ]);
+    //         }
+
+    //         return back()->with('success', 'Pagamento registrado com sucesso!');
+    //     } catch (\Exception $e) {
+    //         if ($request->expectsJson()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Erro ao registrar pagamento: ' . $e->getMessage()
+    //             ], 500);
+    //         }
+
+    //         return back()->with('error', 'Erro ao registrar pagamento: ' . $e->getMessage());
+    //     }
+    // }
+
+    // Método markAsPaid simplificado no InvoiceController
+
     public function markAsPaid(Request $request, Invoice $invoice)
     {
         $request->validate([
-            'amount' => 'nullable|numeric|min:0.01|max:' . $invoice->remaining_amount
-        ]);
-
-        try {
-            $amount = $request->amount ?? $invoice->remaining_amount;
-            $invoice->markAsPaid($amount);
-
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Pagamento registrado com sucesso!'
-                ]);
-            }
-
-            return back()->with('success', 'Pagamento registrado com sucesso!');
-
-        } catch (\Exception $e) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Erro ao registrar pagamento: ' . $e->getMessage()
-                ], 500);
-            }
-
-            return back()->with('error', 'Erro ao registrar pagamento: ' . $e->getMessage());
-        }
-    }
-    */
-    public function markAsPaid(Request $request, Invoice $invoice)
-    {
-        $request->validate([
-            'amount' => 'nullable|numeric|min:0.01|max:' . $invoice->remaining_amount,
-            'payment_method' => 'required|in:cash,bank_transfer,check,credit_card,mobile_money,other',
-            'transaction_reference' => 'nullable|string|max:255',
-            'payment_date' => 'nullable|date',
-            'notes' => 'nullable|string|max:500',
-            'generate_receipt' => 'nullable|boolean'
+            'amount' => 'nullable|numeric|min:0.01|max:' . $invoice->total
         ]);
 
         try {
             DB::beginTransaction();
 
-            $amount = $request->amount ?? $invoice->remaining_amount;
-            $paymentMethod = $request->payment_method;
-            $generateReceipt = $request->generate_receipt ?? true;
+            $amount = $request->amount ?? $invoice->total;
 
             // Atualizar a fatura
             $invoice->markAsPaid($amount);
-            $invoice->update(['payment_method' => $paymentMethod]);
 
             $receipt = null;
 
-            // Gerar recibo se solicitado e se a fatura estiver totalmente paga
-            if ($generateReceipt && $invoice->status === 'paid' && $this->receiptService) {
-                $paymentData = [
-                    'amount_paid' => $amount,
-                    'payment_method' => $paymentMethod,
-                    'payment_date' => $request->payment_date ? \Carbon\Carbon::parse($request->payment_date) : now(),
-                    'transaction_reference' => $request->transaction_reference,
-                    'notes' => $request->notes,
-                ];
-
+            // Gerar recibo automaticamente se a fatura estiver totalmente paga
+            if ($invoice->status === 'paid') {
                 try {
-                    $receipt = $this->receiptService->generateReceiptForInvoice($invoice, $paymentData);
+                    $receipt = Receipt::create([
+                        'invoice_id' => $invoice->id,
+                        'client_id' => $invoice->client_id,
+                        'amount_paid' => $amount,
+                          'company_id'=>$invoice->company_id,
+                        'payment_method' => Receipt::PAYMENT_OTHER, // método genérico
+                        'payment_date' => now(),
+                        'notes' => "Recibo gerado automaticamente para fatura {$invoice->invoice_number}",
+                        'issued_by' => auth()->user()->id,
+                    ]);
                 } catch (\Exception $e) {
                     // Log do erro mas não falhar a operação
                     \Log::warning('Erro ao gerar recibo automaticamente', [
@@ -586,6 +581,12 @@ class InvoiceController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => $message,
+                    'invoice' => [
+                        'id' => $invoice->id,
+                        'status' => $invoice->status,
+                        'paid_amount' => $invoice->paid_amount,
+                        'remaining_amount' => $invoice->remaining_amount
+                    ],
                     'receipt' => $receipt ? [
                         'id' => $receipt->id,
                         'receipt_number' => $receipt->receipt_number,
