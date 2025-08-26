@@ -53,7 +53,7 @@
             'translate-x-0': sidebarOpen || !isMobile,
             '-translate-x-full': !sidebarOpen && isMobile,
             'w-64': !collapsed,
-            'w-20': collapsed && !isMobile
+            'w-64': collapsed && !isMobile
         }"
             class="fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out lg:static lg:translate-x-0"
             x-cloak>
