@@ -433,7 +433,7 @@
             // 'ml-20': collapsed && !isMobile,
             'ml-0': isMobile
         }"
-            class="flex-1 transition-all duration-300 ease-in-out">
+            class="flex-1 overflow-hidden transition-all duration-300 ease-in-out">
             <!-- Top Header -->
             <header class="bg-white border-b border-gray-200 shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4">
