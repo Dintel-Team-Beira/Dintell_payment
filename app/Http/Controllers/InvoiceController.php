@@ -12,6 +12,7 @@ use App\Models\BillingSetting;
 use App\Models\DocumentTemplate;
 use App\Services\BillingCalculatorService;
 use App\Services\InvoicePdfService;
+use App\Services\ReceiptService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -21,8 +22,9 @@ class InvoiceController extends Controller
 {
     protected $calculator;
     protected $pdfService;
+    protected $receiptService;
 
-    public function __construct(BillingCalculatorService $calculator = null, InvoicePdfService $pdfService = null)
+    public function __construct(BillingCalculatorService $calculator = null, InvoicePdfService $pdfService = null, ReceiptService $receiptService = null)
     {
         $this->calculator = $calculator;
         $this->pdfService = $pdfService;
@@ -51,13 +53,13 @@ class InvoiceController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('invoice_number', 'like', '%' . $request->search . '%')
-                  ->orWhere('notes', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('client', function($clientQuery) use ($request) {
-                      $clientQuery->where('name', 'like', '%' . $request->search . '%')
-                                 ->orWhere('email', 'like', '%' . $request->search . '%');
-                  });
+                    ->orWhere('notes', 'like', '%' . $request->search . '%')
+                    ->orWhereHas('client', function ($clientQuery) use ($request) {
+                        $clientQuery->where('name', 'like', '%' . $request->search . '%')
+                            ->orWhere('email', 'like', '%' . $request->search . '%');
+                    });
             });
         }
 
@@ -67,8 +69,8 @@ class InvoiceController extends Controller
 
         if ($sortField === 'client_name') {
             $query->join('clients', 'invoices.client_id', '=', 'clients.id')
-                  ->orderBy('clients.name', $sortDirection)
-                  ->select('invoices.*');
+                ->orderBy('clients.name', $sortDirection)
+                ->select('invoices.*');
         } else {
             $query->orderBy($sortField, $sortDirection);
         }
@@ -88,9 +90,9 @@ class InvoiceController extends Controller
         $settings = BillingSetting::getSettings();
 
 
-          // Verificar se é venda à dinheiro
+        // Verificar se é venda à dinheiro
         $isCashSale = request()->get('cash_sale', false);
-        return view('invoices.create', compact('clients', 'settings','isCashSale'));
+        return view('invoices.create', compact('clients', 'settings', 'isCashSale'));
     }
 
     // public function store(Request $request)
@@ -161,98 +163,97 @@ class InvoiceController extends Controller
     // }
 
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'client_id' => 'required|exists:clients,id',
-        'quote_id' => 'nullable|exists:quotes,id',
-        'invoice_date' => 'required|date',
-        'payment_terms_days' => 'required|numeric|min:0|max:365',
-        // 'payment_method' => 'required|in:cash,bank_transfer,check,credit_card,other',
-        'items' => 'required|array|min:1',
-        'items.*.description' => 'required|string|max:255',
-        'items.*.quantity' => 'required|numeric|min:0.01',
-        'items.*.unit_price' => 'required|numeric|min:0',
-        'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
-        'discount_percentage' => 'nullable|numeric|min:0|max:100',
-        'discount_amount' => 'nullable|numeric|min:0',
-        'notes' => 'nullable|string',
-        'terms_conditions' => 'nullable|string',
-        'is_cash_sale' => 'nullable|boolean',
-        'cash_received' => 'nullable|numeric|min:0'
-    ]);
+    {
+        $validated = $request->validate([
+            'client_id' => 'required|exists:clients,id',
+            'quote_id' => 'nullable|exists:quotes,id',
+            'invoice_date' => 'required|date',
+            'payment_terms_days' => 'required|numeric|min:0|max:365',
+            // 'payment_method' => 'required|in:cash,bank_transfer,check,credit_card,other',
+            'items' => 'required|array|min:1',
+            'items.*.description' => 'required|string|max:255',
+            'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
+            'discount_percentage' => 'nullable|numeric|min:0|max:100',
+            'discount_amount' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string',
+            'terms_conditions' => 'nullable|string',
+            'is_cash_sale' => 'nullable|boolean',
+            'cash_received' => 'nullable|numeric|min:0'
+        ]);
 
-    try {
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        // Calcular totais
-        $totals = $this->calculateInvoiceTotals($validated['items']);
+            // Calcular totais
+            $totals = $this->calculateInvoiceTotals($validated['items']);
 
-        // Calcular desconto
-        $discountAmount = $validated['discount_amount'] ?? 0;
-        if (($validated['discount_percentage'] ?? 0) > 0) {
-            $discountAmount = ($totals['subtotal'] + $totals['tax_amount']) * ($validated['discount_percentage'] / 100);
-        }
-
-        $total = $totals['subtotal'] + $totals['tax_amount'] - $discountAmount;
-
-        // Calcular data de vencimento
-        $paymentTermsDays = (int) $validated['payment_terms_days'];
-        $dueDate = Carbon::parse($validated['invoice_date'])->addDays($paymentTermsDays);
-
-        // Criar fatura
-        $invoiceData = [
-            'client_id' => $validated['client_id'],
-            'quote_id' => $validated['quote_id'] ?? null,
-            'invoice_date' => $validated['invoice_date'],
-            'due_date' => $dueDate,
-            'payment_terms_days' => $paymentTermsDays,
-            // 'payment_method' => $validated['payment_method'],
-            'subtotal' => $totals['subtotal'],
-            'tax_amount' => $totals['tax_amount'],
-            'discount_percentage' => $validated['discount_percentage'] ?? 0,
-            'discount_amount' => $discountAmount,
-            'total' => $total,
-            'status' => 'draft',
-            'notes' => $validated['notes'],
-            'terms_conditions' => $validated['terms_conditions'],
-            'document_type' => Invoice::TYPE_INVOICE,
-            'company_id'=> auth()->user()->company->id
-        ];
-
-        // Se é venda à dinheiro
-        if ($validated['is_cash_sale'] ?? false) {
-            $cashReceived = $validated['cash_received'] ?? $total;
-
-            if ($cashReceived < $total) {
-                throw new \Exception('Valor recebido insuficiente para venda à dinheiro');
+            // Calcular desconto
+            $discountAmount = $validated['discount_amount'] ?? 0;
+            if (($validated['discount_percentage'] ?? 0) > 0) {
+                $discountAmount = ($totals['subtotal'] + $totals['tax_amount']) * ($validated['discount_percentage'] / 100);
             }
 
-            $invoiceData['is_cash_sale'] = true;
-            $invoiceData['cash_received'] = $cashReceived;
-            $invoiceData['change_given'] = $cashReceived - $total;
-            $invoiceData['paid_amount'] = $total;
-            $invoiceData['status'] = 'paid';
-            $invoiceData['paid_at'] = now();
+            $total = $totals['subtotal'] + $totals['tax_amount'] - $discountAmount;
+
+            // Calcular data de vencimento
+            $paymentTermsDays = (int) $validated['payment_terms_days'];
+            $dueDate = Carbon::parse($validated['invoice_date'])->addDays($paymentTermsDays);
+
+            // Criar fatura
+            $invoiceData = [
+                'client_id' => $validated['client_id'],
+                'quote_id' => $validated['quote_id'] ?? null,
+                'invoice_date' => $validated['invoice_date'],
+                'due_date' => $dueDate,
+                'payment_terms_days' => $paymentTermsDays,
+                // 'payment_method' => $validated['payment_method'],
+                'subtotal' => $totals['subtotal'],
+                'tax_amount' => $totals['tax_amount'],
+                'discount_percentage' => $validated['discount_percentage'] ?? 0,
+                'discount_amount' => $discountAmount,
+                'total' => $total,
+                'status' => 'draft',
+                'notes' => $validated['notes'],
+                'terms_conditions' => $validated['terms_conditions'],
+                'document_type' => Invoice::TYPE_INVOICE,
+                'company_id' => auth()->user()->company->id
+            ];
+
+            // Se é venda à dinheiro
+            if ($validated['is_cash_sale'] ?? false) {
+                $cashReceived = $validated['cash_received'] ?? $total;
+
+                if ($cashReceived < $total) {
+                    throw new \Exception('Valor recebido insuficiente para venda à dinheiro');
+                }
+
+                $invoiceData['is_cash_sale'] = true;
+                $invoiceData['cash_received'] = $cashReceived;
+                $invoiceData['change_given'] = $cashReceived - $total;
+                $invoiceData['paid_amount'] = $total;
+                $invoiceData['status'] = 'paid';
+                $invoiceData['paid_at'] = now();
+            }
+
+            $invoice = Invoice::create($invoiceData);
+
+            // Criar itens da fatura
+            foreach ($validated['items'] as $itemData) {
+                $this->createInvoiceItem($invoice, $itemData);
+            }
+
+            DB::commit();
+
+            return redirect()->route('invoices.show', $invoice)
+                ->with('success', 'Fatura criada com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()
+                ->with('error', 'Erro ao criar fatura: ' . $e->getMessage());
         }
-
-        $invoice = Invoice::create($invoiceData);
-
-        // Criar itens da fatura
-        foreach ($validated['items'] as $itemData) {
-            $this->createInvoiceItem($invoice, $itemData);
-        }
-
-        DB::commit();
-
-        return redirect()->route('invoices.show', $invoice)
-            ->with('success', 'Fatura criada com sucesso!');
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return back()->withInput()
-            ->with('error', 'Erro ao criar fatura: ' . $e->getMessage());
     }
-}
 
     private function calculateInvoiceTotals($items)
     {
@@ -296,7 +297,7 @@ class InvoiceController extends Controller
             'subtotal' => $subtotal,
             'tax_amount' => $taxAmount,
             'total' => $total,
-            'company_id'=>$invoice->company_id
+            'company_id' => $invoice->company_id
         ]);
     }
 
@@ -457,7 +458,6 @@ class InvoiceController extends Controller
 
             return redirect()->route('invoices.show', $invoice)
                 ->with('success', 'Fatura atualizada com sucesso!');
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -490,7 +490,6 @@ class InvoiceController extends Controller
 
             return redirect()->route('invoices.index')
                 ->with('success', 'Fatura excluída com sucesso!');
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -499,6 +498,7 @@ class InvoiceController extends Controller
         }
     }
 
+    /*
     public function markAsPaid(Request $request, Invoice $invoice)
     {
         $request->validate([
@@ -529,7 +529,167 @@ class InvoiceController extends Controller
             return back()->with('error', 'Erro ao registrar pagamento: ' . $e->getMessage());
         }
     }
+    */
+    public function markAsPaid(Request $request, Invoice $invoice)
+    {
+        $request->validate([
+            'amount' => 'nullable|numeric|min:0.01|max:' . $invoice->remaining_amount,
+            'payment_method' => 'required|in:cash,bank_transfer,check,credit_card,mobile_money,other',
+            'transaction_reference' => 'nullable|string|max:255',
+            'payment_date' => 'nullable|date',
+            'notes' => 'nullable|string|max:500',
+            'generate_receipt' => 'nullable|boolean'
+        ]);
 
+        try {
+            DB::beginTransaction();
+
+            $amount = $request->amount ?? $invoice->remaining_amount;
+            $paymentMethod = $request->payment_method;
+            $generateReceipt = $request->generate_receipt ?? true;
+
+            // Atualizar a fatura
+            $invoice->markAsPaid($amount);
+            $invoice->update(['payment_method' => $paymentMethod]);
+
+            $receipt = null;
+
+            // Gerar recibo se solicitado e se a fatura estiver totalmente paga
+            if ($generateReceipt && $invoice->status === 'paid' && $this->receiptService) {
+                $paymentData = [
+                    'amount_paid' => $amount,
+                    'payment_method' => $paymentMethod,
+                    'payment_date' => $request->payment_date ? \Carbon\Carbon::parse($request->payment_date) : now(),
+                    'transaction_reference' => $request->transaction_reference,
+                    'notes' => $request->notes,
+                ];
+
+                try {
+                    $receipt = $this->receiptService->generateReceiptForInvoice($invoice, $paymentData);
+                } catch (\Exception $e) {
+                    // Log do erro mas não falhar a operação
+                    \Log::warning('Erro ao gerar recibo automaticamente', [
+                        'invoice_id' => $invoice->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            $message = 'Pagamento registrado com sucesso!';
+            if ($receipt) {
+                $message .= ' Recibo ' . $receipt->receipt_number . ' foi gerado automaticamente.';
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'receipt' => $receipt ? [
+                        'id' => $receipt->id,
+                        'receipt_number' => $receipt->receipt_number,
+                        'download_url' => route('receipts.download-pdf', $receipt)
+                    ] : null
+                ]);
+            }
+
+            return back()->with('success', $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao registrar pagamento: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->with('error', 'Erro ao registrar pagamento: ' . $e->getMessage());
+        }
+    }
+
+    // Novo método para gerar recibo manual
+    public function generateReceipt(Request $request, Invoice $invoice)
+    {
+        $request->validate([
+            'amount_paid' => 'required|numeric|min:0.01|max:' . $invoice->remaining_amount,
+            'payment_method' => 'required|in:cash,bank_transfer,check,credit_card,mobile_money,other',
+            'transaction_reference' => 'nullable|string|max:255',
+            'payment_date' => 'nullable|date',
+            'notes' => 'nullable|string|max:500',
+            'update_invoice' => 'nullable|boolean'
+        ]);
+
+        try {
+            if (!$this->receiptService) {
+                throw new \Exception('Serviço de recibos não disponível');
+            }
+
+            $paymentData = [
+                'amount_paid' => $request->amount_paid,
+                'payment_method' => $request->payment_method,
+                'payment_date' => $request->payment_date ? \Carbon\Carbon::parse($request->payment_date) : now(),
+                'transaction_reference' => $request->transaction_reference,
+                'notes' => $request->notes,
+                'update_invoice' => $request->update_invoice ?? true,
+            ];
+
+            $receipt = $this->receiptService->generateManualReceipt($invoice, $paymentData);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Recibo gerado com sucesso!',
+                    'receipt' => [
+                        'id' => $receipt->id,
+                        'receipt_number' => $receipt->receipt_number,
+                        'amount' => $receipt->formatted_amount,
+                        'download_url' => route('receipts.download-pdf', $receipt)
+                    ]
+                ]);
+            }
+
+            return back()->with('success', 'Recibo ' . $receipt->receipt_number . ' gerado com sucesso!');
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao gerar recibo: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->with('error', 'Erro ao gerar recibo: ' . $e->getMessage());
+        }
+    }
+
+    // Método para listar recibos de uma fatura
+    public function receipts(Invoice $invoice)
+    {
+        $receipts = $invoice->receipts()
+            ->with(['issuedBy'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'receipts' => $receipts->map(function ($receipt) {
+                    return [
+                        'id' => $receipt->id,
+                        'receipt_number' => $receipt->receipt_number,
+                        'amount_paid' => $receipt->formatted_amount,
+                        'payment_method' => $receipt->payment_method_label,
+                        'payment_date' => $receipt->formatted_payment_date,
+                        'status' => $receipt->status,
+                        'issued_by' => $receipt->issuedBy ? $receipt->issuedBy->name : 'Sistema',
+                        'download_url' => route('receipts.download-pdf', $receipt)
+                    ];
+                })
+            ]);
+        }
+
+        return view('invoices.receipts', compact('invoice', 'receipts'));
+    }
     public function updateStatus(Request $request, Invoice $invoice)
     {
         $request->validate([
@@ -565,74 +725,73 @@ class InvoiceController extends Controller
     }
 
     public function duplicate(Invoice $invoice)
-{
-    try {
-        DB::beginTransaction();
+    {
+        try {
+            DB::beginTransaction();
 
-        // Duplicar a fatura usando apenas campos que sabemos que existem
-        $newInvoice = $invoice->replicate([
-            'invoice_number', // será gerado automaticamente
-            'paid_amount',
-            'paid_at'
-        ]);
-
-        // Tratar payment_terms_days como número
-        $paymentTerms = is_numeric($invoice->payment_terms_days)
-            ? (int)$invoice->payment_terms_days
-            : 30;
-
-        // Definir apenas campos que temos certeza que existem
-        $newInvoice->status = 'draft';
-        $newInvoice->invoice_date = Carbon::today();
-        $newInvoice->due_date = Carbon::today()->addDays($paymentTerms);
-        $newInvoice->paid_amount = 0;
-        $newInvoice->paid_at = null;
-
-        $newInvoice->save();
-
-        // Duplicar itens da fatura
-        if ($invoice->items && $invoice->items->count() > 0) {
-            foreach ($invoice->items as $item) {
-                $newItem = $item->replicate();
-                $newItem->invoice_id = $newInvoice->id;
-                $newItem->save();
-            }
-        }
-
-        DB::commit();
-
-        if (request()->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Fatura duplicada com sucesso!',
-                'invoice_id' => $newInvoice->id,
-                'redirect_url' => route('invoices.edit', $newInvoice)
+            // Duplicar a fatura usando apenas campos que sabemos que existem
+            $newInvoice = $invoice->replicate([
+                'invoice_number', // será gerado automaticamente
+                'paid_amount',
+                'paid_at'
             ]);
+
+            // Tratar payment_terms_days como número
+            $paymentTerms = is_numeric($invoice->payment_terms_days)
+                ? (int)$invoice->payment_terms_days
+                : 30;
+
+            // Definir apenas campos que temos certeza que existem
+            $newInvoice->status = 'draft';
+            $newInvoice->invoice_date = Carbon::today();
+            $newInvoice->due_date = Carbon::today()->addDays($paymentTerms);
+            $newInvoice->paid_amount = 0;
+            $newInvoice->paid_at = null;
+
+            $newInvoice->save();
+
+            // Duplicar itens da fatura
+            if ($invoice->items && $invoice->items->count() > 0) {
+                foreach ($invoice->items as $item) {
+                    $newItem = $item->replicate();
+                    $newItem->invoice_id = $newInvoice->id;
+                    $newItem->save();
+                }
+            }
+
+            DB::commit();
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Fatura duplicada com sucesso!',
+                    'invoice_id' => $newInvoice->id,
+                    'redirect_url' => route('invoices.edit', $newInvoice)
+                ]);
+            }
+
+            return redirect()->route('invoices.edit', $newInvoice)
+                ->with('success', 'Fatura duplicada com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Erro ao duplicar fatura', [
+                'invoice_id' => $invoice->id,
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao duplicar fatura: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->with('error', 'Erro ao duplicar fatura: ' . $e->getMessage());
         }
-
-        return redirect()->route('invoices.edit', $newInvoice)
-            ->with('success', 'Fatura duplicada com sucesso!');
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-
-        \Log::error('Erro ao duplicar fatura', [
-            'invoice_id' => $invoice->id,
-            'error' => $e->getMessage(),
-            'line' => $e->getLine(),
-            'file' => $e->getFile()
-        ]);
-
-        if (request()->expectsJson()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao duplicar fatura: ' . $e->getMessage()
-            ], 500);
-        }
-
-        return back()->with('error', 'Erro ao duplicar fatura: ' . $e->getMessage());
     }
-}
 
     public function downloadPdf(Invoice $invoice)
     {
@@ -641,16 +800,15 @@ class InvoiceController extends Controller
                 return $this->pdfService->downloadInvoicePdf($invoice);
             }
 
-            
+
             // Fallback se o serviço não estiver disponível
             return $this->generateSimplePdf($invoice);
-
         } catch (\Exception $e) {
             return back()->with('error', 'Erro ao gerar PDF: ' . $e->getMessage());
         }
     }
 
-   /**
+    /**
      * Enviar fatura por email
      */
     public function sendByEmail(Request $request, Invoice $invoice)
@@ -695,7 +853,6 @@ class InvoiceController extends Controller
             }
 
             return back()->with('success', 'Fatura enviada por email com sucesso!');
-
         } catch (\Exception $e) {
             // Log do erro
             \Log::error('Erro ao enviar fatura por email', [
@@ -748,7 +905,7 @@ class InvoiceController extends Controller
             ->orderBy('created_at', 'desc')
             ->get(['id', 'quote_number', 'total', 'status']);
 
-        return response()->json($quotes->map(function($quote) {
+        return response()->json($quotes->map(function ($quote) {
             return [
                 'id' => $quote->id,
                 'quote_number' => $quote->quote_number,
@@ -768,7 +925,7 @@ class InvoiceController extends Controller
                 'quote_number' => $quote->quote_number,
                 'total' => $quote->total
             ],
-            'items' => $items->map(function($item) {
+            'items' => $items->map(function ($item) {
                 return [
                     'name' => $item->name,
                     'description' => $item->description,
@@ -809,7 +966,6 @@ class InvoiceController extends Controller
                 'success' => true,
                 'message' => "{$updateCount} faturas atualizadas com sucesso!"
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -930,20 +1086,20 @@ class InvoiceController extends Controller
         // Calcular crescimento comparado ao mês anterior
         $lastMonthStats = [
             'total_invoices' => Invoice::whereMonth('created_at', $lastMonth->month)
-                                 ->whereYear('created_at', $lastMonth->year)
-                                 ->count(),
+                ->whereYear('created_at', $lastMonth->year)
+                ->count(),
             'total_amount' => Invoice::whereMonth('created_at', $lastMonth->month)
-                                 ->whereYear('created_at', $lastMonth->year)
-                                 ->sum('total')
+                ->whereYear('created_at', $lastMonth->year)
+                ->sum('total')
         ];
 
         $currentMonthStats = [
             'total_invoices' => Invoice::whereMonth('created_at', $currentMonth->month)
-                                 ->whereYear('created_at', $currentMonth->year)
-                                 ->count(),
+                ->whereYear('created_at', $currentMonth->year)
+                ->count(),
             'total_amount' => Invoice::whereMonth('created_at', $currentMonth->month)
-                                 ->whereYear('created_at', $currentMonth->year)
-                                 ->sum('total')
+                ->whereYear('created_at', $currentMonth->year)
+                ->sum('total')
         ];
 
         // Calcular percentual de crescimento
@@ -971,12 +1127,11 @@ class InvoiceController extends Controller
         // // Usar DomPDF ou similar
         // $pdf = app('dompdf.wrapper');
         // $pdf->loadHTML($html);
-          // return $pdf->download("fatura-{$invoice->invoice_number}.pdf");
+        // return $pdf->download("fatura-{$invoice->invoice_number}.pdf");
 
         //USANDO O TEMPLATE
-        $data = compact('invoice','company');
-        $template = DocumentTemplate::where('company_id',$company->id)->where('type','invoice')->where('is_selected',true)->first();
+        $data = compact('invoice', 'company');
+        $template = DocumentTemplate::where('company_id', $company->id)->where('type', 'invoice')->where('is_selected', true)->first();
         return DocumentTemplateHelper::downloadPdfDocument($template, $data);
-      
     }
 }
