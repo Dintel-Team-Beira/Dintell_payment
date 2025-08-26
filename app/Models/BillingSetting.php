@@ -25,6 +25,11 @@ class BillingSetting extends Model
         'company_nuit',
         'company_id', // Adicionar para multi-tenancy
 
+        //NEW FIELDS
+        'receipt_prefix',
+        'receipt_next_number',
+        'receipt_number_length',
+
     ];
 
     protected $casts = [
@@ -79,7 +84,32 @@ class BillingSetting extends Model
         $this->increment('next_debit_note_number');
         return $number;
     }
-     protected static function booted()
+
+    /**
+     * Gerar próximo número de recibo
+     */
+    public function getNextReceiptNumber()
+    {
+        $prefix = $this->receipt_prefix ?? 'REC';
+        $nextNumber = $this->receipt_next_number ?? 1;
+        $length = $this->receipt_number_length ?? 6;
+
+        $receiptNumber = $prefix . str_pad($nextNumber, $length, '0', STR_PAD_LEFT);
+
+        // Incrementar para próximo uso
+        $this->increment('receipt_next_number');
+
+        return $receiptNumber;
+    }
+
+    /**
+     * Resetar numeração de recibos
+     */
+    public function resetReceiptNumbers($startNumber = 1)
+    {
+        $this->update(['receipt_next_number' => $startNumber]);
+    }
+    protected static function booted()
     {
         static::addGlobalScope(new CompanyScope);
     }
