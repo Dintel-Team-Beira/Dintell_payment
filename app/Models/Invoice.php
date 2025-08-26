@@ -55,7 +55,7 @@ class Invoice extends Model
         'is_cash_sale' => 'boolean'
     ];
 
-        // Constantes para tipos de documento
+    // Constantes para tipos de documento
     const TYPE_INVOICE = 'invoice';
     const TYPE_CREDIT_NOTE = 'credit_note';
     const TYPE_DEBIT_NOTE = 'debit_note';
@@ -67,7 +67,7 @@ class Invoice extends Model
     const PAYMENT_CREDIT_CARD = 'credit_card';
     const PAYMENT_OTHER = 'other';
 
-        // Métodos estáticos auxiliares
+    // Métodos estáticos auxiliares
     public static function getDocumentTypes()
     {
         return [
@@ -78,14 +78,14 @@ class Invoice extends Model
     }
 
 
- // Relacionamento com empresa
+    // Relacionamento com empresa
     public function company()
     {
         return $this->belongsTo(Company::class);
     }
 
 
-       // Scope para filtrar por empresa atual
+    // Scope para filtrar por empresa atual
     public function scopeForCurrentCompany($query)
     {
         $company = session('current_company');
@@ -126,7 +126,7 @@ class Invoice extends Model
     }
 
 
-        // Novos relacionamentos
+    // Novos relacionamentos
     public function relatedInvoice()
     {
         return $this->belongsTo(Invoice::class, 'related_invoice_id');
@@ -135,13 +135,13 @@ class Invoice extends Model
     public function creditNotes()
     {
         return $this->hasMany(Invoice::class, 'related_invoice_id')
-                    ->where('document_type', self::TYPE_CREDIT_NOTE);
+            ->where('document_type', self::TYPE_CREDIT_NOTE);
     }
 
     public function debitNotes()
     {
         return $this->hasMany(Invoice::class, 'related_invoice_id')
-                    ->where('document_type', self::TYPE_DEBIT_NOTE);
+            ->where('document_type', self::TYPE_DEBIT_NOTE);
     }
 
 
@@ -187,7 +187,7 @@ class Invoice extends Model
         ]);
     }
 
-       // Scopes
+    // Scopes
     public function scopeInvoices($query)
     {
         return $query->where('document_type', self::TYPE_INVOICE);
@@ -208,7 +208,7 @@ class Invoice extends Model
         return $query->where('is_cash_sale', true);
     }
 
-     // Getters formatados
+    // Getters formatados
     public function getDocumentTypeLabelAttribute()
     {
         $labels = [
@@ -281,7 +281,7 @@ class Invoice extends Model
 
 
             // Definir company_id automaticamente
-             $company = session('current_company');
+            $company = session('current_company');
             if ($company && !$invoice->company_id) {
                 $invoice->company_id = $company->id;
             }
@@ -290,7 +290,7 @@ class Invoice extends Model
                 $settings = BillingSetting::getSettings();
                 $invoice->invoice_number = $settings->getNextInvoiceNumber();
 
-                  // Gerar número baseado no tipo de documento
+                // Gerar número baseado no tipo de documento
                 switch ($invoice->document_type) {
                     case self::TYPE_CREDIT_NOTE:
                         $invoice->invoice_number = $settings->getNextCreditNoteNumber();
@@ -303,7 +303,7 @@ class Invoice extends Model
                 }
             }
 
-               // Para vendas à dinheiro, definir como paga automaticamente
+            // Para vendas à dinheiro, definir como paga automaticamente
             if ($invoice->is_cash_sale) {
                 $invoice->status = 'paid';
                 $invoice->paid_at = now();
@@ -326,8 +326,6 @@ class Invoice extends Model
                 }
             }
         });
-
-
     }
     /**
      * The "booted" method of the model.
@@ -360,11 +358,22 @@ class Invoice extends Model
 
         if ($company) {
             return $this->where('company_id', $company->id)
-                       ->where($field ?? $this->getRouteKeyName(), $value)
-                       ->first();
+                ->where($field ?? $this->getRouteKeyName(), $value)
+                ->first();
         }
 
         return parent::resolveRouteBinding($value, $field);
     }
-    
+
+
+
+    public function receipts()
+    {
+        return $this->hasMany(Receipt::class);
+    }
+
+    public function latestReceipt()
+    {
+        return $this->hasOne(Receipt::class)->latest();
+    }
 }
