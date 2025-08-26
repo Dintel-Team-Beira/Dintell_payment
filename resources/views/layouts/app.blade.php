@@ -253,6 +253,26 @@
                         </div>
                     </a>
 
+                    <!-- Recibos -->
+                    <a href="{{ route('receipts.index') }}"
+                        class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('receipts.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
+                        :class="collapsed && !isMobile ? 'justify-center' : ''"
+                    >
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                        <span x-show="!collapsed || isMobile" class="flex-1">Recibos</span>
+                        
+                        <div 
+                            x-show="collapsed && !isMobile"
+                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            style="top: 50%; transform: translateY(-50%);"
+                        >
+                            Recibos
+                        </div>
+                    </a>
+                    
                     <!-- Gestão de Stock -->
                     <a href="{{ route('products.index') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('products.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
