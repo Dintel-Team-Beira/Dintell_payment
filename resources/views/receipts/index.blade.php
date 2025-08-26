@@ -6,7 +6,7 @@
 @section('header-actions')
 <div class="flex space-x-3">
     <!-- Botão de Exportar -->
-    <div class="relative" x-data="{ open: false }">
+    {{-- <div class="relative" x-data="{ open: false }">
         <button @click="open = !open" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m-8 9a9 9 0 110-18 9 9 0 010 18z"/>
@@ -36,7 +36,8 @@
                 </a>
             </div>
         </div>
-    </div>
+    </div> --}}
+    
 </div>
 @endsection
 
@@ -360,13 +361,13 @@
                                 <div x-show="open" @click.away="open = false" x-cloak
                                      class="absolute right-0 z-10 w-48 mt-2 bg-white border border-gray-200 divide-y divide-gray-100 rounded-lg shadow-lg">
                                     <div class="py-1">
-                                        <button onclick="duplicateReceipt({{ $receipt->id }})"
+                                        {{-- <button onclick="duplicateReceipt({{ $receipt->id }})"
                                                 class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                             </svg>
                                             Duplicar
-                                        </button>
+                                        </button> --}}
 
                                         @if($receipt->invoice)
                                             <a href="{{ route('invoices.show', $receipt->invoice) }}"
