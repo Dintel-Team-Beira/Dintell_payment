@@ -16,6 +16,7 @@
                     <option value="quote">Cotação</option>
                     <option value="credit">Nota de Crédito</option>
                     <option value="debit">Nota de Débito</option>
+                    <option value="receipt">Recibo</option>
                 </select>
             </div>
 
