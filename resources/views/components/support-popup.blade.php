@@ -1481,7 +1481,8 @@ class SupportPopup {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
-
+            //debugger;
+            console.log(response);
             if (!response.ok) throw new Error('Erro ao carregar ticket');
             const result = await response.json();
 

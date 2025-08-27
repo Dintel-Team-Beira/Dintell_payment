@@ -64,6 +64,7 @@ class SupportController extends Controller
      */
     public function show($ticketId)
     {
+        // return $ticketId;
         try {
             $user = auth()->user();
 

@@ -420,8 +420,7 @@ Route::prefix('dintell')->group(function () {
             ->where('invoice', '[0-9]+');
 
         Route::post('/{invoice}/duplicate', [InvoiceController::class, 'duplicate'])
-            ->name('duplicate')
-            ->where('invoice', '[0-9]+');
+            ->name('duplicate');
 
         // Ações em massa
         Route::post('/bulk-update-status', [InvoiceController::class, 'bulkUpdateStatus'])

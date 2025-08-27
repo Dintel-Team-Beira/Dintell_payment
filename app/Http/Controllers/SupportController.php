@@ -139,6 +139,7 @@ class SupportController extends Controller
      */
     public function show($id)
     {
+
         $user = Auth::user();
 
         $ticket = SupportTicket::with(['replies.user', 'assignedTo', 'user'])

@@ -238,6 +238,7 @@ Route::get('servicos/{any?}', [ServiceController::class, 'index'])
 
     // API para o popup de suporte
     Route::get('/tickets/my', [SupportController::class, 'myTickets'])->name('tickets.my');
+    // Route::get('/tickets/{ticketId}', [SupportController::class, 'show'])->name('tickets.show');
     Route::post('/tickets', [SupportController::class, 'store'])->name('tickets.store');
     Route::get('/knowledge-base/search', [SupportController::class, 'searchKnowledgeBase'])->name('kb.search');
     Route::get('/stats', [SupportController::class, 'getUserStats'])->name('stats');
@@ -246,6 +247,8 @@ Route::get('servicos/{any?}', [ServiceController::class, 'index'])
     Route::post('/tickets/{ticket}/quick-reply', [SupportController::class, 'addReply'])->name('tickets.quick-reply');
     Route::patch('/tickets/{ticket}/quick-close', [SupportController::class, 'close'])->name('tickets.quick-close');
 });
+
+
 // No arquivo routes/api.php (ou web.php se você quiser manter como web routes)
 
 Route::middleware(['auth:sanctum'])->prefix('api/support')->name('api.support.')->group(function () {
