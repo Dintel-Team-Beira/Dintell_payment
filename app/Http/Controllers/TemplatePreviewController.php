@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\Quote;
 use App\Models\CreditNote;
 use App\Models\DebitNote;
+use App\Models\Receipt;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -109,7 +110,10 @@ class TemplatePreviewController extends Controller
                 }
                 $data['debitNote'] = $debitNote;
                 break;
-
+            case 'receipt':
+                $receipt = $this->getReceipt($company->id);
+                $data['receipt'] = $receipt;
+                break;
             default:
                 // Para tipos não mapeados, retornar apenas company
                 break;
@@ -142,6 +146,14 @@ class TemplatePreviewController extends Controller
             ->first();
     }
 
+    /**
+     * Buscar Receipt 
+     */
+    private function getReceipt($companyId)
+    {
+        return Receipt::where('company_id', $companyId)
+            ->first();
+    }
     /**
      * 🆕 Gerar nome do arquivo baseado no template e dados
      */
