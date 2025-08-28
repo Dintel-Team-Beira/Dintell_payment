@@ -39,7 +39,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-      
+
     </style>
 </head>
 
@@ -60,18 +60,18 @@
             'w-64': !collapsed,
             'w-28': collapsed && !isMobile
         }"
-            class="fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out lg:static lg:translate-x-0"
+            class="fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out bg-white border-r border-gray-200 shadow-sm lg:static lg:translate-x-0"
             x-cloak>
             <!-- Logo Section -->
-            <div class="flex items-center align-middle justify-between py-4 w-full " :class="collapsed && !isMobile ?'py-8':''">
+            <div class="flex items-center justify-between w-full py-4 align-middle " :class="collapsed && !isMobile ?'py-8':''">
                 <div class="flex items-center justify-between w-full" >
                     <a href="{{ route('dashboard') }}">
                         <img src="{{ asset('main.webp') }}" :class="collapsed && !isMobile ? 'w-28 ' : 'w-36'"
-                            class="transition-all duration-300 pl-3" />
+                            class="pl-3 transition-all duration-300" />
                     </a>
                     <!-- Toggle Button for Desktop -->
                     <button @click="toggleCollapse()" x-show="!collapsed || isMobile"
-                        class="hidden lg:flex font-bold items-center justify-center w-6 h-6 ml-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200">
+                        class="items-center justify-center hidden w-6 h-6 ml-4 font-bold text-gray-400 transition-colors duration-200 rounded lg:flex hover:text-gray-600 hover:bg-gray-100">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
@@ -80,7 +80,7 @@
 
                 <!-- Toggle Button when collapsed (centered) -->
                 <button @click="toggleCollapse()" x-show="collapsed && !isMobile"
-                    class="hidden lg:flex items-center  w-6 h-6 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200">
+                    class="items-center hidden w-6 h-6 text-gray-400 transition-colors duration-200 rounded lg:flex hover:text-gray-600 hover:bg-gray-100">
                     <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
@@ -99,7 +99,7 @@
                     <a href="{{ route('dashboard') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''">
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
@@ -108,7 +108,7 @@
 
                         <!-- Tooltip para estado colapsado -->
                         <div x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);">
                             Dashboard
                         </div>
@@ -118,7 +118,7 @@
                     <a href="{{ route('clients.index') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('clients.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''">
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -126,7 +126,7 @@
                         <span x-show="!collapsed || isMobile">Clientes</span>
 
                         <div x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);">
                             Clientes
                         </div>
@@ -136,7 +136,7 @@
                     <a href="{{ route('subscriptions.index') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('subscriptions.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''">
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -144,7 +144,7 @@
                         <span x-show="!collapsed || isMobile">Subscrições</span>
 
                         <div x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);">
                             Subscrições
                         </div>
@@ -154,7 +154,7 @@
                     <a href="{{ route('plans.index') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('plans.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''">
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -162,7 +162,7 @@
                         <span x-show="!collapsed || isMobile">Planos</span>
 
                         <div x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);">
                             Planos
                         </div>
@@ -181,15 +181,15 @@
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('billing.dashboard') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''"
                     >
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                         <span x-show="!collapsed || isMobile">Dashboard Facturação</span>
-                        
-                        <div 
+
+                        <div
                             x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);"
                         >
                             Dashboard Facturação
@@ -201,7 +201,7 @@
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('invoices.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''"
                     >
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -210,17 +210,17 @@
                             $overdueCount = 3; // Exemplo
                         @endphp
                         @if ($overdueCount > 0)
-                            <span 
+                            <span
                                 x-show="!collapsed || isMobile"
                                 class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
                             >
                                 {{ $overdueCount }}
                             </span>
                         @endif
-                        
-                        <div 
+
+                        <div
                             x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);"
                         >
                             Faturas @if($overdueCount > 0)({{ $overdueCount }})@endif
@@ -232,7 +232,7 @@
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('quotes.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''"
                     >
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                         </svg>
@@ -241,17 +241,17 @@
                             $pendingQuotes = 2; // Exemplo
                         @endphp
                         @if ($pendingQuotes > 0)
-                            <span 
+                            <span
                                 x-show="!collapsed || isMobile"
                                 class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
                             >
                                 {{ $pendingQuotes }}
                             </span>
                         @endif
-                        
-                        <div 
+
+                        <div
                             x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);"
                         >
                             Cotações @if($pendingQuotes > 0)({{ $pendingQuotes }})@endif
@@ -263,48 +263,48 @@
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('receipts.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''"
                     >
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                         </svg>
                         <span x-show="!collapsed || isMobile" class="flex-1">Recibos</span>
-                        
-                        <div 
+
+                        <div
                             x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);"
                         >
                             Recibos
                         </div>
                     </a>
-                    
+
                     <!-- Gestão de Stock -->
                     <a href="{{ route('products.index') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('products.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''"
                     >
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
-                        <span x-show="!collapsed || isMobile">Gestão de Stock</span>
-                        
-                        <div 
+                        <span x-show="!collapsed || isMobile">Armazem</span>
+
+                        <div
                             x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);"
                         >
-                            Gestão de Stock
+                            Armazem
                         </div>
                     </a>
 
                     <!-- Menu Dropdown de Ações Rápidas -->
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open"
-                            class="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none group relative"
+                            class="relative flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none group"
                             :class="collapsed && !isMobile ? 'justify-center' : ''"
                         >
-                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
@@ -314,10 +314,10 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                            
-                            <div 
+
+                            <div
                                 x-show="collapsed && !isMobile"
-                                class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                                class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                                 style="top: 50%; transform: translateY(-50%);"
                             >
                                 Ações Rápidas
@@ -368,17 +368,17 @@
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('billing.settings.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''"
                     >
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         <span x-show="!collapsed || isMobile">Configurações</span>
-                        
-                        <div 
+
+                        <div
                             x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);"
                         >
                             Configurações
@@ -392,7 +392,7 @@
                     <a href="{{ route('api-logs.index') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('api-logs.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''">
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -400,7 +400,7 @@
                         <span x-show="!collapsed || isMobile">Logs da API</span>
 
                         <div x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);">
                             Logs da API
                         </div>
@@ -410,7 +410,7 @@
                     <a href="{{ route('email-logs.index') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('email-logs.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''">
-                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -418,7 +418,7 @@
                         <span x-show="!collapsed || isMobile">Logs de Email</span>
 
                         <div x-show="collapsed && !isMobile"
-                            class="absolute left-full ml-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);">
                             Logs de Email
                         </div>
@@ -441,7 +441,7 @@
                     <div class="flex items-center space-x-4">
                         <!-- Mobile Menu Button -->
                         <button @click="toggleSidebar()"
-                            class="lg:hidden flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+                            class="flex items-center justify-center w-8 h-8 text-gray-500 transition-colors duration-200 rounded-lg lg:hidden hover:text-gray-700 hover:bg-gray-100">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 6h16M4 12h16M4 18h16" />
@@ -460,13 +460,15 @@
 
                         <!-- User Menu -->
                         <div class="relative" x-data="{ open: false }">
+
                             <button @click="open = !open"
                                 class="flex items-center text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <img class="w-8 h-8 rounded-full"
-                                    src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'User') }}&color=7c3aed&background=ddd6fe"
-                                    alt="{{ auth()->user()->name ?? 'User' }}">
-                                <span
-                                    class="ml-2 font-medium text-gray-700">{{ auth()->user()->name ?? 'User' }}</span>
+                                    src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'User') }}&color=7c3aed&background=ddd6fe"  alt="{{ auth()->user()->name ?? 'User' }}">
+                             <div class="flex">
+    <span class="ml-2 font-medium text-gray-700">{{ auth()->user()->name ?? 'User' }}</span>
+
+</div>
                                 <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

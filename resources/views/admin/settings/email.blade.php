@@ -176,7 +176,7 @@
                             <input type="text" name="mail_from_name" id="mail_from_name"
                                    value="{{ old('mail_from_name', $settings['mail_from_name'] ?? config('app.name')) }}"
                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                   placeholder="SFS - Sistema de Faturação">
+                                   placeholder="SFS - Sistema de Facturação">
                             @error('mail_from_name')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -244,8 +244,8 @@
                                        class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
                             </div>
                             <div class="ml-3 text-sm">
-                                <label for="new_invoice" class="font-medium text-gray-700">Nova Fatura</label>
-                                <p class="text-gray-500">Notificar quando uma nova fatura é criada</p>
+                                <label for="new_invoice" class="font-medium text-gray-700">Nova Factura</label>
+                                <p class="text-gray-500">Notificar quando uma nova factura é criada</p>
                             </div>
                         </div>
 
@@ -256,8 +256,8 @@
                                        class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
                             </div>
                             <div class="ml-3 text-sm">
-                                <label for="invoice_paid" class="font-medium text-gray-700">Fatura Paga</label>
-                                <p class="text-gray-500">Notificar quando uma fatura é marcada como paga</p>
+                                <label for="invoice_paid" class="font-medium text-gray-700">Factura Paga</label>
+                                <p class="text-gray-500">Notificar quando uma factura é marcada como paga</p>
                             </div>
                         </div>
 
@@ -268,8 +268,8 @@
                                        class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
                             </div>
                             <div class="ml-3 text-sm">
-                                <label for="invoice_overdue" class="font-medium text-gray-700">Fatura Vencida</label>
-                                <p class="text-gray-500">Notificar quando uma fatura está vencida</p>
+                                <label for="invoice_overdue" class="font-medium text-gray-700">Factura Vencida</label>
+                                <p class="text-gray-500">Notificar quando uma factura está vencida</p>
                             </div>
                         </div>
 

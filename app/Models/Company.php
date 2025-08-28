@@ -54,6 +54,7 @@ class Company extends Model
         'last_activity_at',
         'metadata',
         'company_id', // Adicionar para multi-tenancy
+        'plan_id'
     ];
 
     protected $casts = [
@@ -261,5 +262,10 @@ class Company extends Model
         $this->update([
             'trial_ends_at' => $currentEndDate->addDays($days)
         ]);
+    }
+
+    public function Plan()
+    {
+        return $this->belongsTo(Plan::class,'plan_id');
     }
 }

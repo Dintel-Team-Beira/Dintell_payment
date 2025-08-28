@@ -233,7 +233,7 @@
                                        name="from_name"
                                        id="from_name"
                                        value="{{ old('from_name', $settings['from_name']) }}"
-                                       placeholder="SFS - Sistema de Faturação"
+                                       placeholder="SFS - Sistema de Facturação"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('from_name') border-red-300 @enderror"
                                        required>
                                 @error('from_name')
@@ -330,7 +330,7 @@
 
                 <div class="space-y-2">
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
-                        <span class="text-sm text-gray-600">Faturas</span>
+                        <span class="text-sm text-gray-600">Facturas</span>
                         <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
                             Ativo
                         </span>

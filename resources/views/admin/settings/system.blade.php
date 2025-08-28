@@ -263,14 +263,14 @@
 
                         <div>
                             <label for="max_invoices_per_month" class="block text-sm font-medium text-gray-700">
-                                Máximo de faturas por mês
+                                Máximo de facturas por mês
                             </label>
                             <input type="number" name="max_invoices_per_month" id="max_invoices_per_month"
                                    value="{{ old('max_invoices_per_month', $settings['max_invoices_per_month']) }}"
                                    min="1" max="10000"
                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <p class="mt-1 text-xs text-gray-500">
-                                Limite de faturas que podem ser criadas por empresa por mês
+                                Limite de facturas que podem ser criadas por empresa por mês
                             </p>
                         </div>
                     </div>

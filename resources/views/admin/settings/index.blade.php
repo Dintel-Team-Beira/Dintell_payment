@@ -49,7 +49,7 @@
                 </div>
             </div>
 
-            <!-- Configurações de Faturação -->
+            <!-- Configurações de Facturação -->
             <div class="overflow-hidden transition-shadow duration-200 bg-white rounded-lg shadow hover:shadow-lg">
                 <div class="p-6">
                     <div class="flex items-center">
@@ -61,8 +61,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900">Faturação</h3>
-                            <p class="text-sm text-gray-500">Configurações de faturas e pagamentos</p>
+                            <h3 class="text-lg font-medium text-gray-900">Facturação</h3>
+                            <p class="text-sm text-gray-500">Configurações de facturas e pagamentos</p>
                         </div>
                     </div>
                     <div class="mt-4">
@@ -215,7 +215,7 @@
                     </div>
                 </div>
 
-                <!-- Total de Faturas -->
+                <!-- Total de Facturas -->
                 <div class="overflow-hidden bg-white rounded-lg shadow">
                     <div class="p-5">
                         <div class="flex items-center">
@@ -226,7 +226,7 @@
                             </div>
                             <div class="flex-1 w-0 ml-5">
                                 <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total de Faturas</dt>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Total de Facturas</dt>
                                     <dd class="text-lg font-medium text-gray-900">{{ $stats['total_invoices'] ?? 0 }}</dd>
                                 </dl>
                             </div>

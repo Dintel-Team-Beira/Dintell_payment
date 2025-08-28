@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Configurações de Faturação')
+@section('title', 'Configurações de Facturação')
 
 @section('content')
 <div class="min-h-screen bg-gray-50">
@@ -9,8 +9,8 @@
         <div class="px-6 py-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Configurações de Faturação</h1>
-                    <p class="mt-1 text-sm text-gray-600">Gerencie configurações relacionadas à faturação e pagamentos</p>
+                    <h1 class="text-2xl font-bold text-gray-900">Configurações de Facturação</h1>
+                    <p class="mt-1 text-sm text-gray-600">Gerencie configurações relacionadas à facturação e pagamentos</p>
                 </div>
                 <div>
                     <a href="{{ route('admin.settings.index') }}"
@@ -156,7 +156,7 @@
                 </div>
             </div>
 
-            <!-- Configurações de Fatura -->
+            <!-- Configurações de Factura -->
             <div class="mb-8 bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <div class="flex items-center">
@@ -166,15 +166,15 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Configurações de Fatura</h3>
-                            <p class="text-sm text-gray-600">Numeração e formato das faturas</p>
+                            <h3 class="text-lg font-semibold text-gray-900">Configurações de Factura</h3>
+                            <p class="text-sm text-gray-600">Numeração e formato das facturas</p>
                         </div>
                     </div>
                 </div>
                 <div class="p-6 space-y-6">
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
-                            <label for="invoice_prefix" class="block text-sm font-medium text-gray-700">Prefixo da Fatura</label>
+                            <label for="invoice_prefix" class="block text-sm font-medium text-gray-700">Prefixo da Factura</label>
                             <input type="text" name="invoice_prefix" id="invoice_prefix"
                                    value="{{ old('invoice_prefix', $settings['invoice_prefix'] ?? 'FAT') }}"
                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
@@ -207,7 +207,7 @@
                         </div>
 
                         <div>
-                            <label for="invoice_footer" class="block text-sm font-medium text-gray-700">Rodapé da Fatura</label>
+                            <label for="invoice_footer" class="block text-sm font-medium text-gray-700">Rodapé da Factura</label>
                             <textarea name="invoice_footer" id="invoice_footer" rows="3"
                                       class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
                                       placeholder="Obrigado pela preferência!">{{ old('invoice_footer', $settings['invoice_footer'] ?? '') }}</textarea>
