@@ -19,6 +19,9 @@ class AdminMonitoringController extends Controller
         $systemInfo = $this->getSystemInfo();
         $databaseStats = $this->getDatabaseStats();
 
+
+
+
         return view('admin.monitoring.performance', compact('metrics', 'systemInfo', 'databaseStats'));
     }
 
