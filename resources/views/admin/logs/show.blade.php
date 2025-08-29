@@ -5,7 +5,7 @@
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <!-- Header -->
-    <div class="bg-white shadow">
+    <div class="mx-5 bg-white rounded-md shadow">
         <div class="px-6 py-4">
             <div class="flex items-center justify-between">
                 <div>
@@ -147,7 +147,8 @@
                                class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
 
-                    <div class="flex items-end">
+                    <div class="">
+                           <label class="block mb-1 text-sm font-medium text-gray-700"> Filtros</label>
                         <button onclick="clearFilters()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             Limpar Filtros
                         </button>

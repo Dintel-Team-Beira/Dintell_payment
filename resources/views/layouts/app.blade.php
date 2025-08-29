@@ -434,7 +434,7 @@
                             </div>
                         </div>
                     </div> --}}
-                    <div x-show="!collapsed || isMobile" class="my-4 border-t mb-4 border-gray-200"></div>
+                    <div x-show="!collapsed || isMobile" class="my-4 mb-4 border-t border-gray-200"></div>
                     <div class="pt-4">
                         <div class="p-4 rounded-lg bg-gray-50">
                             <div class="flex items-center justify-between text-sm">
@@ -449,12 +449,12 @@
                                 <div class="flex justify-between">
                                     <span>Plano</span>
 
-                                    <span class="font-medium text-gray-700 flex"> <img
+                                    <span class="flex font-medium text-gray-700"> <img
                                             src="{{ asset('facebook-verified.png') }}" alt=""
-                                            class="h-4 w-4 mr-1"> {{ auth()->user()->company->Plan->name }}
+                                            class="w-4 h-4 mr-1"> {{ auth()->user()->company->Plan->name }}
                                     </span>
                                 </div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex items-center justify-between">
                                     <span>Usuários</span>
                                     <div class="flex flex-col items-end">
                                         @if (auth()->user()->company)
@@ -472,10 +472,10 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex items-center justify-between">
                                     <span>Facturas</span>
+                                    @if (auth()->user()->company)
                                     <div class="flex flex-col items-end">
-                                        @if (auth()->user()->company)
                                             @php
                                                 $currentInvoices = auth()
                                                     ->user()
@@ -542,18 +542,18 @@
 
 
                             <div
-                                class="hidden sm:flex items-center space-x-3 pl-4 border-l border-gray-200 dark:border-gray-600">
+                                class="items-center hidden pl-4 space-x-3 border-l border-gray-200 sm:flex dark:border-gray-600">
                                 <div class="text-right">
                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
                                         {{ auth()->user()->name ?? 'User' }}</p>
-                                    {{-- <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                                    {{-- <p class="flex items-center text-xs text-gray-500 dark:text-gray-400">
                                         <img src="{{ asset('facebook-verified.png') }}" alt=""
-                                            class="h-4 w-4">
+                                            class="w-4 h-4">
                                         <span
-                                            class="text-blue-600 font-medium">{{ auth()->user()->company->Plan->name }}</span>
+                                            class="font-medium text-blue-600">{{ auth()->user()->company->Plan->name }}</span>
                                     </p> --}}
                                 </div>
-                                <div class="w-8 h-8  rounded-lg flex items-center justify-center shadow-sm">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-lg shadow-sm">
                                     <button @click="open = !open"
                                         class="flex items-center text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         <img class="w-8 h-8 rounded-full"
