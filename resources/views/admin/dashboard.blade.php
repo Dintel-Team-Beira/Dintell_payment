@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Dashboard Administrativo')
-
+{{-- Comment --}}
 @section('header-actions')
 <div class="flex items-center gap-x-4">
     <div class="flex items-center px-3 py-1 text-sm text-green-800 bg-green-100 rounded-full">

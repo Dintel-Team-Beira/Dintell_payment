@@ -12,6 +12,7 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    // Comment
     public function index()
     {
         // Estatísticas gerais
