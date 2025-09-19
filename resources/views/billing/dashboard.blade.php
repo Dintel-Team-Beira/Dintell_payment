@@ -363,23 +363,17 @@
     const revenueChart = new Chart(revenueCtx, {
         type: 'line'
         , data: {
-            labels: {
-                !!json_encode($chartData['months']) !!
-            }
+            labels: {!!json_encode($chartData['months']) !!}
             , datasets: [{
                 label: 'Receita'
-                , data: {
-                    !!json_encode($chartData['revenue']) !!
-                }
+                , data: {!!json_encode($chartData['revenue']) !!}
                 , borderColor: 'rgb(59, 130, 246)'
                 , backgroundColor: 'rgba(59, 130, 246, 0.1)'
                 , tension: 0.4
                 , fill: true
             }, {
-                label: 'Pendente'
-                , data: {
-                    !!json_encode($chartData['pending']) !!
-                }
+                label: 'Pendente', 
+                data: {!!json_encode($chartData['pending']) !!}
                 , borderColor: 'rgb(245, 158, 11)'
                 , backgroundColor: 'rgba(245, 158, 11, 0.1)'
                 , tension: 0.4
@@ -415,26 +409,10 @@
         , data: {
             labels: ['Pagas', 'Pendentes', 'Vencidas', 'Cotações Ativas']
             , datasets: [{
-                data: [{
-                        {
-                            $stats['paid_count']
-                        }
-                    }
-                    , {
-                        {
-                            $stats['sent_count']
-                        }
-                    }
-                    , {
-                        {
-                            $stats['count_overdue']
-                        }
-                    }
-                    , {
-                        {
-                            $stats['quotes_count']
-                        }
-                    }
+                data: [{{$stats['paid_count']}}, 
+                    {{$stats['sent_count']}}, 
+                    {{$stats['count_overdue']}}, 
+                    {{$stats['quotes_count']}}
                 ]
                 , backgroundColor: [
                     'rgb(34, 197, 94)'
