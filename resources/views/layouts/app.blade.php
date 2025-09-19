@@ -541,19 +541,8 @@
                         <div class="relative" x-data="{ open: false }">
 
 
-                            <div
-                                class="items-center hidden pl-4 space-x-3 border-l border-gray-200 sm:flex dark:border-gray-600">
-                                <div class="text-right">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ auth()->user()->name ?? 'User' }}</p>
-                                    {{-- <p class="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                                        <img src="{{ asset('facebook-verified.png') }}" alt=""
-                                            class="w-4 h-4">
-                                        <span
-                                            class="font-medium text-blue-600">{{ auth()->user()->company->Plan->name }}</span>
-                                    </p> --}}
-                                </div>
-                                <div class="flex items-center justify-center w-8 h-8 rounded-lg shadow-sm">
+                            <div class="items-center hidden pl-4 space-x-3 border-gray-200 sm:flex ">
+        <div class="flex items-center justify-center w-8 h-8 rounded-lg shadow-sm">
                                     <button @click="open = !open"
                                         class="flex items-center text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         <img class="w-8 h-8 rounded-full"
@@ -562,6 +551,20 @@
 
                                     </button>
                                 </div>
+
+                                <div class="text-right">
+                                    <p class="flex items-center text-sm text-gray-600 ">  {{ auth()->user()->name ?? 'User' }}
+                                         <img src="{{ asset('facebook-verified.png') }}" alt="" class="w-4 h-4">
+                                    </p>
+
+                                    <p class="flex items-center text-xs text-gray-500 ">
+                                        <span  class="font-medium text-blue-600">{{ auth()->user()->company->Plan->name }}</span>
+
+                                    </p>
+                                </div>
+
+
+
                             </div>
 
 
