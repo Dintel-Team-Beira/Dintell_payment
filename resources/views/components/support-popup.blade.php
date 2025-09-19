@@ -1248,7 +1248,16 @@ class SupportPopup {
                 }
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            // if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            try {
+                if (response.ok)
+                {
+
+                } 
+            } catch (error) {
+                console.log(error);
+                
+            }
             const result = await response.json();
 
             if (result.success) {

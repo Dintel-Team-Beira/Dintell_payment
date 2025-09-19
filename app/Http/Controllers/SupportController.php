@@ -163,7 +163,10 @@ class SupportController extends Controller
         // Marcar como visualizado
         $ticket->markAsViewed($user);
 
-        return view('support.show', compact('ticket'));
+        return response()->json([
+                'success' => true,
+                'ticket'=>$ticket]);
+        // return view('support.show', compact('ticket'));
     }
 
     /**
