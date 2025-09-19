@@ -1457,7 +1457,13 @@ class SupportPopup {
     async openTicketChat(ticketId) {
         this.currentTicketId = ticketId;
         this.showScreen('ticketChat');
-        await this.loadTicketChat(ticketId);
+
+        try {
+            await this.loadTicketChat(ticketId);
+        } catch (error) {
+            console.log(error);
+               
+        }
     }
 
     // Load ticket chat
@@ -1475,7 +1481,7 @@ class SupportPopup {
         `;
 
         try {
-            const response = await fetch(`/api/support/tickets/${ticketId}`, {
+            const response = await fetch(`/api/support/tickets/${ticketId}/{{ auth()->user()->id }}`, {
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
@@ -1483,7 +1489,16 @@ class SupportPopup {
             });
             //debugger;
             console.log(response);
-            if (!response.ok) throw new Error('Erro ao carregar ticket');
+            // if (!response.ok) throw new Error('Erro ao carregar ticket');
+            
+            try {
+                if (response.ok){
+
+                }
+            } catch (error) {
+                console.log(error);
+                
+            }
             const result = await response.json();
 
             if (result.success && result.ticket) {

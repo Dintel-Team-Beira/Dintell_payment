@@ -234,11 +234,11 @@ Route::get('servicos/{any?}', [ServiceController::class, 'index'])
     ->name('services.index.fallback');
 
 
-    Route::prefix('api/support')->name('api.support.')->group(function () {
+Route::prefix('support')->name('api.support.')->group(function () {
 
     // API para o popup de suporte
     Route::get('/tickets/my', [SupportController::class, 'myTickets'])->name('tickets.my');
-    // Route::get('/tickets/{ticketId}', [SupportController::class, 'show'])->name('tickets.show');
+    Route::get('/tickets/{ticketId}/{idUser}', [SupportController::class, 'show'])->name('tickets.show');
     Route::post('/tickets', [SupportController::class, 'store'])->name('tickets.store');
     Route::get('/knowledge-base/search', [SupportController::class, 'searchKnowledgeBase'])->name('kb.search');
     Route::get('/stats', [SupportController::class, 'getUserStats'])->name('stats');

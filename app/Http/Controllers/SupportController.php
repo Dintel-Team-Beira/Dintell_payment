@@ -137,13 +137,18 @@ class SupportController extends Controller
     /**
      * Visualizar ticket específico
      */
-    public function show($id)
+    public function show($ticketId, $idUser)
     {
 
-        $user = Auth::user();
-
+        // $user = Auth::user();
+        $user = User::find($idUser);
+        
+// return response()->json([
+//                 'success' => true,
+//                 'message'=>$user->name]);
+        
         $ticket = SupportTicket::with(['replies.user', 'assignedTo', 'user'])
-            ->where('id', $id)
+            ->where('id', $ticketId)
             ->where(function($query) use ($user) {
                 // Usuario pode ver seus próprios tickets ou admin pode ver todos
                 $query->where('user_id', $user->id)
