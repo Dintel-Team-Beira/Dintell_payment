@@ -181,7 +181,8 @@ class SupportController extends Controller
                 'attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx,txt'
             ]);
 
-            $user = Auth::user();
+            // $user = Auth::user();
+            $user = User::first();
 
             $ticket = SupportTicket::where('id', $id)
                 ->where(function($query) use ($user) {
@@ -653,8 +654,11 @@ class AdminSupportController extends Controller
             ]);
 
             $ticket = SupportTicket::findOrFail($id);
-            $user = Auth::user();
+            // $user = Auth::user();
 
+            $user = User::first();
+
+            
             // Processar anexos
             $attachments = [];
             if ($request->hasFile('attachments')) {

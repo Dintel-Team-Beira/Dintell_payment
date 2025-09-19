@@ -244,7 +244,7 @@ Route::prefix('support')->name('api.support.')->group(function () {
     Route::get('/stats', [SupportController::class, 'getUserStats'])->name('stats');
 
     // Quick actions
-    Route::post('/tickets/{ticket}/quick-reply', [SupportController::class, 'addReply'])->name('tickets.quick-reply');
+    Route::post('/tickets/{ticket}/reply', [SupportController::class, 'addReply'])->name('tickets.quick-reply');
     Route::patch('/tickets/{ticket}/quick-close', [SupportController::class, 'close'])->name('tickets.quick-close');
 });
 
