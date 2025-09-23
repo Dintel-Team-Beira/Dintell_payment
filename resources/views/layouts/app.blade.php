@@ -457,14 +457,29 @@
                                 <div class="flex items-center justify-between">
                                     <span>Usuários</span>
                                     <div class="flex flex-col items-end">
+                                      @php
+
+
+                                        @endphp
+                                        <span class="font-medium text-gray-500">{{ auth()->user()->company->users->count()  }} / <a>{{ Auth::user()->Company->Plan->max_users }}Max</a></span>
                                         @if (auth()->user()->company)
                                             @php
                                                 $currentUsers = auth()->user()->company->users->count();
                                                 $maxUsers = max(auth()->user()->company->max_users ?? 1, 1);
                                                 $percentage = min(100, ($currentUsers / $maxUsers) * 100);
                                             @endphp
+
+                                              @php
+                                            if ($percentage < 50) {
+                                                $color = 'bg-blue-600';
+                                            } elseif ($percentage < 100) {
+                                                $color = 'bg-yellow-500';
+                                            } else {
+                                                $color = 'bg-red-600';
+                                            }
+                                        @endphp
                                             <div class="bg-gray-200 rounded-full h-1.5 mt-1 w-16">
-                                                <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                                                <div class="{{ $color }} h-1.5 rounded-full transition-all duration-300"
                                                     style="width: {{ $percentage }}%"></div>
                                             </div>
                                         @else
@@ -476,8 +491,32 @@
                                     <span>Facturas</span>
                                           <div class="flex flex-col items-end">
 
-                                            <span class="font-medium text-gray-500">{{ Auth::user()->Company->invoices->count() }}/ <a>{{ Auth::user()->Company->Plan->max_invoices_per_month}}</a></span>
+                                            <span class="font-medium text-gray-500">{{ Auth::user()->Company->invoices->count() }}/ <a>{{ Auth::user()->Company->Plan->max_invoices_per_month}}Max</a></span>
+                                            @if (auth()->user()->company)
+                                            @php
+                                                $currentUsers = auth()->user()->company->invoices->count();
+                                                $maxUsers = max(auth()->user()->Company->Plan->max_invoices_per_month ?? 1, 1);
+                                                $percentage = min(100, ($currentUsers / $maxUsers) * 100);
+                                            @endphp
+                                    @php
+                                            if ($percentage < 50) {
+                                                $color = 'bg-blue-600';
+                                            } elseif ($percentage < 100) {
+                                                $color = 'bg-yellow-500';
+                                            } else {
+                                                $color = 'bg-red-600';
+                                            }
+                                        @endphp
 
+                                        <div class="bg-gray-200 rounded-full h-1.5 mt-1 w-16">
+                                            <div class="{{ $color }} h-1.5 rounded-full transition-all duration-300"
+                                                style="width: {{ $percentage }}%">
+                                            </div>
+                                        </div>
+
+                                        @else
+                                            <span class="font-medium text-gray-500">N/A</span>
+                                        @endif
                                             </div>
 
 
