@@ -46,7 +46,7 @@ class Subscription extends Model
         'expiry_warning_days',
         'last_warning_sent',
         'metadata',
-          'company_id', // Adicionar para multi-tenancy
+        'company_id', // Adicionar para multi-tenancy
     ];
 
     protected $casts = [

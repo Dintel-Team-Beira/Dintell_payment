@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BillingSetting;
-use App\Models\Invoice;
+use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Quote;
 use App\Models\Client;
-use Carbon\Carbon;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
+use App\Models\BillingSetting;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class BillingController extends Controller
 {
@@ -47,7 +49,8 @@ class BillingController extends Controller
         $chartData = $this->getEnhancedChartData();
         $statss = $this->getInvoiceStats();
         // $stats = $this->getInvoiceStats();
-
+        // $empresas=User::find(Auth::user()->id);
+        // dd($empresas->Company->invoices);
         return view('billing.dashboard', compact(
             'stats',
             'statss',
@@ -57,7 +60,8 @@ class BillingController extends Controller
             'chartData',
             'period',
             'startDate',
-            'endDate'
+            'endDate',
+            // 'empresas'
         ));
     }
 

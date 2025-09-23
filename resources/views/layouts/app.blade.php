@@ -474,29 +474,13 @@
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span>Facturas</span>
-                                    @if (auth()->user()->company)
-                                    <div class="flex flex-col items-end">
-                                            @php
-                                                $currentInvoices = auth()
-                                                    ->user()
-                                                    ->company->invoices()
-                                                    ->whereMonth('created_at', now()->month)
-                                                    ->whereYear('created_at', now()->year)
-                                                    ->count();
-                                                $maxInvoices = max(
-                                                    auth()->user()->company->max_invoices_per_month ?? 1,
-                                                    1,
-                                                );
-                                                $percentage = min(100, ($currentInvoices / $maxInvoices) * 100);
-                                            @endphp
-                                            <div class="bg-gray-200 rounded-full h-1.5 mt-1 w-16">
-                                                <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
-                                                    style="width: {{ $percentage }}%"></div>
+                                          <div class="flex flex-col items-end">
+
+                                            <span class="font-medium text-gray-500">{{ Auth::user()->Company->invoices->count() }}/ <a>{{ Auth::user()->Company->Plan->max_invoices_per_month}}</a></span>
+
                                             </div>
-                                        @else
-                                            <span class="font-medium text-gray-500">N/A</span>
-                                        @endif
-                                    </div>
+
+
                                 </div>
                             </div>
                         </div>
