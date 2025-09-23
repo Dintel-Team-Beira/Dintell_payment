@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class Company extends Model
 {
@@ -31,6 +32,12 @@ class Company extends Model
         'status',
         'trial_ends_at',
         'subscription_plan',
+        'subscription_type',
+        'subscription_status',
+        'subscription_expires_at',
+        'plan_id',
+        'suspended_at',
+        'suspension_reason',
         'max_users',
         'max_invoices_per_month',
         'max_clients',
@@ -52,9 +59,8 @@ class Company extends Model
         'total_revenue',
         'created_by',
         'last_activity_at',
+        'admin_notes',
         'metadata',
-        'company_id', // Adicionar para multi-tenancy
-        'plan_id'
     ];
 
     protected $casts = [
@@ -64,6 +70,8 @@ class Company extends Model
         'settings' => 'array',
         'metadata' => 'array',
         'trial_ends_at' => 'datetime',
+        'subscription_expires_at' => 'datetime',
+        'suspended_at' => 'datetime',
         'last_payment_at' => 'datetime',
         'next_payment_due' => 'datetime',
         'last_activity_at' => 'datetime',
@@ -73,6 +81,21 @@ class Company extends Model
         'custom_domain_enabled' => 'boolean',
         'api_access_enabled' => 'boolean',
     ];
+
+    // Constants
+    const STATUS_ACTIVE = 'active';
+    const STATUS_INACTIVE = 'inactive';
+    const STATUS_SUSPENDED = 'suspended';
+    const STATUS_TRIAL = 'trial';
+
+    const SUBSCRIPTION_TYPE_TRIAL = 'trial';
+    const SUBSCRIPTION_TYPE_PAID = 'paid';
+
+    const SUBSCRIPTION_STATUS_ACTIVE = 'active';
+    const SUBSCRIPTION_STATUS_EXPIRED = 'expired';
+    const SUBSCRIPTION_STATUS_SUSPENDED = 'suspended';
+    const SUBSCRIPTION_STATUS_CANCELLED = 'cancelled';
+    const SUBSCRIPTION_STATUS_PENDING_PAYMENT = 'pending_payment';
 
     protected static function boot()
     {
@@ -90,10 +113,23 @@ class Company extends Model
                 $company->slug = $originalSlug . '-' . $counter;
                 $counter++;
             }
+
+            // Definir valores padrão para nova empresa
+            if (!$company->subscription_type) {
+                $company->subscription_type = self::SUBSCRIPTION_TYPE_TRIAL;
+            }
+            if (!$company->subscription_status) {
+                $company->subscription_status = self::SUBSCRIPTION_STATUS_ACTIVE;
+            }
+            if (!$company->subscription_expires_at && $company->subscription_type === self::SUBSCRIPTION_TYPE_TRIAL) {
+                $company->subscription_expires_at = now()->addDays(14); // 14 dias de trial
+            }
         });
     }
 
-    // Relationships
+    /**
+     * Relacionamentos
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -101,7 +137,7 @@ class Company extends Model
 
     public function users(): HasMany
     {
-        return $this->hasMany(User::class, 'company_id');
+        return $this->hasMany(User::class);
     }
 
     public function invoices(): HasMany
@@ -124,148 +160,346 @@ class Company extends Model
         return $this->hasMany(Service::class);
     }
 
-    // Scopes
-    public function scopeActive($query)
+    public function plan(): BelongsTo
     {
-        return $query->where('status', 'active');
+        return $this->belongsTo(Plan::class, 'plan_id');
     }
 
-    public function scopeOnTrial($query)
+    public function payments(): HasMany
     {
-        return $query->where('status', 'trial');
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * MÉTODOS DE SUBSCRIÇÃO
+     */
+
+    /**
+     * Verificar se a empresa tem plano ativo
+     */
+    public function hasActivePlan(): bool
+    {
+        return $this->subscription_status === self::SUBSCRIPTION_STATUS_ACTIVE &&
+               $this->plan_id &&
+               ($this->subscription_expires_at === null || $this->subscription_expires_at->isFuture());
+    }
+
+    /**
+     * Verificar se pode criar fatura
+     */
+    public function canCreateInvoice(): bool
+    {
+        if (!$this->hasActivePlan()) {
+            return false;
+        }
+
+        if (!$this->plan) {
+            return false;
+        }
+
+        $currentMonth = now()->startOfMonth();
+        $invoicesThisMonth = $this->invoices()
+            ->whereYear('created_at', $currentMonth->year)
+            ->whereMonth('created_at', $currentMonth->month)
+            ->count();
+
+        return $invoicesThisMonth < ($this->plan->max_invoices_per_month ?? PHP_INT_MAX);
+    }
+
+    /**
+     * Verificar se pode criar usuário
+     */
+    public function canCreateUser(): bool
+    {
+        if (!$this->hasActivePlan()) {
+            return false;
+        }
+
+        if (!$this->plan) {
+            return false;
+        }
+
+        return $this->users()->count() < ($this->plan->max_users ?? PHP_INT_MAX);
+    }
+
+    /**
+     * Verificar se pode criar cliente
+     */
+    public function canCreateClient(): bool
+    {
+        if (!$this->hasActivePlan()) {
+            return false;
+        }
+
+        // Se não há limite de clientes no plano, sempre pode criar
+        if (!$this->plan || !$this->plan->max_clients) {
+            return true;
+        }
+
+        return $this->clients()->count() < $this->plan->max_clients;
+    }
+
+    /**
+     * Obter uso atual de usuários
+     */
+    public function getUserUsage(): array
+    {
+        $current = $this->users()->count();
+        $max = $this->plan->max_users ?? 0;
+
+        return [
+            'current' => $current,
+            'max' => $max,
+            'percentage' => $max > 0 ? min(100, ($current / $max) * 100) : 0,
+            'remaining' => max(0, $max - $current),
+            'exceeded' => $current > $max
+        ];
+    }
+
+    /**
+     * Obter uso atual de faturas mensais
+     */
+    public function getInvoiceUsage(): array
+    {
+        $currentMonth = now()->startOfMonth();
+        $current = $this->invoices()
+            ->whereYear('created_at', $currentMonth->year)
+            ->whereMonth('created_at', $currentMonth->month)
+            ->count();
+
+        $max = $this->plan->max_invoices_per_month ?? 0;
+
+        return [
+            'current' => $current,
+            'max' => $max,
+            'percentage' => $max > 0 ? min(100, ($current / $max) * 100) : 0,
+            'remaining' => max(0, $max - $current),
+            'exceeded' => $current >= $max
+        ];
+    }
+
+    /**
+     * Verificar se está em período de teste
+     */
+    public function isTrial(): bool
+    {
+        return $this->subscription_type === self::SUBSCRIPTION_TYPE_TRIAL;
+    }
+
+    /**
+     * Verificar se o teste está expirando (próximos 3 dias)
+     */
+    public function isTrialExpiring(): bool
+    {
+        return $this->isTrial() &&
+               $this->subscription_expires_at &&
+               $this->subscription_expires_at->diffInDays(now()) <= 3;
+    }
+
+    /**
+     * Verificar se está suspenso
+     */
+    public function isSuspended(): bool
+    {
+        return $this->subscription_status === self::SUBSCRIPTION_STATUS_SUSPENDED;
+    }
+
+    /**
+     * Verificar se está expirado
+     */
+    public function isExpired(): bool
+    {
+        return $this->subscription_expires_at && $this->subscription_expires_at->isPast();
+    }
+
+    /**
+     * Obter dias restantes até expiração
+     */
+    public function getDaysUntilExpiration(): ?int
+    {
+        if (!$this->subscription_expires_at) {
+            return null;
+        }
+
+        $diff = $this->subscription_expires_at->diffInDays(now(), false);
+        return $diff > 0 ? $diff : 0;
+    }
+
+    /**
+     * Obter status de bloqueio
+     */
+    public function getBlockStatus(): array
+    {
+        $reasons = [];
+        $blocked = false;
+
+        // Verificar se tem plano ativo
+        if (!$this->hasActivePlan()) {
+            $blocked = true;
+            if ($this->isExpired()) {
+                $reasons[] = 'Subscrição expirada';
+            } elseif ($this->isSuspended()) {
+                $reasons[] = 'Conta suspensa';
+            } else {
+                $reasons[] = 'Sem plano ativo';
+            }
+        }
+
+        // Verificar limites de usuários
+        $userUsage = $this->getUserUsage();
+        if ($userUsage['exceeded']) {
+            $blocked = true;
+            $reasons[] = 'Limite de usuários excedido';
+        }
+
+        // Verificar limites de faturas
+        $invoiceUsage = $this->getInvoiceUsage();
+        if ($invoiceUsage['exceeded']) {
+            $blocked = true;
+            $reasons[] = 'Limite de faturas mensais atingido';
+        }
+
+        return [
+            'blocked' => $blocked,
+            'reasons' => $reasons,
+            'user_usage' => $userUsage,
+            'invoice_usage' => $invoiceUsage
+        ];
+    }
+
+    /**
+     * Obter avisos de limite
+     */
+    public function getUsageWarnings(): array
+    {
+        $warnings = [];
+
+        if (!$this->hasActivePlan()) {
+            return $warnings;
+        }
+
+        // Aviso de usuários (80% do limite)
+        $userUsage = $this->getUserUsage();
+        if ($userUsage['percentage'] >= 80 && !$userUsage['exceeded']) {
+            $warnings[] = [
+                'type' => 'users',
+                'message' => 'Você está próximo do limite de usuários (' . $userUsage['current'] . '/' . $userUsage['max'] . ')',
+                'percentage' => $userUsage['percentage'],
+                'priority' => $userUsage['percentage'] >= 95 ? 'high' : 'medium'
+            ];
+        }
+
+        // Aviso de faturas (90% do limite)
+        $invoiceUsage = $this->getInvoiceUsage();
+        if ($invoiceUsage['percentage'] >= 90 && !$invoiceUsage['exceeded']) {
+            $warnings[] = [
+                'type' => 'invoices',
+                'message' => 'Você está próximo do limite de faturas mensais (' . $invoiceUsage['current'] . '/' . $invoiceUsage['max'] . ')',
+                'percentage' => $invoiceUsage['percentage'],
+                'priority' => 'high'
+            ];
+        }
+
+        // Aviso de expiração
+        $daysLeft = $this->getDaysUntilExpiration();
+        if ($daysLeft !== null && $daysLeft <= 7) {
+            $priority = $daysLeft <= 3 ? 'urgent' : ($daysLeft <= 7 ? 'high' : 'medium');
+            $warnings[] = [
+                'type' => 'expiration',
+                'message' => $this->isTrial() ?
+                    "Seu período de teste expira em {$daysLeft} dias" :
+                    "Sua subscrição expira em {$daysLeft} dias",
+                'days_left' => $daysLeft,
+                'priority' => $priority
+            ];
+        }
+
+        return $warnings;
+    }
+
+    /**
+     * Calcular valor de upgrade pro-rated
+     */
+    public function calculateUpgradeAmount(Plan $newPlan): float
+    {
+        if (!$this->plan || !$this->subscription_expires_at) {
+            return $newPlan->price;
+        }
+
+        $daysLeft = $this->subscription_expires_at->diffInDays(now());
+        if ($daysLeft <= 0) {
+            return $newPlan->price;
+        }
+
+        // Calcular com base no ciclo de cobrança
+        $totalDays = match($this->plan->billing_cycle) {
+            'yearly' => 365,
+            'quarterly' => 90,
+            default => 30, // monthly
+        };
+
+        $currentPlanDaily = $this->plan->price / $totalDays;
+        $newPlanDaily = $newPlan->price / $totalDays;
+
+        $unusedCredit = $currentPlanDaily * $daysLeft;
+        $newPlanCost = $newPlanDaily * $daysLeft;
+
+        return max(0, $newPlanCost - $unusedCredit);
+    }
+
+    /**
+     * SCOPES
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('subscription_status', self::SUBSCRIPTION_STATUS_ACTIVE);
+    }
+
+    public function scopeExpired($query)
+    {
+        return $query->where('subscription_expires_at', '<', now());
+    }
+
+    public function scopeExpiringSoon($query, $days = 7)
+    {
+        return $query->where('subscription_expires_at', '<=', now()->addDays($days))
+                     ->where('subscription_expires_at', '>', now());
+    }
+
+    public function scopeTrial($query)
+    {
+        return $query->where('subscription_type', self::SUBSCRIPTION_TYPE_TRIAL);
     }
 
     public function scopeSuspended($query)
     {
-        return $query->where('status', 'suspended');
+        return $query->where('subscription_status', self::SUBSCRIPTION_STATUS_SUSPENDED);
     }
 
-    public function scopeTrialExpired($query)
+    /**
+     * ACCESSORS
+     */
+    public function getStatusColorAttribute(): string
     {
-        return $query->where('status', 'trial')
-                    ->where('trial_ends_at', '<', now());
+        return match($this->subscription_status) {
+            self::SUBSCRIPTION_STATUS_ACTIVE => 'green',
+            self::SUBSCRIPTION_STATUS_SUSPENDED => 'red',
+            self::SUBSCRIPTION_STATUS_EXPIRED => 'gray',
+            self::SUBSCRIPTION_STATUS_CANCELLED => 'gray',
+            self::SUBSCRIPTION_STATUS_PENDING_PAYMENT => 'yellow',
+            default => 'gray'
+        };
     }
 
-    public function scopePaymentDue($query)
+    public function getStatusNameAttribute(): string
     {
-        return $query->where('next_payment_due', '<=', now())
-                    ->whereIn('status', ['active', 'trial']);
-    }
-
-    // Accessors & Mutators
-    public function getIsTrialAttribute(): bool
-    {
-        return $this->status === 'trial';
-    }
-
-    public function getIsActiveAttribute(): bool
-    {
-        return $this->status === 'active';
-    }
-
-    public function getTrialDaysLeftAttribute(): int
-    {
-        if (!$this->is_trial || !$this->trial_ends_at) {
-            return 0;
-        }
-
-        return max(0, $this->trial_ends_at->diffInDays(now()));
-    }
-
-    public function getUsagePercentageAttribute(): array
-    {
-        return [
-            'users' => $this->max_users > 0 ? ($this->current_users_count / $this->max_users) * 100 : 0,
-            'invoices' => $this->max_invoices_per_month > 0 ? ($this->current_month_invoices / $this->max_invoices_per_month) * 100 : 0,
-            'clients' => $this->max_clients > 0 ? ($this->total_clients / $this->max_clients) * 100 : 0,
-        ];
-    }
-
-    public function getSubdomainUrlAttribute(): string
-    {
-        $domain = config('app.domain', 'localhost');
-        return "https://{$this->slug}.{$domain}";
-    }
-
-    public function getUrlAttribute(): string
-    {
-        if ($this->domain && $this->custom_domain_enabled) {
-            return "https://{$this->domain}";
-        }
-
-        return $this->subdomain_url;
-    }
-
-    // Methods
-    public function canCreateUser(): bool
-    {
-        return $this->current_users_count < $this->max_users;
-    }
-
-    public function canCreateInvoice(): bool
-    {
-        return $this->current_month_invoices < $this->max_invoices_per_month;
-    }
-
-    public function canCreateClient(): bool
-    {
-        return $this->total_clients < $this->max_clients;
-    }
-
-    public function hasFeature(string $feature): bool
-    {
-        $features = $this->feature_flags ?? [];
-        return isset($features[$feature]) && $features[$feature] === true;
-    }
-
-    public function updateUsageStats(): void
-    {
-        $this->update([
-            'current_users_count' => $this->users()->count(),
-            'total_clients' => $this->clients()->count(),
-            'total_invoices' => $this->invoices()->count(),
-            'current_month_invoices' => $this->invoices()
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->count(),
-            'total_revenue' => $this->invoices()
-                ->where('status', 'paid')
-                ->sum('total_amount'),
-            'last_activity_at' => now(),
-        ]);
-    }
-
-    public function suspend(string $reason = null): void
-    {
-        $this->update([
-            'status' => 'suspended',
-            'metadata' => array_merge($this->metadata ?? [], [
-                'suspension_reason' => $reason,
-                'suspended_at' => now()->toISOString(),
-            ])
-        ]);
-    }
-
-    public function activate(): void
-    {
-        $this->update([
-            'status' => 'active',
-            'metadata' => array_merge($this->metadata ?? [], [
-                'activated_at' => now()->toISOString(),
-            ])
-        ]);
-    }
-
-    public function extendTrial(int $days): void
-    {
-        $currentEndDate = $this->trial_ends_at ?? now();
-        $this->update([
-            'trial_ends_at' => $currentEndDate->addDays($days)
-        ]);
-    }
-
-    public function Plan()
-    {
-        return $this->belongsTo(Plan::class,'plan_id');
+        return match($this->subscription_status) {
+            self::SUBSCRIPTION_STATUS_ACTIVE => 'Ativo',
+            self::SUBSCRIPTION_STATUS_SUSPENDED => 'Suspenso',
+            self::SUBSCRIPTION_STATUS_EXPIRED => 'Expirado',
+            self::SUBSCRIPTION_STATUS_CANCELLED => 'Cancelado',
+            self::SUBSCRIPTION_STATUS_PENDING_PAYMENT => 'Pagamento Pendente',
+            default => 'Desconhecido'
+        };
     }
 }
