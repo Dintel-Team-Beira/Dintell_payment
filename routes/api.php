@@ -275,3 +275,5 @@ Route::middleware(['web', 'auth'])->prefix('api/support')->group(function () {
     Route::patch('/tickets/{ticket}/close', [App\Http\Controllers\SupportController::class, 'close']);
     Route::post('/tickets/{ticket}/rate', [App\Http\Controllers\SupportController::class, 'rate']);
 });
+
+
