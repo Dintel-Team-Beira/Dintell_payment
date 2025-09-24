@@ -9,11 +9,12 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
 
-class SubscriptionController extends Controller
+/**
+ * Controller ADMIN para gerenciar subscrições dos usuários
+ * Separado do SubscriptionController existente para SaaS
+ */
+class UserSubscriptionController extends Controller
 {
     public function __construct()
     {
@@ -21,7 +22,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Dashboard de subscrições
+     * Dashboard de subscrições (Admin)
      */
     public function index(Request $request)
     {
@@ -44,7 +45,7 @@ class SubscriptionController extends Controller
         // Métricas adicionais
         $metrics = $this->getSubscriptionMetrics();
 
-        return view('admin.subscriptions.index', compact(
+        return view('admin.user-subscriptions.index', compact(
             'companies',
             'plans',
             'stats',
@@ -72,18 +73,14 @@ class SubscriptionController extends Controller
             ->take(10)
             ->get();
 
-        // Atividade recente
-        $recentActivity = $this->getCompanyActivity($company);
-
         // Status e alertas
         $alerts = $this->getCompanyAlerts($company);
 
-        return view('admin.subscriptions.show', compact(
+        return view('admin.user-subscriptions.show', compact(
             'company',
             'usage',
             'timeline',
             'recentPayments',
-            'recentActivity',
             'alerts'
         ));
     }
@@ -94,9 +91,8 @@ class SubscriptionController extends Controller
     public function edit(Company $company)
     {
         $plans = Plan::where('is_active', true)->orderBy('price')->get();
-        $users = User::where('role', 'admin')->get(); // Para histórico de mudanças
 
-        return view('admin.subscriptions.edit', compact('company', 'plans', 'users'));
+        return view('admin.user-subscriptions.edit', compact('company', 'plans'));
     }
 
     /**
@@ -127,36 +123,13 @@ class SubscriptionController extends Controller
                 'admin_notes' => $request->admin_notes
             ]);
 
-            // Log da atividade administrativa
-            activity()
-                ->performedOn($company)
-                ->causedBy(auth()->user())
-                ->withProperties([
-                    'old' => $oldData,
-                    'new' => $request->only(['plan_id', 'subscription_status', 'subscription_expires_at']),
-                    'admin_notes' => $request->admin_notes
-                ])
-                ->log('Subscription updated by admin');
-
-            // Notificar empresa se necessário
-            if ($request->subscription_status === Company::SUBSCRIPTION_STATUS_ACTIVE &&
-                $oldData['subscription_status'] !== Company::SUBSCRIPTION_STATUS_ACTIVE) {
-                $this->notifyCompanyActivation($company);
-            }
-
             DB::commit();
 
-            return redirect()->route('admin.subscriptions.show', $company)
+            return redirect()->route('admin.user-subscriptions.show', $company)
                 ->with('success', 'Subscrição atualizada com sucesso!');
 
         } catch (\Exception $e) {
             DB::rollback();
-            \Log::error('Error updating subscription', [
-                'company_id' => $company->id,
-                'admin_id' => auth()->id(),
-                'error' => $e->getMessage()
-            ]);
-
             return back()->with('error', 'Erro ao atualizar subscrição: ' . $e->getMessage());
         }
     }
@@ -177,24 +150,14 @@ class SubscriptionController extends Controller
         DB::beginTransaction();
         try {
             $company->update([
-                'subscription_status' => Company::SUBSCRIPTION_STATUS_SUSPENDED,
+                'subscription_status' => 'suspended',
                 'suspended_at' => now(),
                 'suspension_reason' => $request->reason
             ]);
 
-            // Log da atividade
-            activity()
-                ->performedOn($company)
-                ->causedBy(auth()->user())
-                ->withProperties(['reason' => $request->reason])
-                ->log('Company suspended by admin');
-
-            // Notificar empresa
-            $this->notifyCompanySuspension($company, $request->reason);
-
             DB::commit();
 
-            return redirect()->route('admin.subscriptions.show', $company)
+            return redirect()->route('admin.user-subscriptions.show', $company)
                 ->with('success', 'Empresa suspensa com sucesso!');
 
         } catch (\Exception $e) {
@@ -215,23 +178,14 @@ class SubscriptionController extends Controller
         DB::beginTransaction();
         try {
             $company->update([
-                'subscription_status' => Company::SUBSCRIPTION_STATUS_ACTIVE,
+                'subscription_status' => 'active',
                 'suspended_at' => null,
                 'suspension_reason' => null
             ]);
 
-            // Log da atividade
-            activity()
-                ->performedOn($company)
-                ->causedBy(auth()->user())
-                ->log('Company reactivated by admin');
-
-            // Notificar empresa
-            $this->notifyCompanyReactivation($company);
-
             DB::commit();
 
-            return redirect()->route('admin.subscriptions.show', $company)
+            return redirect()->route('admin.user-subscriptions.show', $company)
                 ->with('success', 'Empresa reativada com sucesso!');
 
         } catch (\Exception $e) {
@@ -261,19 +215,6 @@ class SubscriptionController extends Controller
             $company->update([
                 'subscription_expires_at' => $newExpirationDate
             ]);
-
-            // Log da atividade
-            activity()
-                ->performedOn($company)
-                ->causedBy(auth()->user())
-                ->withProperties([
-                    'extended_days' => $request->days,
-                    'new_expiration' => $newExpirationDate
-                ])
-                ->log('Trial extended by admin');
-
-            // Notificar empresa
-            $this->notifyTrialExtension($company, $request->days);
 
             DB::commit();
 
@@ -314,7 +255,7 @@ class SubscriptionController extends Controller
         // Estatísticas de pagamentos
         $paymentStats = $this->getPaymentStats();
 
-        return view('admin.subscriptions.payments', compact('payments', 'paymentStats'));
+        return view('admin.user-subscriptions.payments', compact('payments', 'paymentStats'));
     }
 
     /**
@@ -322,7 +263,7 @@ class SubscriptionController extends Controller
      */
     public function approvePayment(Payment $payment)
     {
-        if (!$payment->isSubmitted()) {
+        if ($payment->status !== 'submitted') {
             return back()->with('error', 'Este pagamento não pode ser aprovado.');
         }
 
@@ -330,7 +271,7 @@ class SubscriptionController extends Controller
         try {
             // Atualizar status do pagamento
             $payment->update([
-                'status' => Payment::STATUS_APPROVED,
+                'status' => 'approved',
                 'approved_at' => now(),
                 'approved_by' => auth()->id()
             ]);
@@ -338,19 +279,6 @@ class SubscriptionController extends Controller
             // Ativar/renovar subscrição da empresa
             $company = $payment->company;
             $this->activateCompanySubscription($company, $payment->plan, $payment->type);
-
-            // Log da atividade
-            activity()
-                ->performedOn($payment)
-                ->causedBy(auth()->user())
-                ->withProperties([
-                    'company_id' => $company->id,
-                    'amount' => $payment->amount
-                ])
-                ->log('Payment approved by admin');
-
-            // Notificar empresa
-            $this->notifyPaymentApproved($payment);
 
             DB::commit();
 
@@ -371,30 +299,18 @@ class SubscriptionController extends Controller
             'rejection_reason' => 'required|string|max:500'
         ]);
 
-        if (!$payment->isSubmitted()) {
+        if ($payment->status !== 'submitted') {
             return back()->with('error', 'Este pagamento não pode ser rejeitado.');
         }
 
         DB::beginTransaction();
         try {
             $payment->update([
-                'status' => Payment::STATUS_REJECTED,
+                'status' => 'rejected',
                 'rejected_at' => now(),
                 'rejected_by' => auth()->id(),
                 'rejection_reason' => $request->rejection_reason
             ]);
-
-            // Log da atividade
-            activity()
-                ->performedOn($payment)
-                ->causedBy(auth()->user())
-                ->withProperties([
-                    'reason' => $request->rejection_reason
-                ])
-                ->log('Payment rejected by admin');
-
-            // Notificar empresa
-            $this->notifyPaymentRejected($payment, $request->rejection_reason);
 
             DB::commit();
 
@@ -404,37 +320,6 @@ class SubscriptionController extends Controller
             DB::rollback();
             return back()->with('error', 'Erro ao rejeitar pagamento: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Relatório de subscrições
-     */
-    public function subscriptionReports(Request $request)
-    {
-        $period = $request->get('period', 'month');
-
-        $reports = [
-            'overview' => $this->getSubscriptionOverview($period),
-            'revenue' => $this->getRevenueReport($period),
-            'churn' => $this->getChurnReport($period),
-            'growth' => $this->getGrowthReport($period)
-        ];
-
-        return view('admin.subscriptions.reports', compact('reports', 'period'));
-    }
-
-    /**
-     * Relatório de receita
-     */
-    public function revenueReports(Request $request)
-    {
-        $period = $request->get('period', 'month');
-        $planId = $request->get('plan_id');
-
-        $revenueData = $this->getDetailedRevenueReport($period, $planId);
-        $plans = Plan::where('is_active', true)->get();
-
-        return view('admin.subscriptions.revenue', compact('revenueData', 'plans', 'period'));
     }
 
     // ============ MÉTODOS AUXILIARES ============
@@ -474,8 +359,8 @@ class SubscriptionController extends Controller
     {
         return [
             'total_companies' => Company::count(),
-            'active_subscriptions' => Company::where('subscription_status', Company::SUBSCRIPTION_STATUS_ACTIVE)->count(),
-            'pending_payments' => Payment::where('status', Payment::STATUS_SUBMITTED)->count(),
+            'active_subscriptions' => Company::where('subscription_status', 'active')->count(),
+            'pending_payments' => Payment::where('status', 'submitted')->count(),
             'expiring_soon' => Company::expiringSoon(7)->count(),
             'expired' => Company::expired()->count(),
             'trial_companies' => Company::trial()->count(),
@@ -486,11 +371,10 @@ class SubscriptionController extends Controller
     private function getSubscriptionMetrics()
     {
         $currentMonth = now()->startOfMonth();
-        $lastMonth = now()->subMonth()->startOfMonth();
 
         return [
             'new_subscriptions_this_month' => Company::where('created_at', '>=', $currentMonth)->count(),
-            'revenue_this_month' => Payment::where('status', Payment::STATUS_APPROVED)
+            'revenue_this_month' => Payment::where('status', 'approved')
                 ->where('approved_at', '>=', $currentMonth)
                 ->sum('amount'),
             'average_revenue_per_user' => $this->calculateARPU(),
@@ -526,10 +410,6 @@ class SubscriptionController extends Controller
             'clients' => [
                 'current' => $company->clients()->count(),
                 'max' => $plan->max_clients ?? 0
-            ],
-            'storage' => [
-                'used' => 0, // Implementar se necessário
-                'max' => $plan->max_storage_mb ?? 0
             ]
         ];
     }
@@ -541,23 +421,8 @@ class SubscriptionController extends Controller
             'trial_started' => $company->created_at,
             'subscription_expires_at' => $company->subscription_expires_at,
             'suspended_at' => $company->suspended_at,
-            'last_payment' => $company->payments()->where('status', Payment::STATUS_APPROVED)->latest()->first()?->approved_at,
-            'plan_changes' => activity()
-                ->forSubject($company)
-                ->where('description', 'Subscription updated by admin')
-                ->latest()
-                ->take(5)
-                ->get()
+            'last_payment' => $company->payments()->where('status', 'approved')->latest()->first()?->approved_at
         ];
-    }
-
-    private function getCompanyActivity($company)
-    {
-        return activity()
-            ->forSubject($company)
-            ->latest()
-            ->take(10)
-            ->get();
     }
 
     private function getCompanyAlerts($company)
@@ -575,7 +440,7 @@ class SubscriptionController extends Controller
         }
 
         // Verificar se tem pagamentos pendentes
-        $pendingPayments = $company->payments()->where('status', Payment::STATUS_SUBMITTED)->count();
+        $pendingPayments = $company->payments()->where('status', 'submitted')->count();
         if ($pendingPayments > 0) {
             $alerts[] = [
                 'type' => 'info',
@@ -600,10 +465,10 @@ class SubscriptionController extends Controller
     private function getPaymentStats()
     {
         return [
-            'pending_review' => Payment::where('status', Payment::STATUS_SUBMITTED)->count(),
-            'approved_today' => Payment::where('status', Payment::STATUS_APPROVED)
+            'pending_review' => Payment::where('status', 'submitted')->count(),
+            'approved_today' => Payment::where('status', 'approved')
                 ->whereDate('approved_at', today())->count(),
-            'total_revenue_month' => Payment::where('status', Payment::STATUS_APPROVED)
+            'total_revenue_month' => Payment::where('status', 'approved')
                 ->whereMonth('approved_at', now()->month)
                 ->whereYear('approved_at', now()->year)
                 ->sum('amount'),
@@ -616,9 +481,9 @@ class SubscriptionController extends Controller
         $expirationDate = $this->calculateExpirationDate($plan, $company, $paymentType);
 
         $company->update([
-            'subscription_status' => Company::SUBSCRIPTION_STATUS_ACTIVE,
+            'subscription_status' => 'active',
             'subscription_expires_at' => $expirationDate,
-            'subscription_type' => Company::SUBSCRIPTION_TYPE_PAID
+            'subscription_type' => 'paid'
         ]);
     }
 
@@ -632,20 +497,20 @@ class SubscriptionController extends Controller
         }
 
         return match($plan->billing_cycle) {
-            Plan::BILLING_CYCLE_MONTHLY => $baseDate->addMonth(),
-            Plan::BILLING_CYCLE_QUARTERLY => $baseDate->addMonths(3),
-            Plan::BILLING_CYCLE_YEARLY => $baseDate->addYear(),
+            'monthly' => $baseDate->addMonth(),
+            'quarterly' => $baseDate->addMonths(3),
+            'yearly' => $baseDate->addYear(),
             default => $baseDate->addMonth()
         };
     }
 
     private function calculateARPU()
     {
-        $totalRevenue = Payment::where('status', Payment::STATUS_APPROVED)
+        $totalRevenue = Payment::where('status', 'approved')
             ->whereMonth('approved_at', now()->month)
             ->sum('amount');
 
-        $activeCompanies = Company::where('subscription_status', Company::SUBSCRIPTION_STATUS_ACTIVE)->count();
+        $activeCompanies = Company::where('subscription_status', 'active')->count();
 
         return $activeCompanies > 0 ? $totalRevenue / $activeCompanies : 0;
     }
@@ -656,7 +521,7 @@ class SubscriptionController extends Controller
         $endOfMonth = now()->endOfMonth();
 
         $companiesAtStart = Company::where('created_at', '<', $startOfMonth)->count();
-        $cancelledThisMonth = Company::where('subscription_status', Company::SUBSCRIPTION_STATUS_CANCELLED)
+        $cancelledThisMonth = Company::where('subscription_status', 'cancelled')
             ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
             ->count();
 
@@ -665,7 +530,7 @@ class SubscriptionController extends Controller
 
     private function calculateAveragePaymentTime()
     {
-        $avgTime = Payment::where('status', Payment::STATUS_APPROVED)
+        $avgTime = Payment::where('status', 'approved')
             ->whereNotNull('submitted_at')
             ->whereNotNull('approved_at')
             ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, submitted_at, approved_at)) as avg_hours')
@@ -673,36 +538,4 @@ class SubscriptionController extends Controller
 
         return round($avgTime ?? 0, 1);
     }
-
-    // Métodos de notificação (implementar conforme necessário)
-    private function notifyCompanyActivation($company) {
-        // Implementar notificação por email
-    }
-
-    private function notifyCompanySuspension($company, $reason) {
-        // Implementar notificação por email
-    }
-
-    private function notifyCompanyReactivation($company) {
-        // Implementar notificação por email
-    }
-
-    private function notifyTrialExtension($company, $days) {
-        // Implementar notificação por email
-    }
-
-    private function notifyPaymentApproved($payment) {
-        // Implementar notificação por email
-    }
-
-    private function notifyPaymentRejected($payment, $reason) {
-        // Implementar notificação por email
-    }
-
-    // Métodos de relatório (implementar conforme necessário)
-    private function getSubscriptionOverview($period) { return []; }
-    private function getRevenueReport($period) { return []; }
-    private function getChurnReport($period) { return []; }
-    private function getGrowthReport($period) { return []; }
-    private function getDetailedRevenueReport($period, $planId) { return []; }
 }
