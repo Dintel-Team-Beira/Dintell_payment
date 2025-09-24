@@ -202,6 +202,7 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 @if($company->logo)
+
                                 <img class="w-10 h-10 rounded-lg" src="{{ Storage::url($company->logo) }}" alt="{{ $company->name }}">
                                 @else
                                 <div class="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-lg">
