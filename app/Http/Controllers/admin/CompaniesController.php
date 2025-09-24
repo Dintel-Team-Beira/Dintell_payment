@@ -12,6 +12,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class CompaniesController extends Controller
@@ -83,13 +84,13 @@ public function show(Company $company)
         'total_invoices' => $company->invoices()->count(),
         'paid_invoices' => $company->invoices()->where('status', 'paid')->count(),
         'pending_invoices' => $company->invoices()->where('status', 'pending')->count(),
-        'total_revenue' => $company->invoices()->where('status', 'paid')->sum('total_amount'),
+        'total_revenue' => $company->invoices()->where('status', 'paid')->sum('paid_amount'),
         'monthly_revenue' => $company->invoices()
             ->where('status', 'paid')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
-            ->sum('total_amount'),
-        'avg_invoice_value' => $company->invoices()->where('status', 'paid')->avg('total_amount'),
+            ->sum('total'),
+        'avg_invoice_value' => $company->invoices()->where('status', 'paid')->avg('total'),
         // Adicionar estatísticas que faltavam
         'users' => $company->users()->count(),
         'clients' => $company->clients()->count(),
@@ -107,7 +108,7 @@ public function show(Company $company)
             DB::raw('YEAR(created_at) as year'),
             DB::raw('MONTH(created_at) as month'),
             DB::raw('COUNT(*) as invoices_count'),
-            DB::raw('SUM(CASE WHEN status = "paid" THEN total_amount ELSE 0 END) as revenue')
+            DB::raw('SUM(CASE WHEN status = "paid" THEN total ELSE 0 END) as revenue')
         )
         ->groupBy('year', 'month')
         ->orderBy('year', 'desc')
@@ -324,6 +325,147 @@ public function show(Company $company)
                 ->withErrors(['error' => 'Erro ao criar empresa: ' . $e->getMessage()]);
         }
     }
+
+
+      /**
+     * Atualiza uma empresa existente
+     *
+     * @param Request $request
+     * @param Company $company
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request, Company $company)
+    {
+        // Validação com mensagens personalizadas
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:companies,slug,' . $company->id,
+            'email' => 'required|email|max:255|unique:companies,email,' . $company->id,
+            'phone' => 'nullable|string|max:20|regex:/^([0-9\s\-\+\(\)]*)$/',
+            'address' => 'nullable|string|max:500',
+            'city' => 'nullable|string|max:100',
+            'tax_number' => 'nullable|string|max:50',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'subscription_plan' => 'required|exists:plans,slug',
+            'status' => 'required|in:trial,active,suspended',
+            'trial_days' => 'nullable|integer|min:1|max:90|required_if:status,trial',
+            'custom_domain_enabled' => 'boolean',
+            'api_access_enabled' => 'boolean',
+        ], [
+            'name.required' => 'O nome da empresa é obrigatório.',
+            'email.unique' => 'Este e-mail já está em uso.',
+            'slug.unique' => 'Este slug já está em uso.',
+            'phone.regex' => 'O formato do telefone é inválido.',
+            'trial_days.required_if' => 'O número de dias de teste é obrigatório para o status "trial".',
+        ]);
+
+        // Iniciar transação para garantir consistência
+        DB::beginTransaction();
+
+        try {
+            // Gerar slug único se alterado
+            $slug = $request->slug ?? Str::slug($request->name);
+            if ($slug !== $company->slug) {
+                $slug = $this->generateUniqueSlug($slug, Company::class);
+            }
+
+            // Buscar plano com cache
+            $plan = Cache::remember("plan_{$request->subscription_plan}", now()->addHour(), function () use ($request) {
+                return Plan::where('slug', $request->subscription_plan)->firstOrFail();
+            });
+
+            // Upload do logo se fornecido
+            $logoPath = $company->logo;
+            if ($request->hasFile('logo')) {
+                // Remover logo antigo, se existir
+                if ($logoPath) {
+                    \Storage::disk('public')->delete($logoPath);
+                }
+                $logoPath = $request->file('logo')->store('companies/logos', 'public');
+                if (!$logoPath) {
+                    throw new \Exception('Falha ao fazer upload do logo.');
+                }
+            }
+
+            // Atualizar a empresa
+            $company->update([
+                'name' => $validated['name'],
+                'slug' => $slug,
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'address' => $validated['address'],
+                'city' => $validated['city'],
+                'tax_number' => $validated['tax_number'],
+                'logo' => $logoPath,
+                'plan_id' => $plan->id,
+                'status' => $validated['status'],
+                'trial_ends_at' => $validated['status'] === 'trial' && $validated['trial_days']
+                    ? now()->addDays($validated['trial_days'])
+                    : ($validated['status'] !== 'trial' ? null : $company->trial_ends_at),
+                'custom_domain_enabled' => $request->boolean('custom_domain_enabled'),
+                'api_access_enabled' => $request->boolean('api_access_enabled'),
+                'settings' => array_merge($company->settings ?? [], [
+                    'updated_by_admin' => true,
+                    'last_updated' => now()->toDateTimeString(),
+                    'initial_plan' => $company->settings['initial_plan'] ?? $plan->slug,
+                    'plan_limits' => [
+                        'max_users' => $plan->max_users,
+                        'max_invoices_per_month' => $plan->max_invoices_per_month,
+                        'max_clients' => $plan->max_clients,
+                        'max_products' => $plan->max_products,
+                        'max_storage_mb' => $plan->max_storage_mb,
+                    ],
+                ]),
+            ]);
+
+            // Disparar evento para notificações ou integrações
+            // event(new CompanyUpdated($company));
+
+            // Log da ação
+            // $this->logAdminActivity(auth()->user(), "Atualizou empresa: {$company->name} (ID: {$company->id}) com plano {$plan->slug}");
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.companies.show', $company)
+                ->with('success', "Empresa '{$company->name}' atualizada com sucesso!");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log do erro com contexto detalhado
+            Log::error('Erro ao atualizar empresa: ' . $e->getMessage(), [
+                'request_data' => $request->except(['logo']),
+                'error_trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+                'company_id' => $company->id,
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Erro ao atualizar empresa: ' . $e->getMessage()]);
+        }
+    }
+
+      /**
+     * Gera um slug único para a empresa
+     *
+     * @param string $slug
+     * @param string $model
+     * @return string
+     */
+    protected function generateUniqueSlug(string $slug, string $model): string
+    {
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while ($model::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $counter++;
+        }
+
+        return $slug;
+    }
+
 
     public function suspend(Request $request, Company $company)
     {
