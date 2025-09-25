@@ -250,7 +250,7 @@
 </div>
 
 {{-- JavaScript para controlar o modal --}}
-@push('scripts')
+{{-- @push('scripts') --}}
 <script>
 // Controle do Modal
 let subscriptionModal = {
@@ -446,7 +446,7 @@ setInterval(() => {
     }
 }
 </style>
-@endpush
+{{-- @endpush --}}
 
 @php
 // MÉTODOS HELPER PARA LÓGICA DE NEGÓCIO
