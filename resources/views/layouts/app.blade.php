@@ -415,7 +415,7 @@
 
 
 
-                    {{-- <div class="p-4 mt-6 rounded-lg bg-gray-50">
+                    <div class="p-4 mt-6 rounded-lg bg-gray-50">
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-600">Status do Sistema</span>
                             <div class="flex items-center">
@@ -433,7 +433,7 @@
                                 <span>{{ App\Models\Company::where('status', 'active')->count() }}</span>
                             </div>
                         </div>
-                    </div> --}}
+                    </div>
                     <div x-show="!collapsed || isMobile" class="my-4 mb-4 border-t border-gray-200"></div>
                     <div class="pt-4">
                         <div class="p-4 rounded-lg bg-gray-50">
@@ -441,7 +441,7 @@
                                 <span class="text-gray-600">Status da Empresa</span>
                                 <div class="flex items-center">
                                     <div class="w-2 h-2 mr-2 bg-green-400 rounded-full"></div>
-                                    <span class="font-medium text-green-600">Activo</span>
+                                    <span class="font-medium text-green-600">{{ auth()->user()->company->status }}</span>
                                 </div>
                             </div>
 
@@ -523,41 +523,7 @@
 
                                 </div>
 
-                                <div class="flex items-center justify-between">
-                                      <!-- Subscription Status Indicator -->
-                        @auth
-                            @if(Auth::user()->company)
-                                @php
-                                    $company = Auth::user()->company;
-                                    $statusColor = $company->hasActivePlan() ? 'green' : 'red';
-                                    $statusIcon = $company->hasActivePlan() ? 'check-circle' : 'exclamation-triangle';
-                                @endphp
-                                <div class="relative">
-                                    <a href="#"
-                                    {{-- <a href="{{ route('subscription.index') }}" --}}
-                                       class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600">
-                                        <svg class="w-4 h-4 mr-1 text-{{ $statusColor }}-500" fill="currentColor" viewBox="0 0 20 20">
-                                            @if($company->hasActivePlan())
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                            @else
-                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                            @endif
-                                        </svg>
-                                        Subscrição
-                                    </a>
 
-                                    <!-- Notification Badge -->
-                                    @if(!$company->hasActivePlan() || $company->getUsageWarnings())
-                                        <div class="absolute -top-10-right-20">
-                                            <div class="flex items-center justify-center w-4 h-4 bg-red-500 rounded-full">
-                                                <span class="text-xs font-bold text-white">!</span>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-                        @endauth
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -738,6 +704,7 @@
         @endauth --}}
 
     <x-loading />
+    <x-subscription-popup />
 
     @stack('scripts')
 
