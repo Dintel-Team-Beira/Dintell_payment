@@ -733,10 +733,11 @@
         <x-support-popup />
     @endauth
     <!-- Subscription Popup Component -->
-        @auth
+        {{-- @auth
             @include('components.subscription-popup')
-        @endauth
+        @endauth --}}
 
+    <x-loading />
 
     @stack('scripts')
 
