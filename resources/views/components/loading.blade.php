@@ -25,7 +25,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -114,8 +114,8 @@
 /* Logo e Spinner */
 .sfs-loading-logo {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 320px;
+    height: 320px;
     margin-bottom: 2rem;
     display: flex;
     align-items: center;
@@ -139,8 +139,8 @@
     left: 0;
     width: 120px;
     height: 120px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid #ffffff;
+    /* border: 4px solid rgba(255, 255, 255, 0.3); */
+    /* border-top: 4px solid #f9f9f927; */
     border-radius: 50%;
     animation: sfs-spin 2s linear infinite;
     z-index: 1;
@@ -154,7 +154,7 @@
 /* Título */
 .sfs-loading-title {
     margin-bottom: 2rem;
-    color: white;
+    /* color: white; */
 }
 
 .sfs-loading-title h2 {
@@ -184,7 +184,7 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    color: rgba(255, 255, 255, 0.9);
+    /* color: rgba(255, 255, 255, 0.9); */
     font-size: 1.1rem;
     font-weight: 500;
     opacity: 0;
@@ -213,7 +213,7 @@
 
 .sfs-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #ffffff, #f0f0f0);
+    /* background: linear-gradient(90deg, #ffffff, #f0f0f0); */
     border-radius: 3px;
     width: 0%;
     animation: sfs-progress 3s ease-in-out infinite;
@@ -226,7 +226,7 @@
 }
 
 .sfs-progress-text {
-    color: rgba(255, 255, 255, 0.8);
+    /* color: rgba(255, 255, 255, 0.8); */
     font-size: 0.9rem;
     text-align: center;
 }
@@ -238,7 +238,7 @@
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
-    color: rgba(255, 255, 255, 0.7);
+    /* color: rgba(255, 255, 255, 0.7); */
     font-size: 0.85rem;
     z-index: 10;
 }
