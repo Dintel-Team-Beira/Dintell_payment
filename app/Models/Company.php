@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Models;
@@ -81,7 +80,7 @@ class Company extends Model
         'total_revenue' => 'decimal:2',
         'custom_domain_enabled' => 'boolean',
         'api_access_enabled' => 'boolean',
-        'status' => 'boolean',
+        // 'status' => 'boolean',
     ];
 
     // Constants

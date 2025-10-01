@@ -473,8 +473,10 @@ public function show(Company $company)
             'reason' => 'required|string|max:500'
         ]);
 
+        // dd('suspend');
         $company->suspend($request->reason);
 
+        
 
         // Log da suspensão
         $this->logAdminActivity('Suspendeu empresa', [

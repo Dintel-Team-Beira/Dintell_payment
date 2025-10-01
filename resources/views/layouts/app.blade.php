@@ -702,7 +702,8 @@
 
 <x-subscription-popup
     :company="auth()->user()->company"
-    :plan="auth()->user()->plan"
+    {{-- :plan="auth()->user()->plan" --}}
+    :plan="auth()->user()->company->plan ?? null"
     :force-show="true"
 />
     <x-loading />

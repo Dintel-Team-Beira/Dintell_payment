@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Company;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Notifications\SubscriptionActivatedNotification;
@@ -383,5 +384,166 @@ class SubscriptionController extends Controller
         });
 
         return response()->json($subscriptions);
+    }
+
+
+
+    // NEW METHODS YAM
+
+    /**
+     * Mostrar página de bloqueio
+     */
+    public function blocked(Request $request)
+    {
+        // Se não estiver autenticado, redireciona para login
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $user = auth()->user();
+        $company = $user->company;
+
+        // Se não tem company
+        if (!$company) {
+            return view('subscriptions.blocked', [
+                'reason' => 'no_company',
+                'title' => 'Empresa Não Encontrada',
+                'message' => 'Você precisa estar associado a uma empresa para acessar o sistema.',
+                'company' => null,
+                'user' => $user,
+            ]);
+        }
+
+        // Pegar o motivo da URL (passado pela middleware)
+        $reason = $request->get('reason', $this->detectBlockReason($company));
+
+        // Montar dados baseados no motivo
+        $blockData = $this->getBlockData($reason, $company);
+
+        return view('subscription.blocked', [
+            'reason' => $reason,
+            'title' => $blockData['title'],
+            'message' => $blockData['message'],
+            'actionText' => $blockData['actionText'],
+            'actionRoute' => $blockData['actionRoute'],
+            'company' => $company,
+            'plan' => $company->plan,
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * Detectar o motivo do bloqueio analisando a company
+     */
+    protected function detectBlockReason(Company $company): string
+    {
+        // Status administrativo
+        if ($company->status === Company::STATUS_SUSPENDED) {
+            return 'suspended';
+        }
+
+        if ($company->status === Company::STATUS_INACTIVE) {
+            return 'inactive';
+        }
+
+        if ($company->status === Company::STATUS_PENDING) {
+            return 'pending';
+        }
+
+        // Subscrição
+        if ($company->subscription_status === Company::SUBSCRIPTION_STATUS_CANCELLED) {
+            return 'cancelled';
+        }
+
+        if ($company->subscription_status === Company::SUBSCRIPTION_STATUS_EXPIRED) {
+            return 'expired';
+        }
+
+        if ($company->subscription_status === Company::SUBSCRIPTION_STATUS_SUSPENDED) {
+            return 'subscription_suspended';
+        }
+
+        // Trial expirado
+        if ($company->subscription_type === Company::SUBSCRIPTION_TYPE_TRIAL) {
+            if ($company->trial_ends_at && $company->trial_ends_at->isPast()) {
+                return 'trial_expired';
+            }
+        }
+
+        return 'unknown';
+    }
+
+    /**
+     * Obter dados de bloqueio baseado no motivo
+     */
+    protected function getBlockData(string $reason, Company $company): array
+    {
+        return match($reason) {
+            'suspended' => [
+                'title' => 'Conta Suspensa',
+                'message' => $company->suspension_reason ?? 'Sua conta foi suspensa administrativamente. Entre em contato com o suporte para mais informações.',
+                'actionText' => 'Contatar Suporte',
+                'actionRoute' => 'support.contact',
+            ],
+            
+            'inactive' => [
+                'title' => 'Conta Inativa',
+                'message' => 'Sua conta está inativa. Entre em contato com o suporte para reativação.',
+                'actionText' => 'Contatar Suporte',
+                'actionRoute' => 'support.contact',
+            ],
+            
+            'pending' => [
+                'title' => 'Conta Pendente',
+                'message' => 'Sua conta está em análise. Aguarde a aprovação ou entre em contato com o suporte.',
+                'actionText' => 'Contatar Suporte',
+                'actionRoute' => 'support.contact',
+            ],
+            
+            'cancelled' => [
+                'title' => 'Subscrição Cancelada',
+                'message' => 'Sua subscrição foi cancelada. Escolha um novo plano para continuar usando o sistema.',
+                'actionText' => 'Ver Planos',
+                'actionRoute' => 'billing.plans',
+            ],
+            
+            'expired' => [
+                'title' => 'Subscrição Expirada',
+                'message' => 'Sua subscrição expirou. Renove agora para continuar aproveitando todos os recursos do sistema.',
+                'actionText' => 'Renovar Agora',
+                'actionRoute' => 'billing.plans',
+            ],
+            
+            'subscription_suspended' => [
+                'title' => 'Subscrição Suspensa',
+                'message' => 'Sua subscrição foi suspensa devido a pagamento pendente. Regularize para continuar.',
+                'actionText' => 'Regularizar Pagamento',
+                'actionRoute' => 'billing.payment',
+            ],
+            
+            'trial_expired' => [
+                'title' => 'Período de Teste Expirado',
+                'message' => sprintf(
+                    'Seu período de teste de %s dias expirou. Escolha um plano para continuar com acesso completo.',
+                    $company->trial_ends_at ? now()->diffInDays($company->trial_ends_at) : 14
+                ),
+                'actionText' => 'Ver Planos',
+                'actionRoute' => 'billing.plans',
+            ],
+            
+            'no_company' => [
+                'title' => 'Empresa Não Encontrada',
+                'message' => 'Você precisa estar associado a uma empresa para acessar o sistema.',
+                'actionText' => 'Contatar Suporte',
+                'actionRoute' => 'support.contact',
+            ],
+            
+            default => [
+                'title' => 'Acesso Bloqueado',
+                'message' => 'Sua conta está temporariamente bloqueada. Entre em contato com o suporte.',
+                'actionText' => 'Contatar Suporte',
+                'actionRoute' => 'support.contact',
+            ],
+        };
     }
 }

@@ -7,6 +7,7 @@
     'forceShow' => false
 ])
 
+
 @php
 // ✅ LÓGICA SIMPLES COM IF/ELSE - SEM CLASSES COMPLEXAS
 

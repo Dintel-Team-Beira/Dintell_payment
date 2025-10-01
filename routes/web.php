@@ -3,41 +3,38 @@
 use App\Http\Controllers\Admin\AdminHelpController;
 use App\Http\Controllers\Admin\AdminMonitoringController;
 use App\Http\Controllers\Admin\AdminSupportController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
-use App\Http\Middleware\AdminMiddleware;
-use App\Http\Controllers\EmailController;
-use App\Http\Controllers\QuoteController;
-use App\Http\Middleware\TenantMiddleware;
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\CompaniesController as AdminCompaniesController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\InvoicesController as AdminInvoicesController;
+use App\Http\Controllers\Admin\LogsController;
+use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\UsersController as AdminUsersController;
 use App\Http\Controllers\ApiLogController;
-use App\Http\Controllers\ClientController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CreditNoteController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DebitNoteController;
+use App\Http\Controllers\EmailController;
+// Controllers Admin (SaaS)
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\ReceiptController;
+// Middlewares diretos
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\DashboardController;
-
-// Controllers Admin (SaaS)
-use App\Http\Controllers\DebitNoteController;
-use App\Http\Controllers\CreditNoteController;
 use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\SuspensionPageController;
 use App\Http\Controllers\SubscriptionPlanController;
-
-// Middlewares diretos
-use App\Http\Controllers\Admin\AuthController as AdminAuthController;
-use App\Http\Controllers\Admin\UsersController as AdminUsersController;
-use App\Http\Controllers\Admin\InvoicesController as AdminInvoicesController;
-
-use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
-use App\Http\Controllers\Admin\CompaniesController as AdminCompaniesController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\LogsController;
-use App\Http\Controllers\Admin\ReportsController;
-use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\SuspensionPageController;
 use App\Http\Controllers\TemplatePreviewController;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\TenantMiddleware;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -178,7 +175,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{invoice}/print', [InvoiceController::class, 'print'])->name('print');
         });
 
-
         // Relatórios Administrativos
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/revenue', [ReportsController::class, 'revenue'])->name('revenue');
@@ -240,7 +236,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/download/{log}', [LogsController::class, 'download'])->name('download');
         });
 
-
         // Monitoramento
         Route::prefix('monitoring')->name('monitoring.')->group(function () {
             Route::get('/performance', [AdminMonitoringController::class, 'performance'])->name('performance');
@@ -285,7 +280,7 @@ Route::get('/', function () {
         if ($user->company_id) {
             $company = \App\Models\Company::find($user->company_id);
             if ($company && $company->slug) {
-                return redirect("dintell/dashboard");
+                return redirect('dintell/dashboard');
             }
         }
 
@@ -303,8 +298,7 @@ Route::get('/', function () {
 -------------------------------------------------------
 */
 
-
-Route::prefix('dintell')->group(function () {
+Route::middleware(['auth', 'subscription.check'])->prefix('dintell')->group(function () {
     // Dashboard da Empresa
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('dashboard.analytics');
@@ -452,7 +446,6 @@ Route::prefix('dintell')->group(function () {
         Route::get('/api/stats', [ReceiptController::class, 'stats'])->name('api.stats');
     });
 
-
     // Produtos
     Route::prefix('produtos')->name('products.')->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('index');
@@ -488,8 +481,6 @@ Route::prefix('dintell')->group(function () {
         Route::post('/import/data', [ServiceController::class, 'import'])->name('import');
     });
 
-
-
     // Notas de Crédito
     // Notas de Crédito
     Route::resource('credit-notes', CreditNoteController::class)->names([
@@ -499,9 +490,8 @@ Route::prefix('dintell')->group(function () {
         'show' => 'credit-notes.show',
         'edit' => 'credit-notes.edit',
         'update' => 'credit-notes.update',
-        'destroy' => 'credit-notes.destroy'
+        'destroy' => 'credit-notes.destroy',
     ]);
-
 
     Route::group(['prefix' => 'credit-notes', 'as' => 'credit-notes.'], function () {
         Route::get('/{creditNote}/pdf', [CreditNoteController::class, 'downloadPdf'])->name('download-pdf');
@@ -609,6 +599,15 @@ Route::middleware(['auth', TenantMiddleware::class])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('/subscription/blocked', function () {
+        return view('subscriptions.blocked');
+    })->name('subscription.blocked');
+
+    // Página que avisa que precisa de empresa
+    Route::get('/company/required', function () {
+        return view('required');
+    })->name('company.required');
+
     // Dashboard (redireciona automaticamente para versão com slug)
     // Route::get('/dashboard', function () {
     //     $user = auth()->user();
@@ -623,7 +622,6 @@ Route::middleware(['auth', TenantMiddleware::class])->group(function () {
 
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | ROTAS DE AUTENTICAÇÃO (Breeze/Fortify)
@@ -631,11 +629,11 @@ Route::middleware(['auth', TenantMiddleware::class])->group(function () {
 */
 
 // Incluir rotas de autenticação do sistema
-require __DIR__ . '/auth.php';
-require __DIR__ . '/support.php';
-require __DIR__ . '/admin_settings.php';
-require __DIR__ . '/admin_plans.php';
-require __DIR__ . '/Admin_monitoring.php';
+require __DIR__.'/auth.php';
+require __DIR__.'/support.php';
+require __DIR__.'/admin_settings.php';
+require __DIR__.'/admin_plans.php';
+require __DIR__.'/Admin_monitoring.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -646,5 +644,6 @@ require __DIR__ . '/Admin_monitoring.php';
 // Limpar cache
 Route::get('/limpar-cache', function () {
     Artisan::call('optimize:clear');
+
     return 'Cache limpo com sucesso!';
 });
