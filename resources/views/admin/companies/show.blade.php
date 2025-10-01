@@ -16,7 +16,7 @@
         @if($company->status === 'suspended')
         <form action="{{ route('admin.companies.activate', $company) }}" method="POST" class="inline">
             @csrf
-            @method('PATCH')
+            @method('POST')
             <button type="submit"
                     class="flex items-center px-3 py-2 text-sm font-semibold text-green-700 bg-green-100 border border-green-200 rounded-md hover:bg-green-200"
                     onclick="return confirm('Tem certeza que deseja ativar esta empresa?')">
@@ -489,7 +489,7 @@
         <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
             <form action="{{ route('admin.companies.suspend', $company) }}" method="POST">
                 @csrf
-                @method('PATCH')
+                @method('POST')
 
                 <div class="px-6 pt-6 pb-4 bg-white">
                     <div class="flex items-center mb-4">
@@ -547,7 +547,7 @@
         <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
             <form action="{{ route('admin.companies.extend-trial', $company) }}" method="POST">
                 @csrf
-                @method('PATCH')
+                @method('POST')
 
                 <div class="px-6 pt-6 pb-4 bg-white">
                     <div class="flex items-center mb-4">
