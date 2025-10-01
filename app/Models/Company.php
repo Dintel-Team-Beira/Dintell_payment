@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Models;
@@ -80,6 +81,7 @@ class Company extends Model
         'total_revenue' => 'decimal:2',
         'custom_domain_enabled' => 'boolean',
         'api_access_enabled' => 'boolean',
+        'status' => 'boolean',
     ];
 
     // Constants
@@ -87,6 +89,8 @@ class Company extends Model
     const STATUS_INACTIVE = 'inactive';
     const STATUS_SUSPENDED = 'suspended';
     const STATUS_TRIAL = 'trial';
+     const STATUS_EXPIRED = 'expired';
+    const STATUS_PENDING = 'pending';
 
     const SUBSCRIPTION_TYPE_TRIAL = 'trial';
     const SUBSCRIPTION_TYPE_PAID = 'paid';
@@ -94,8 +98,20 @@ class Company extends Model
     const SUBSCRIPTION_STATUS_ACTIVE = 'active';
     const SUBSCRIPTION_STATUS_EXPIRED = 'expired';
     const SUBSCRIPTION_STATUS_SUSPENDED = 'suspended';
+
     const SUBSCRIPTION_STATUS_CANCELLED = 'cancelled';
     const SUBSCRIPTION_STATUS_PENDING_PAYMENT = 'pending_payment';
+
+
+    const SUBSCRIPTION_ACTIVE = 'active';
+    const SUBSCRIPTION_SUSPENDED = 'suspended';
+    const SUBSCRIPTION_EXPIRED = 'expired';
+    const SUBSCRIPTION_CANCELLED = 'cancelled';
+    const SUBSCRIPTION_PENDING_PAYMENT = 'pending_payment';
+
+
+
+
 
     protected static function boot()
     {
@@ -304,6 +320,15 @@ class Company extends Model
         return $this->subscription_status === self::SUBSCRIPTION_STATUS_SUSPENDED;
     }
 
+/**
+     * Verificar se a empresa está ativa
+     */
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE &&
+               $this->subscription_status === self::SUBSCRIPTION_ACTIVE;
+    }
+
     /**
      * Verificar se está expirado
      */
@@ -502,4 +527,87 @@ class Company extends Model
             default => 'Desconhecido'
         };
     }
+
+
+    // Rascunhos
+    /**
+     * Suspender empresa
+     */
+    public function suspend(string $reason)
+    {
+        $this->update([
+            'status' => self::STATUS_SUSPENDED,
+            'subscription_status' => self::SUBSCRIPTION_SUSPENDED,
+            'suspended_at' => now(),
+            'suspension_reason' => $reason
+        ]);
+
+        // Log da suspensão (opcional)
+        // activity()
+        //     ->performedOn($this)
+        //     ->withProperties([
+        //         'reason' => $reason,
+        //         'suspended_by' => auth()->id()
+        //     ])
+        //     ->log('Company suspended');
+
+        return $this;
+    }
+
+     /**
+     * Ativar/Reativar empresa
+     */
+    public function activate()
+    {
+        $this->update([
+            'status' => self::STATUS_ACTIVE,
+            'subscription_status' => self::SUBSCRIPTION_ACTIVE,
+            'suspended_at' => null,
+            'suspension_reason' => null
+        ]);
+
+        // Log da ativação (opcional)
+        // activity()
+        //     ->performedOn($this)
+        //     ->withProperties([
+        //         'activated_by' => auth()->id()
+        //     ])
+        //     ->log('Company activated');
+
+        return $this;
+    }
+
+     /**
+     * Estender período de trial
+     */
+    public function extendTrial(int $days)
+    {
+        $currentTrialEnd = $this->trial_ends_at ?? now();
+        $newTrialEnd = $currentTrialEnd->addDays($days);
+
+        $this->update([
+            'trial_ends_at' => $newTrialEnd
+        ]);
+
+        // Log da extensão (opcional)
+        // activity()
+        //     ->performedOn($this)
+        //     ->withProperties([
+        //         'days_added' => $days,
+        //         'new_trial_end' => $newTrialEnd->toISOString(),
+        //         'extended_by' => auth()->id()
+        //     ])
+        //     ->log('Trial extended');
+
+        return $this;
+    }
+
+     /**
+     * Verificar se o trial expirou
+     */
+    public function isTrialExpired(): bool
+    {
+        return $this->trial_ends_at && $this->trial_ends_at->isPast();
+    }
+
 }
