@@ -415,7 +415,7 @@
 
 
 
-                    <div class="p-4 mt-6 rounded-lg bg-gray-50">
+                    {{-- <div class="p-4 mt-6 rounded-lg bg-gray-50">
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-600">Status do Sistema</span>
                             <div class="flex items-center">
@@ -433,16 +433,16 @@
                                 <span>{{ App\Models\Company::where('status', 'active')->count() }}</span>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                     <div x-show="!collapsed || isMobile" class="my-4 mb-4 border-t border-gray-200"></div>
                     <div class="pt-4">
                         <div class="p-4 rounded-lg bg-gray-50">
                             <div class="flex items-center justify-between text-sm">
                                 <span class="text-gray-600">Status da Empresa</span>
-                                <div class="flex items-center">
+                                {{-- <div class="flex items-center">
                                     <div class="w-2 h-2 mr-2 bg-green-400 rounded-full"></div>
                                     <span class="font-medium text-green-600">{{ auth()->user()->company->status }}</span>
-                                </div>
+                                </div> --}}
                             </div>
 
                             <div class="mt-3 space-y-2 text-xs text-gray-500">
@@ -698,13 +698,15 @@
     @auth
         <x-support-popup />
     @endauth
-    <!-- Subscription Popup Component -->
-        {{-- @auth
-            @include('components.subscription-popup')
-        @endauth --}}
 
+
+<x-subscription-popup
+    :company="auth()->user()->company"
+    :plan="auth()->user()->plan"
+    :force-show="true"
+/>
     <x-loading />
-    <x-subscription-popup />
+    {{-- <x-subscription-popup /> --}}
 
     @stack('scripts')
 
