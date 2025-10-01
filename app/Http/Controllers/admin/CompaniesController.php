@@ -475,6 +475,7 @@ public function show(Company $company)
 
         $company->suspend($request->reason);
 
+
         // Log da suspensão
         $this->logAdminActivity('Suspendeu empresa', [
             'company_id' => $company->id,
@@ -487,8 +488,7 @@ public function show(Company $company)
 
     public function activate(Company $company)
     {
-        $company->activate();
-
+        $company->update(['status' => 'active']);
         // Log da ativação
         $this->logAdminActivity('Ativou empresa', [
             'company_id' => $company->id,
