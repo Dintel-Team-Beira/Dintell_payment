@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminMonitoringController;
 use App\Http\Controllers\Admin\AdminSupportController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CompaniesController as AdminCompaniesController;
+use App\Http\Controllers\admin\CompanySubscription;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\InvoicesController as AdminInvoicesController;
 use App\Http\Controllers\Admin\LogsController;
@@ -256,6 +257,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/documentation', [AdminHelpController::class, 'documentation'])->name('documentation');
             Route::get('/api-docs', [AdminHelpController::class, 'apiDocs'])->name('api-docs');
             Route::get('/changelog', [AdminHelpController::class, 'changelog'])->name('changelog');
+        });
+
+        Route::prefix('subscription')->name('subscriptions.')->group(function(){
+            Route::get('',[CompanySubscription::class,'index'])->name('index');
+            Route::get('/create',[CompanySubscription::class,'create'])->name('create');
+            Route::get('/store',[CompanySubscription::class,'store'])->name('store');
         });
     });
 });
