@@ -130,9 +130,9 @@ class Company extends Model
             }
 
             // Definir valores padrão para nova empresa
-            if (!$company->subscription_type) {
-                $company->subscription_type = self::SUBSCRIPTION_TYPE_TRIAL;
-            }
+            // if (!$company->subscription_type) {
+            //     $company->subscription_type = self::SUBSCRIPTION_TYPE_TRIAL;
+            // }
             if (!$company->subscription_status) {
                 $company->subscription_status = self::SUBSCRIPTION_STATUS_ACTIVE;
             }
