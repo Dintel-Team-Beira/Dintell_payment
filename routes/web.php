@@ -259,10 +259,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/changelog', [AdminHelpController::class, 'changelog'])->name('changelog');
         });
 
-        Route::prefix('subscription')->name('subscriptions.')->group(function(){
-            Route::get('',[CompanySubscription::class,'index'])->name('index');
-            Route::get('/create',[CompanySubscription::class,'create'])->name('create');
-            Route::get('/store',[CompanySubscription::class,'store'])->name('store');
+        // Resouce routes subscription
+        Route::resource('subscriptions', CompanySubscription::class)->except(['edit', 'update']);
+        // Rotas de ações específicas
+        Route::prefix('subscriptions')->name('subscriptions.')->group(function () {
+
+            // Cancelamento
+            Route::post('{subscription}/cancel', [CompanySubscription::class, 'cancel'])
+                ->name('cancel');
+
+            // Suspensão
+            Route::post('{subscription}/suspend', [CompanySubscription::class, 'suspend'])
+                ->name('suspend');
+
+            // Reativação
+            Route::post('{subscription}/reactivate', [CompanySubscription::class, 'reactivate'])
+                ->name('reactivate');
+
+            // Renovação manual
+            Route::post('{subscription}/renew', [CompanySubscription::class, 'renew'])
+                ->name('renew');
+
+            // Toggle auto-renew (AJAX)
+            Route::post('{subscription}/toggle-auto-renew', [CompanySubscription::class, 'toggleAutoRenew'])
+                ->name('toggle-auto-renew');
+
+            // Processar expirações (chamado por cron/command)
+            Route::post('process-expirations', [CompanySubscription::class, 'processExpirations'])
+                ->name('process-expirations');
         });
     });
 });

@@ -219,14 +219,15 @@ class CompanySubscription extends Model
 
     public function isExpiringIn(int $days): bool
     {
-        return $this->ends_at->isFuture() && 
-               $this->ends_at->diffInDays(now()) <= $days;
+        // dd($this->ends_at->isFuture(), $this->ends_at->diffInDays(now()), now()->diffInDays($this->ends_at));
+        return $this->ends_at->isFuture() && now()->diffInDays($this->ends_at) <=$days;
+            //    $this->ends_at->diffInDays(now()) <= $days;
     }
 
     public function isTrialExpiringIn(int $days): bool
     {
-        return $this->isTrialing() && 
-               $this->trial_ends_at->diffInDays(now()) <= $days;
+        return $this->isTrialing() &&  now()->diffInDays($this->ends_at) <= $days;
+            //    $this->trial_ends_at->diffInDays(now()) <= $days;
     }
 
     // ==================== CANCELAMENTO ====================

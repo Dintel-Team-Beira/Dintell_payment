@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Plan extends Model
@@ -74,7 +75,7 @@ class Plan extends Model
 
     public function subscriptions()
     {
-        return $this->hasMany(Subscription::class);
+        return $this->hasMany(CompanySubscription::class);
     }
 
     /**
@@ -348,4 +349,88 @@ class Plan extends Model
             );
         }
     }
+
+
+    // New methods
+     /**
+     * Relacionamento: Subscrições ativas deste plano
+     */
+    public function activeSubscriptions(): HasMany
+    {
+        return $this->hasMany(CompanySubscription::class)
+            ->whereIn('status', ['active', 'trialing'])
+            ->where('ends_at', '>', now());
+    }
+
+    /**
+     * Helper: Contar empresas ativas neste plano
+     */
+    public function getActiveSubscriptionsCount(): int
+    {
+        return $this->activeSubscriptions()->count();
+    }
+
+    /**
+     * Helper: Receita mensal deste plano
+     */
+    public function getMonthlyRevenue(): float
+    {
+        return $this->activeSubscriptions()
+            ->where('billing_cycle', 'monthly')
+            ->sum('amount');
+    }
+
+    /**
+     * Helper: Formatar limite (null = Ilimitado)
+     */
+    // public function getLimit(string $field): string
+    // {
+    //     $value = $this->{$field};
+    //     return $value ? (string) $value : 'Ilimitado';
+    // }
+
+    /**
+     * Helper: Verificar se plano pode ser deletado
+     */
+    public function canBeDeleted(): bool
+    {
+        return $this->activeSubscriptions()->count() === 0;
+    }
+
+    /**
+     * Accessor: Preço formatado
+     */
+    // public function getFormattedPriceAttribute(): string
+    // {
+    //     if ($this->price == 0) {
+    //         return 'Gratuito';
+    //     }
+    //     return number_format($this->price, 2) . ' MT';
+    // }
+
+    /**
+     * Accessor: Texto do ciclo
+     */
+    // public function getBillingCycleTextAttribute(): string
+    // {
+    //     return match($this->billing_cycle) {
+    //         'monthly' => 'Mensal',
+    //         'quarterly' => 'Trimestral',
+    //         'yearly' => 'Anual',
+    //         default => ucfirst($this->billing_cycle),
+    //     };
+    // }
+
+    /**
+     * Accessor: Preço por mês (para comparação)
+     */
+    // public function getPricePerMonthAttribute(): float
+    // {
+    //     return match($this->billing_cycle) {
+    //         'monthly' => $this->price,
+    //         'quarterly' => $this->price / 3,
+    //         'yearly' => $this->price / 12,
+    //         default => $this->price,
+    //     };
+    // }
 }

@@ -381,5 +381,273 @@
         </form>
     </div>
 </div>
-
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const companySelect = document.getElementById('company_id');
+    const planRadios = document.querySelectorAll('input[name="plan_id"]');
+    const billingCycleSelect = document.getElementById('billing_cycle');
+    const discountAmountInput = document.getElementById('discount_amount');
+    const discountPercentageInput = document.getElementById('discount_percentage');
+    const toggleDiscountBtn = document.getElementById('toggleDiscount');
+    const discountSection = document.getElementById('discountSection');
+
+    // Preview da empresa
+    companySelect.addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        const preview = document.getElementById('companyPreview');
+        
+        if (this.value) {
+            const name = selected.dataset.name;
+            const email = selected.dataset.email;
+            const initials = name.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase();
+            
+            document.getElementById('companyInitials').textContent = initials;
+            document.getElementById('companyName').textContent = name;
+            document.getElementById('companyEmail').textContent = email;
+            preview.classList.remove('hidden');
+        } else {
+            preview.classList.add('hidden');
+        }
+    });
+
+    // Atualizar resumo quando plano é selecionado
+    planRadios.forEach(radio => {
+        radio.addEventListener('change', updateSummary);
+    });
+
+    billingCycleSelect.addEventListener('change', updateSummary);
+    discountAmountInput.addEventListener('input', updateSummary);
+    discountPercentageInput.addEventListener('input', updateSummary);
+
+    // Toggle seção de desconto
+    toggleDiscountBtn.addEventListener('click', function() {
+        discountSection.classList.toggle('hidden');
+        this.textContent = discountSection.classList.contains('hidden') 
+            ? 'Adicionar Desconto' 
+            : 'Ocultar Desconto';
+    });
+
+    function updateSummary() {
+        const selectedPlan = document.querySelector('input[name="plan_id"]:checked');
+        
+        if (!selectedPlan) {
+            document.getElementById('selectedPlanInfo').classList.add('hidden');
+            return;
+        }
+
+        const planName = selectedPlan.dataset.name;
+        const basePrice = parseFloat(selectedPlan.dataset.price);
+        const billingCycle = billingCycleSelect.value;
+
+        // Mostrar info do plano
+        document.getElementById('selectedPlanInfo').classList.remove('hidden');
+        document.getElementById('planName').textContent = planName;
+        
+        const cycleText = {
+            'monthly': 'Mensal',
+            'quarterly': 'Trimestral',
+            'yearly': 'Anual'
+        };
+        document.getElementById('planCycle').textContent = cycleText[billingCycle];
+
+        // Calcular desconto
+        let discountAmount = parseFloat(discountAmountInput.value) || 0;
+        const discountPercentage = parseFloat(discountPercentageInput.value) || 0;
+
+        let finalPrice = basePrice;
+
+        // Aplicar desconto percentual primeiro
+        if (discountPercentage > 0) {
+            const percentDiscount = (basePrice * discountPercentage) / 100;
+            finalPrice -= percentDiscount;
+            discountAmount += percentDiscount;
+        }
+
+        // Aplicar desconto fixo
+        if (parseFloat(discountAmountInput.value) > 0) {
+            finalPrice -= parseFloat(discountAmountInput.value);
+            discountAmount = parseFloat(discountAmountInput.value);
+        }
+
+        // Não permitir valores negativos
+        finalPrice = Math.max(0, finalPrice);
+
+        // Atualizar display
+        document.getElementById('basePrice').textContent = formatCurrency(basePrice);
+        
+        if (discountAmount > 0) {
+            document.getElementById('discountRow').classList.remove('hidden');
+            document.getElementById('discountValue').textContent = '- ' + formatCurrency(discountAmount);
+        } else {
+            document.getElementById('discountRow').classList.add('hidden');
+        }
+
+        document.getElementById('totalPrice').textContent = formatCurrency(finalPrice);
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('pt-MZ', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value) + ' MT';
+    }
+
+    // Validação do formulário
+    document.getElementById('subscriptionForm').addEventListener('submit', function(e) {
+        const companyId = document.getElementById('company_id').value;
+        const planId = document.querySelector('input[name="plan_id"]:checked');
+
+        if (!companyId) {
+            e.preventDefault();
+            showNotification('Selecione uma empresa', 'error');
+            return false;
+        }
+
+        if (!planId) {
+            e.preventDefault();
+            showNotification('Selecione um plano', 'error');
+            return false;
+        }
+
+        // Loading state no botão
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = `
+            <svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Criando...
+        `;
+        submitBtn.disabled = true;
+
+        // Restaurar em caso de erro
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 10000);
+    });
+
+    function showNotification(message, type = 'info') {
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(n => n.remove());
+
+        const notification = document.createElement('div');
+        notification.className = `notification fixed top-4 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg transform transition-all duration-300`;
+
+        const colors = {
+            success: 'bg-green-50 border border-green-200 text-green-800',
+            error: 'bg-red-50 border border-red-200 text-red-800',
+            info: 'bg-blue-50 border border-blue-200 text-blue-800',
+        };
+
+        notification.className += ` ${colors[type]}`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-1"><p class="text-sm font-medium">${message}</p></div>
+                <button class="ml-3 text-gray-400 hover:text-gray-600" onclick="this.closest('.notification').remove()">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 5000);
+    }
+
+    // Inicializar Select2
+    $('.select2').select2({
+        placeholder: 'Digite para buscar...',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Trigger inicial se houver empresa pré-selecionada
+    if (companySelect.value) {
+        companySelect.dispatchEvent(new Event('change'));
+    }
+
+    // Trigger inicial se houver plano pré-selecionado
+    const preselectedPlan = document.querySelector('input[name="plan_id"]:checked');
+    if (preselectedPlan) {
+        updateSummary();
+    }
+});
+</script>
+
+<style>
+/* Animação para os cards de plano */
+.plan-card input:checked + div {
+    transform: scale(1.02);
+}
+
+.plan-card:hover input + div {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Loading animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Sticky sidebar */
+/* .sticky {
+    position: sticky;
+    top: 2rem;
+} */
+
+/* Select2 custom styling */
+.select2-container--default .select2-selection--single {
+    height: 48px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.5rem !important;
+    padding: 0 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 48px !important;
+    padding-left: 0 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 46px !important;
+}
+
+/* Transições suaves */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .xl\:grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .xl\:col-span-2 {
+        grid-column: span 1;
+    }
+
+    /* .sticky {
+        position: static;
+    } */
+}
+</style>
+@endpush

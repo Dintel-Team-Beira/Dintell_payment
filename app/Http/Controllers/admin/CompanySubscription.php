@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\CompanySubscription as ModelsCompanySubscription;
 use App\Models\Plan;
 use App\Services\SubscriptionService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CompanySubscription extends Controller
@@ -138,7 +139,7 @@ class CompanySubscription extends Controller
                 plan: $plan,
                 options: [
                     'billing_cycle' => $validated['billing_cycle'],
-                    'starts_at' => $validated['starts_at'] ?? now(),
+                    'starts_at' => Carbon::parse($validated['starts_at']) ?? now(),
                     'auto_renew' => $validated['auto_renew'] ?? true,
                     'coupon_code' => $validated['coupon_code'] ?? null,
                     'discount_amount' => $validated['discount_amount'] ?? null,

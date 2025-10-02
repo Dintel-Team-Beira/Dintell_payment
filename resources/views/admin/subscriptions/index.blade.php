@@ -211,7 +211,7 @@
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 w-10 h-10">
                                         @if($subscription->company->logo)
-                                            <img class="w-10 h-10 rounded-full" src="{{ asset($subscription->company->logo) }}" alt="">
+                                            <img class="w-10 h-10 rounded-full" src="{{ Storage::url($subscription->company->logo) }}" alt="">
                                         @else
                                             <div class="flex items-center justify-center w-10 h-10 text-white bg-blue-600 rounded-full">
                                                 {{ strtoupper(substr($subscription->company->name, 0, 2)) }}

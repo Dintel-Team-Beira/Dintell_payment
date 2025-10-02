@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Company extends Model
 {
@@ -608,6 +609,119 @@ class Company extends Model
     public function isTrialExpired(): bool
     {
         return $this->trial_ends_at && $this->trial_ends_at->isPast();
+    }
+
+
+
+    // NES METHODS
+
+    /**
+     * Relacionamento: Uma empresa tem muitas subscrições
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(CompanySubscription::class);
+    }
+
+    /**
+     * Relacionamento: Uma empresa tem UMA subscrição ativa
+     */
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(CompanySubscription::class)
+            ->whereIn('status', ['active', 'trialing'])
+            ->where('ends_at', '>', now())
+            ->latest('created_at');
+    }
+
+    /**
+     * Relacionamento: Plano atual através da subscrição ativa
+     * (Opcional - útil para acessar direto)
+     */
+    public function currentPlan(): BelongsTo|null
+    {
+        $subscription = $this->activeSubscription;
+        return $subscription ? $subscription->plan() : null;
+    }
+
+    /**
+     * Helper: Verificar se tem subscrição ativa
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->activeSubscription()->exists();
+    }
+
+    /**
+     * Helper: Verificar se pode acessar o sistema
+     */
+    public function canAccessSystem(): bool
+    {
+        $subscription = $this->activeSubscription;
+        return $subscription && $subscription->canAccess();
+    }
+
+    /**
+     * Helper: Obter limites de uso da subscrição atual
+     */
+    public function getUsageLimits(): array
+    {
+        $subscription = $this->activeSubscription;
+        
+        if (!$subscription) {
+            return [
+                'max_users' => 1,
+                'max_invoices_per_month' => 10,
+                'max_clients' => 50,
+            ];
+        }
+
+        return [
+            'max_users' => $subscription->plan->max_users ?? null,
+            'max_invoices_per_month' => $subscription->plan->max_invoices_per_month ?? null,
+            'max_clients' => $subscription->plan->max_clients ?? null,
+            'max_products' => $subscription->plan->max_products ?? null,
+            'max_storage_mb' => $subscription->plan->max_storage_mb ?? null,
+        ];
+    }
+
+    /**
+     * Helper: Verificar uso de faturas do mês atual
+     */
+    public function getInvoiceUsageFeatured(): array
+    {
+        $subscription = $this->activeSubscription;
+        $max = $subscription?->plan->max_invoices_per_month ?? 10;
+        
+        $current = $this->invoices()
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->count();
+
+        return [
+            'current' => $current,
+            'max' => $max,
+            'percentage' => $max > 0 ? ($current / $max) * 100 : 0,
+            'remaining' => max(0, $max - $current),
+        ];
+    }
+
+    /**
+     * Helper: Verificar uso de usuários
+     */
+    public function getUserUsageFeatured(): array
+    {
+        $subscription = $this->activeSubscription;
+        $max = $subscription?->plan->max_users ?? 1;
+        
+        $current = $this->users()->count();
+
+        return [
+            'current' => $current,
+            'max' => $max,
+            'percentage' => $max > 0 ? ($current / $max) * 100 : 0,
+            'remaining' => max(0, $max - $current),
+        ];
     }
 
 }
