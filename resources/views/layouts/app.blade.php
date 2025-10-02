@@ -715,7 +715,12 @@
     :force-show="true"
 />
 -->
-    <x-subscription-popup-advanced :company="auth()->user()->company" :plan="auth()->user()->company->plan ?? null" />
+   @if (request()->routeIs(['dashboard', 'billing.*', 'quotes.*','invoices.*','receipts.*']))
+   {{-- {{ Route::currentRouteName() }} --}}
+   {{-- Apenas exibido em páginas críticas: dashboard, faturação, fatura, cotação e recibo --}}
+    <x-subscription-popup-advanced :company="auth()->user()->company" :plan="auth()->user()->company->plan ?? null" />       
+   @endif
+
     <x-loading />
     {{-- <x-subscription-popup /> --}}
 

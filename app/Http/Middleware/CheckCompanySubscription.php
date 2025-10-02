@@ -89,8 +89,11 @@ class CheckCompanySubscription
         // 2º PRIORIDADE: SUBSCRIÇÃO
         // ===================================
 
+        $subscription = $company->subscriptions()->latest()->first();
         // Subscrição cancelada
-        if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_CANCELLED) {
+        // dd($subscription->isCanceled());
+        // if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_CANCELLED) {
+        if ($subscription->isCanceled()) {
             return $this->blockAccess(
                 'Subscrição Cancelada',
                 'Sua subscrição foi cancelada. Faça um upgrade para continuar usando o sistema.',
@@ -100,7 +103,8 @@ class CheckCompanySubscription
         }
 
         // Subscrição expirada
-        if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_EXPIRED) {
+        // if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_EXPIRED) {
+        if($subscription->isExpired()){
             return $this->blockAccess(
                 'Subscrição Expirada',
                 'Sua subscrição expirou. Renove agora para continuar usando o sistema.',
@@ -110,7 +114,8 @@ class CheckCompanySubscription
         }
 
         // Subscrição suspensa (provavelmente por falta de pagamento)
-        if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_SUSPENDED) {
+        // if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_SUSPENDED) {
+        if($subscription->isSuspended()){
             return $this->blockAccess(
                 'Subscrição Suspensa',
                 'Sua subscrição foi suspensa. Regularize o pagamento para continuar.',
@@ -144,7 +149,8 @@ class CheckCompanySubscription
         if ($company->plan_id && $company->plan) {
             
             // Limite de usuários excedido
-            $userUsage = $company->getUserUsage();
+            $userUsage = $company->getUserUsageFeatured();
+            // dd($userUsage);
             if ($userUsage['exceeded']) {
                 // Bloqueia criação de novos usuários, mas permite uso do sistema
                 // Você pode ajustar se quiser bloquear totalmente
@@ -153,10 +159,17 @@ class CheckCompanySubscription
 
             // Limite de faturas mensais excedido
             $invoiceUsage = $company->getInvoiceUsage();
+            // $invoiceUsage = $company->getInvoiceUsageFeatured();
             // dd($invoiceUsage);
             if ($invoiceUsage['exceeded']) {
                 // Bloqueia criação de novas faturas
                 session()->flash('warning', 'Você atingiu o limite de faturas mensais do seu plano.');
+            }
+
+            $clientUsage = $company->getClientUsage();
+            if ($clientUsage['exceeded']) {
+                // Bloqueia criação de novos clientes
+                session()->flash('warning', 'Você atingiu o limite de clientes do seu plano.');
             }
         }
 
@@ -188,6 +201,7 @@ class CheckCompanySubscription
             session()->flash('usage_warnings', $warnings);
         }
 
+            // dd($company->getClientUsage());
         return $next($request);
     }
       /**

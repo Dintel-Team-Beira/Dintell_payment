@@ -703,6 +703,7 @@ class Company extends Model
             'max' => $max,
             'percentage' => $max > 0 ? ($current / $max) * 100 : 0,
             'remaining' => max(0, $max - $current),
+            'exceeded' => max(0, $max - $current) <0
         ];
     }
 
@@ -721,6 +722,21 @@ class Company extends Model
             'max' => $max,
             'percentage' => $max > 0 ? ($current / $max) * 100 : 0,
             'remaining' => max(0, $max - $current),
+            'exceeded' => max(0, $max - $current) < 0
+        ];
+    }
+    public function getClientUsage()
+    {
+        $subscription = $this->activeSubscription;
+        $max = $subscription?->plan->max_clients ?? 1;
+        $current = $this->clients()->count();
+        
+        return [
+            'current' => $current,
+            'max' => $max,
+            'percentage' => $max > 0 ? ($current / $max) * 100 : 0,
+            'remaining' => max(0, $max - $current),
+            'exceeded' => max(0, $max - $current) < 0
         ];
     }
 
