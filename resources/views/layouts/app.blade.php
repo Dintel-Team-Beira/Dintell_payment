@@ -457,11 +457,12 @@
                                 <div class="flex items-center justify-between">
                                     <span>Usuários</span>
                                     <div class="flex flex-col items-end">
-                                      @php
-
+                                        @php
 
                                         @endphp
-                                        <span class="font-medium text-gray-500">{{ auth()->user()->company->users->count()  }} / <a>{{ Auth::user()->Company->Plan->max_users }}Max</a></span>
+                                        <span
+                                            class="font-medium text-gray-500">{{ auth()->user()->company->users->count() }}
+                                            / <a>{{ Auth::user()->Company->Plan->max_users }}Max</a></span>
                                         @if (auth()->user()->company)
                                             @php
                                                 $currentUsers = auth()->user()->company->users->count();
@@ -469,15 +470,15 @@
                                                 $percentage = min(100, ($currentUsers / $maxUsers) * 100);
                                             @endphp
 
-                                              @php
-                                            if ($percentage < 50) {
-                                                $color = 'bg-blue-600';
-                                            } elseif ($percentage < 100) {
-                                                $color = 'bg-yellow-500';
-                                            } else {
-                                                $color = 'bg-red-600';
-                                            }
-                                        @endphp
+                                            @php
+                                                if ($percentage < 50) {
+                                                    $color = 'bg-blue-600';
+                                                } elseif ($percentage < 100) {
+                                                    $color = 'bg-yellow-500';
+                                                } else {
+                                                    $color = 'bg-red-600';
+                                                }
+                                            @endphp
                                             <div class="bg-gray-200 rounded-full h-1.5 mt-1 w-16">
                                                 <div class="{{ $color }} h-1.5 rounded-full transition-all duration-300"
                                                     style="width: {{ $percentage }}%"></div>
@@ -490,35 +491,39 @@
                                 <div class="flex items-center justify-between">
 
                                     <span>Facturas</span>
-                                          <div class="flex flex-col items-end">
+                                    <div class="flex flex-col items-end">
 
-                                            <span class="font-medium text-gray-500">{{ Auth::user()->Company->invoices->count() }}/ <a>{{ Auth::user()->Company->Plan->max_invoices_per_month}}Max</a></span>
-                                            @if (auth()->user()->company)
+                                        <span
+                                            class="font-medium text-gray-500">{{ Auth::user()->Company->invoices->count() }}/
+                                            <a>{{ Auth::user()->Company->Plan->max_invoices_per_month }}Max</a></span>
+                                        @if (auth()->user()->company)
                                             @php
                                                 $currentUsers = auth()->user()->company->invoices->count();
-                                                $maxUsers = max(auth()->user()->Company->Plan->max_invoices_per_month ?? 1, 1);
+                                                $maxUsers = max(
+                                                    auth()->user()->Company->Plan->max_invoices_per_month ?? 1,
+                                                    1,
+                                                );
                                                 $percentage = min(100, ($currentUsers / $maxUsers) * 100);
                                             @endphp
-                                    @php
-                                            if ($percentage < 50) {
-                                                $color = 'bg-blue-600';
-                                            } elseif ($percentage < 100) {
-                                                $color = 'bg-yellow-500';
-                                            } else {
-                                                $color = 'bg-red-600';
-                                            }
-                                        @endphp
+                                            @php
+                                                if ($percentage < 50) {
+                                                    $color = 'bg-blue-600';
+                                                } elseif ($percentage < 100) {
+                                                    $color = 'bg-yellow-500';
+                                                } else {
+                                                    $color = 'bg-red-600';
+                                                }
+                                            @endphp
 
-                                        <div class="bg-gray-200 rounded-full h-1.5 mt-1 w-16">
-                                            <div class="{{ $color }} h-1.5 rounded-full transition-all duration-300"
-                                                style="width: {{ $percentage }}%">
+                                            <div class="bg-gray-200 rounded-full h-1.5 mt-1 w-16">
+                                                <div class="{{ $color }} h-1.5 rounded-full transition-all duration-300"
+                                                    style="width: {{ $percentage }}%">
+                                                </div>
                                             </div>
-                                        </div>
-
                                         @else
                                             <span class="font-medium text-gray-500">N/A</span>
                                         @endif
-                                            </div>
+                                    </div>
 
 
                                 </div>
@@ -568,7 +573,7 @@
 
 
                             <div class="items-center hidden pl-4 space-x-3 border-gray-200 sm:flex ">
-        <div class="flex items-center justify-center w-8 h-8 rounded-lg shadow-sm">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-lg shadow-sm">
                                     <button @click="open = !open"
                                         class="flex items-center text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         <img class="w-8 h-8 rounded-full"
@@ -579,12 +584,15 @@
                                 </div>
 
                                 <div class="text-right">
-                                    <p class="flex items-center text-sm text-gray-600 ">  {{ auth()->user()->name ?? 'User' }}
-                                         <img src="{{ asset('facebook-verified.png') }}" alt="" class="w-4 h-4">
+                                    <p class="flex items-center text-sm text-gray-600 ">
+                                        {{ auth()->user()->name ?? 'User' }}
+                                        <img src="{{ asset('facebook-verified.png') }}" alt=""
+                                            class="w-4 h-4">
                                     </p>
 
                                     <p class="flex items-center text-xs text-gray-500 ">
-                                        <span  class="font-medium text-blue-600">{{ auth()->user()->company->Plan->name }}</span>
+                                        <span
+                                            class="font-medium text-blue-600">{{ auth()->user()->company->Plan->name }}</span>
 
                                     </p>
                                 </div>
@@ -699,13 +707,15 @@
         <x-support-popup />
     @endauth
 
-
+    <!--
 <x-subscription-popup
     :company="auth()->user()->company"
     {{-- :plan="auth()->user()->plan" --}}
     :plan="auth()->user()->company->plan ?? null"
     :force-show="true"
 />
+-->
+    <x-subscription-popup-advanced :company="auth()->user()->company" :plan="auth()->user()->company->plan ?? null" />
     <x-loading />
     {{-- <x-subscription-popup /> --}}
 

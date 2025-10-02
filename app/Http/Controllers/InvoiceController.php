@@ -93,7 +93,19 @@ class InvoiceController extends Controller
 
         // Verificar se é venda à dinheiro
         $isCashSale = request()->get('cash_sale', false);
-        return view('invoices.create', compact('clients', 'settings', 'isCashSale'));
+        $user = auth()->user();
+        $company = $user->company;
+        // dd($company);
+        $excededUsage = false;
+        if ($company->plan_id && $company->plan) {
+            $invoiceUsage = $company->getInvoiceUsage();
+            // dd($invoiceUsage);
+            if ($invoiceUsage['exceeded']) {
+                $excededUsage = true;
+            }
+        }
+
+        return view('invoices.create', compact('clients', 'settings', 'isCashSale', 'excededUsage'));
     }
 
     // public function store(Request $request)

@@ -413,14 +413,17 @@ class SubscriptionController extends Controller
                 'user' => $user,
             ]);
         }
-
+        if($company->status == \App\Models\Company::STATUS_ACTIVE && $company->subscription_status == \App\Models\Company::SUBSCRIPTION_ACTIVE)
+        {
+            return redirect(route('dashboard'));
+        }
         // Pegar o motivo da URL (passado pela middleware)
         $reason = $request->get('reason', $this->detectBlockReason($company));
 
         // Montar dados baseados no motivo
         $blockData = $this->getBlockData($reason, $company);
 
-        return view('subscription.blocked', [
+        return view('subscriptions.blocked', [
             'reason' => $reason,
             'title' => $blockData['title'],
             'message' => $blockData['message'],

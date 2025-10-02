@@ -281,6 +281,7 @@ class Company extends Model
             ->whereYear('created_at', $currentMonth->year)
             ->whereMonth('created_at', $currentMonth->month)
             ->count();
+            $current = 45;
 
         $max = $this->plan->max_invoices_per_month ?? 0;
 

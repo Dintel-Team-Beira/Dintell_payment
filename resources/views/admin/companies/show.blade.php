@@ -13,7 +13,7 @@
     </a>
 
     <div class="flex items-center space-x-2">
-        @if($company->status === 'suspended')
+        @if($company->subscription_status === 'suspended')
         <form action="{{ route('admin.companies.activate', $company) }}" method="POST" class="inline">
             @csrf
             @method('POST')

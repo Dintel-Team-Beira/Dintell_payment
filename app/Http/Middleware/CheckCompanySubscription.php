@@ -46,7 +46,12 @@ class CheckCompanySubscription
             return redirect()->route('company.required')
                 ->with('error', 'Você precisa estar associado a uma empresa.');
         }
-           // ===================================
+        // Verify both status: 
+        // if($company->status === \App\Models\Company::STATUS_ACTIVE && $company->subscription_status === \App\Models\Company::SUBSCRIPTION_ACTIVE)
+        // {
+        //     return $next($request);
+        // }
+        // ===================================
         // 1º PRIORIDADE: STATUS ADMINISTRATIVO
         // ===================================
         
@@ -134,6 +139,7 @@ class CheckCompanySubscription
         // 4º PRIORIDADE: LIMITES DE USO
         // ===================================
 
+        // dd($company->plan_id == $company->plan->id);
         // Verificar limites apenas se tiver plano
         if ($company->plan_id && $company->plan) {
             
@@ -147,6 +153,7 @@ class CheckCompanySubscription
 
             // Limite de faturas mensais excedido
             $invoiceUsage = $company->getInvoiceUsage();
+            // dd($invoiceUsage);
             if ($invoiceUsage['exceeded']) {
                 // Bloqueia criação de novas faturas
                 session()->flash('warning', 'Você atingiu o limite de faturas mensais do seu plano.');

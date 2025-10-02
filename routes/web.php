@@ -599,9 +599,7 @@ Route::middleware(['auth', TenantMiddleware::class])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/subscription/blocked', function () {
-        return view('subscriptions.blocked');
-    })->name('subscription.blocked');
+    Route::get('/subscription/blocked', [SubscriptionController::class, 'blocked'])->name('subscription.blocked');
 
     // Página que avisa que precisa de empresa
     Route::get('/company/required', function () {

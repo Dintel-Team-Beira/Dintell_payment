@@ -274,6 +274,7 @@ public function show(Company $company)
             if ($request->hasFile('logo')) {
                 $logoPath = $request->file('logo')->store('companies/logos', 'public');
             }
+            // dd($request->trial_days);
 
             // Criar a empresa
             $company = Company::create([
@@ -288,7 +289,7 @@ public function show(Company $company)
                 'plan_id' => $plan->id,
                 'status' => $request->status,
                 'trial_ends_at' => $request->status === 'trial' && $request->trial_days
-                    ? now()->addDays($request->trial_days)
+                    ? now()->addDays(intval($request->trial_days))
                     : null,
                 'custom_domain_enabled' => $request->boolean('custom_domain_enabled'),
                 'api_access_enabled' => $request->boolean('api_access_enabled'),
@@ -491,6 +492,7 @@ public function show(Company $company)
     public function activate(Company $company)
     {
         $company->update(['status' => 'active']);
+        $company->activate();
         // Log da ativação
         $this->logAdminActivity('Ativou empresa', [
             'company_id' => $company->id,
