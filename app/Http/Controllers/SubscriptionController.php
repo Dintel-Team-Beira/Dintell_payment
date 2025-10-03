@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Company;
+use App\Models\CompanySubscription;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Notifications\SubscriptionActivatedNotification;
@@ -442,6 +443,10 @@ class SubscriptionController extends Controller
     {
         // Status administrativo
         if ($company->status === Company::STATUS_SUSPENDED) {
+            if($company->subscriptions()->latest()->first()->status===CompanySubscription::STATUS_SUSPENDED)
+            {
+                return 'subscription_suspended';
+            }
             return 'suspended';
         }
 
@@ -454,20 +459,20 @@ class SubscriptionController extends Controller
         }
 
         // Subscrição
-        if ($company->subscription_status === Company::SUBSCRIPTION_STATUS_CANCELLED) {
+        if ($company->subscriptions()->latest()->first()->status === CompanySubscription::STATUS_CANCELED) {
             return 'cancelled';
         }
 
-        if ($company->subscription_status === Company::SUBSCRIPTION_STATUS_EXPIRED) {
+        if ($company->subscriptions()->latest()->first()->status === CompanySubscription::STATUS_EXPIRED) {
             return 'expired';
         }
 
-        if ($company->subscription_status === Company::SUBSCRIPTION_STATUS_SUSPENDED) {
+        if ($company->subscriptions()->latest()->first()->status === CompanySubscription::STATUS_SUSPENDED) {
             return 'subscription_suspended';
         }
 
         // Trial expirado
-        if ($company->subscription_type === Company::SUBSCRIPTION_TYPE_TRIAL) {
+        if ($company->subscriptions()->latest()->first()->status === CompanySubscription::STATUS_TRIALING) {
             if ($company->trial_ends_at && $company->trial_ends_at->isPast()) {
                 return 'trial_expired';
             }
@@ -484,7 +489,7 @@ class SubscriptionController extends Controller
         return match($reason) {
             'suspended' => [
                 'title' => 'Conta Suspensa',
-                'message' => $company->suspension_reason ?? 'Sua conta foi suspensa administrativamente. Entre em contato com o suporte para mais informações.',
+                'message' => $company->subscriptions()->latest()->first()->suspension_message ?? 'Sua conta foi suspensa administrativamente. Entre em contato com o suporte para mais informações.',
                 'actionText' => 'Contatar Suporte',
                 'actionRoute' => 'support.contact',
             ],

@@ -226,10 +226,16 @@ class CompanySubscription extends Controller
                 notes: $validated['notes'] ?? null
             );
 
-            return back()->with('success', 'Subscrição reativada com sucesso!');
+            // return back()->with('success', 'Subscrição reativada com sucesso!');
+            return response()->json(['success' => true, 'message' => 'Subscrição reativada com sucesso!']);
+
 
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Erro ao reativar: ' . $e->getMessage()]);
+                  return response()->json([
+            'success' => false,
+            'message' => 'Erro ao reativar: ' . $e->getMessage(),
+        ], 500); // Retorne um status HTTP de erro
+            // return back()->withErrors(['error' => 'Erro ao reativar: ' . $e->getMessage()]);
         }
     }
 

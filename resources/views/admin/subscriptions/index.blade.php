@@ -602,7 +602,7 @@ function reactivateSubscription(subscriptionId) {
             setTimeout(() => window.location.reload(), 1000);
         }
     })
-    .catch(error => showNotification('Erro ao reativar subscrição', 'error'));
+    .catch(error => showNotification('Erro ao reativar subscrição'+error, 'error'));
 }
 
 // Sistema de notificações

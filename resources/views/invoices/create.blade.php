@@ -106,12 +106,12 @@
                                     <div class="flex items-center justify-between pt-3 mt-3 border-t border-gray-300">
                                         <div>
                                             <p class="text-xs text-gray-600">Plano Atual</p>
-                                            <p class="font-semibold text-gray-900">{{ $company->plan->name }}</p>
+                                            <p class="font-semibold text-gray-900">{{ $company->subscriptions()->latest()->first()->plan->name  }}</p>
                                         </div>
                                         <div class="text-right">
                                             <p class="text-xs text-gray-600">Renovação</p>
                                             <p class="font-semibold text-gray-900">
-                                                {{ \Carbon\Carbon::parse($company->subscription_ends_at)->format('d/m/Y') }}
+                                                {{ \Carbon\Carbon::parse($company->subscriptions()->latest()->first()->next_payment_due)->format('d/m/Y') }}
                                             </p>
                                         </div>
                                     </div>

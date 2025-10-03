@@ -78,6 +78,14 @@ class CompanySubscription extends Model
         'suspension_count' => 'integer',
     ];
 
+    // Constantes para os status de assinatura
+    public const STATUS_TRIALING = 'trialing';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_PAST_DUE = 'past_due';
+    public const STATUS_CANCELED = 'canceled';
+    public const STATUS_EXPIRED = 'expired';
+    public const STATUS_SUSPENDED = 'suspended';
+    public const STATUS_GRACE_PERIOD = 'grace_period';
     // ==================== RELATIONSHIPS ====================
 
     public function company(): BelongsTo

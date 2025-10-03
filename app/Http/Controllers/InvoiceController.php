@@ -94,12 +94,12 @@ class InvoiceController extends Controller
         // Verificar se é venda à dinheiro
         $isCashSale = request()->get('cash_sale', false);
         $user = auth()->user();
+
         $company = $user->company;
-        // dd($company);
         $excededUsage = false;
         if ($company->plan_id && $company->plan) {
-            $invoiceUsage = $company->getInvoiceUsage();
-            // dd($invoiceUsage);
+            // $invoiceUsage = $company->getInvoiceUsage(); 
+            $invoiceUsage = $company->getInvoiceUsageFeatured();
             if ($invoiceUsage['exceeded']) {
                 $excededUsage = true;
             }

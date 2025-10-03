@@ -83,7 +83,18 @@ class QuoteController extends Controller
     {
         $clients = Client::orderBy('name')->get();
         $settings = BillingSetting::getSettings();
-        return view('quotes.create', compact('clients', 'settings'));
+        $user = auth()->user();
+
+        $company = $user->company;
+        $excededUsage = false;
+        if ($company->plan_id && $company->plan) {
+            // $invoiceUsage = $company->getInvoiceUsage(); //teste 
+            $invoiceUsage = $company->getInvoiceUsageFeatured();
+            if ($invoiceUsage['exceeded']) {
+                $excededUsage = true;
+            }
+        }
+        return view('quotes.create', compact('clients', 'settings',  'excededUsage', 'company'));
     }
 
     public function store(Request $request)

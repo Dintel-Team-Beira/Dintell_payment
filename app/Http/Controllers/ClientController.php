@@ -63,7 +63,16 @@ class ClientController extends Controller
 
     public function create()
     {
-        return view('clients.create');
+        $user = auth()->user();
+        $company = $user->company;
+        $excededUsage = false;
+        if ($company->plan_id && $company->plan) {
+            $clientUsage = $company->getClientUsage(); 
+            if ($clientUsage['exceeded']) {
+                $excededUsage = true;
+            }
+        }
+        return view('clients.create',compact('excededUsage', 'company'));
     }
 
     public function store(Request $request)

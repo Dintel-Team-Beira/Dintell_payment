@@ -54,9 +54,18 @@ class CheckCompanySubscription
         // ===================================
         // 1º PRIORIDADE: STATUS ADMINISTRATIVO
         // ===================================
-        
+        $subscription = $company->subscriptions()->latest()->first();
         // Admin suspendeu manualmente
         if ($company->status === \App\Models\Company::STATUS_SUSPENDED) {
+            if($subscription->isSuspended())
+            {
+                return $this->blockAccess(
+                'Subscrição Suspensa',
+                'Sua subscrição foi suspensa. Regularize o pagamento para continuar.',
+                'subscription_suspended',
+                $company
+            );   
+            }
             return $this->blockAccess(
                 'Conta Suspensa',
                 $company->suspension_reason ?? 'Sua conta foi suspensa. Entre em contato com o suporte.',
@@ -89,7 +98,7 @@ class CheckCompanySubscription
         // 2º PRIORIDADE: SUBSCRIÇÃO
         // ===================================
 
-        $subscription = $company->subscriptions()->latest()->first();
+
         // Subscrição cancelada
         // dd($subscription->isCanceled());
         // if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_CANCELLED) {
@@ -116,6 +125,7 @@ class CheckCompanySubscription
         // Subscrição suspensa (provavelmente por falta de pagamento)
         // if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_SUSPENDED) {
         if($subscription->isSuspended()){
+            
             return $this->blockAccess(
                 'Subscrição Suspensa',
                 'Sua subscrição foi suspensa. Regularize o pagamento para continuar.',

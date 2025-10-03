@@ -232,7 +232,7 @@
             {{-- Footer --}}
             <p class="mt-6 text-xs text-center text-gray-500">
                 Tem dúvidas? Entre em contato: 
-                <a href="mailto:suporte@seusite.com" class="text-blue-600 hover:text-blue-700 hover:underline">
+                <a href="mailto:suporte@sub360.co.mz" class="text-blue-600 hover:text-blue-700 hover:underline">
                     suporte@sub360.co.mz
                 </a>
             </p>
