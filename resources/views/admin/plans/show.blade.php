@@ -428,7 +428,7 @@
                                 {{ number_format($subscription->amount, 2) }} MT
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                {{ $subscription->start_date->format('d/m/Y') }}
+                                {{ $subscription->starts_at->format('d/m/Y') }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                 @if($subscription->next_billing_date)

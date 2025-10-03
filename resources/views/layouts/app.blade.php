@@ -451,7 +451,7 @@
 
                                     <span class="flex font-medium text-gray-700"> <img
                                             src="{{ asset('facebook-verified.png') }}" alt=""
-                                            class="w-4 h-4 mr-1"> {{ auth()->user()->company->Plan->name }}
+                                            class="w-4 h-4 mr-1"> {{ auth()->user()->company->subscriptions()->latest()->first()->plan->name  }}
                                     </span>
                                 </div>
                                 <div class="flex items-center justify-between">
@@ -462,11 +462,11 @@
                                         @endphp
                                         <span
                                             class="font-medium text-gray-500">{{ auth()->user()->company->users->count() }}
-                                            / <a>{{ Auth::user()->Company->Plan->max_users }}Max</a></span>
+                                            / <a>{{ Auth::user()->company->subscriptions()->latest()->first()->plan->max_users }}Max</a></span>
                                         @if (auth()->user()->company)
                                             @php
                                                 $currentUsers = auth()->user()->company->users->count();
-                                                $maxUsers = max(auth()->user()->company->max_users ?? 1, 1);
+                                                $maxUsers = max(auth()->user()->company->subscriptions()->latest()->first()->plan->max_users ?? 1, 1);
                                                 $percentage = min(100, ($currentUsers / $maxUsers) * 100);
                                             @endphp
 
@@ -495,12 +495,12 @@
 
                                         <span
                                             class="font-medium text-gray-500">{{ Auth::user()->Company->invoices->count() }}/
-                                            <a>{{ Auth::user()->Company->Plan->max_invoices_per_month }}Max</a></span>
+                                            <a>{{ Auth::user()->company->subscriptions()->latest()->first()->plan->max_invoices_per_month }}Max</a></span>
                                         @if (auth()->user()->company)
                                             @php
                                                 $currentUsers = auth()->user()->company->invoices->count();
                                                 $maxUsers = max(
-                                                    auth()->user()->Company->Plan->max_invoices_per_month ?? 1,
+                                                    auth()->user()->company->subscriptions()->latest()->first()->plan->max_invoices_per_month?? 1,
                                                     1,
                                                 );
                                                 $percentage = min(100, ($currentUsers / $maxUsers) * 100);
@@ -715,8 +715,7 @@
     :force-show="true"
 />
 -->
-   @if (request()->routeIs(['dashboard', 'billing.*', 'quotes.*','invoices.*','receipts.*']))
-   {{-- {{ Route::currentRouteName() }} --}}
+   @if (request()->routeIs(['dashboard', 'billing.*', 'quotes.*','invoices.*','receipts.*','clients.*']))
    {{-- Apenas exibido em páginas críticas: dashboard, faturação, fatura, cotação e recibo --}}
     <x-subscription-popup-advanced :company="auth()->user()->company" :plan="auth()->user()->company->plan ?? null" />       
    @endif

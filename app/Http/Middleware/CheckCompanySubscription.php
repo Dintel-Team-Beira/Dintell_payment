@@ -168,8 +168,8 @@ class CheckCompanySubscription
             }
 
             // Limite de faturas mensais excedido
-            $invoiceUsage = $company->getInvoiceUsage();
-            // $invoiceUsage = $company->getInvoiceUsageFeatured();
+            // $invoiceUsage = $company->getInvoiceUsage();
+            $invoiceUsage = $company->getInvoiceUsageFeatured();
             // dd($invoiceUsage);
             if ($invoiceUsage['exceeded']) {
                 // Bloqueia criação de novas faturas

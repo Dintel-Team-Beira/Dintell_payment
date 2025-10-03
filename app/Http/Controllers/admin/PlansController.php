@@ -108,7 +108,7 @@ class PlansController extends Controller
 
         $stats = [
             'active_subscriptions' => $plan->subscriptions()->where('status', 'active')->count(),
-            'total_revenue' => $plan->subscriptions()->sum('amount_paid'),
+            'total_revenue' => $plan->subscriptions()->sum('amount'),
             'companies_count' => $plan->companies()->count(),
             'average_usage' => $this->calculateAverageUsage($plan),
         ];
