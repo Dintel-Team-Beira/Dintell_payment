@@ -58,9 +58,9 @@
                             <label class="block mb-2 text-sm font-medium text-gray-700">Categoria:</label>
                             <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">Todas</option>
-                                @foreach(App\Models\Service::getCategories() as $key => $category)
-                                    <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>
-                                        {{ $category }}
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -122,7 +122,7 @@
     </div>
 
     <!-- Cards de Estatísticas por Categoria -->
-    <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+    {{-- <div class="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
         <div class="p-6 transition-shadow bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md">
             <div class="flex items-center justify-between">
                 <div>
@@ -178,7 +178,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Tabela de Serviços -->
     <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
@@ -257,7 +257,8 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ App\Models\Service::getCategories()[$service->category] ?? $service->category }}
+                                    {{-- {{ App\Models\Service::getCategories()[$service->category] ?? $service->category }} --}}
+                                    {{ $service->category?->name ?? 'Sem categoria' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -452,8 +453,8 @@
                                         name="category"
                                         required>
                                     <option value="">Selecione...</option>
-                                    @foreach(App\Models\Service::getCategories() as $key => $category)
-                                        <option value="{{ $key }}">{{ $category }}</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
                                     @endforeach
                                 </select>
                             </div>

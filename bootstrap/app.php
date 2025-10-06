@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'company_prefix' => CompanyPrefixMiddleware::class,
             'subscription.check' => \App\Http\Middleware\CheckCompanySubscription::class,
+            'tenant.resolve' => \App\Http\Middleware\ResolveTenant::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

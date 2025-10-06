@@ -98,9 +98,9 @@
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 required>
                             <option value="">Selecione uma categoria</option>
-                            @foreach(App\Models\Service::getCategories() as $key => $category)
-                                <option value="{{ $key }}" {{ old('category') == $key ? 'selected' : '' }}>
-                                    {{ $category }}
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -845,9 +845,9 @@ function loadDraft() {
 // Auto-save every 30 seconds
 document.addEventListener('DOMContentLoaded', function() {
     // Load draft on page load
-    if (confirm('Deseja carregar o rascunho salvo?')) {
-        loadDraft();
-    }
+    // if (confirm('Deseja carregar o rascunho salvo?')) {
+    //     loadDraft();
+    // }
 
     // Auto-save form changes
     const form = document.getElementById('serviceForm');

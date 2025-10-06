@@ -104,9 +104,9 @@
                                 <select name="category" id="category" required
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('category') border-red-300 @enderror">
                                     <option value="">Selecione uma categoria</option>
-                                    @foreach(\App\Models\Service::getCategories() as $key => $label)
-                                        <option value="{{ $key }}" {{ old('category', $service->category) == $key ? 'selected' : '' }}>
-                                            {{ $label }}
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}" {{ old('category', $service->category?->id) == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -122,10 +122,10 @@
                                 <select name="complexity_level" id="complexity_level"
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('complexity_level') border-red-300 @enderror">
                                     <option value="">Selecione o nível</option>
-                                    <option value="basic" {{ old('complexity_level', $service->complexity_level) == 'basic' ? 'selected' : '' }}>Básico</option>
-                                    <option value="intermediate" {{ old('complexity_level', $service->complexity_level) == 'intermediate' ? 'selected' : '' }}>Intermediário</option>
-                                    <option value="advanced" {{ old('complexity_level', $service->complexity_level) == 'advanced' ? 'selected' : '' }}>Avançado</option>
-                                    <option value="expert" {{ old('complexity_level', $service->complexity_level) == 'expert' ? 'selected' : '' }}>Especialista</option>
+                                    <option value="baixa" {{ old('complexity_level', $service->complexity_level) == 'basic' ? 'selected' : '' }}>Básico</option>
+                                    <option value="media" {{ old('complexity_level', $service->complexity_level) == 'intermediate' ? 'selected' : '' }}>Intermediário</option>
+                                    <option value="alta" {{ old('complexity_level', $service->complexity_level) == 'advanced' ? 'selected' : '' }}>Avançado</option>
+                                    {{-- <option value="expert" {{ old('complexity_level', $service->complexity_level) == 'expert' ? 'selected' : '' }}>Especialista</option> --}}
                                 </select>
                                 @error('complexity_level')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

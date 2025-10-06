@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -58,8 +59,12 @@ class ServiceController extends Controller
         }
 
         $services = $query->orderBy('name')->paginate(20);
+        $categories = Category::where('type', 'service')
+                        ->orWhere('type', 'both')
+                        ->orderBy('name')
+                        ->get();
 
-        return view('services.index', compact('services'));
+        return view('services.index', compact('services', 'categories'));
     }
 
     /**
@@ -67,7 +72,11 @@ class ServiceController extends Controller
      */
     public function create()
     {
-        return view('services.create');
+        $categories = Category::where('type', 'service')
+                        ->orWhere('type', 'both')
+                        ->orderBy('name')
+                        ->get();
+        return view('services.create',compact('categories'));
     }
 
     /**
@@ -81,13 +90,15 @@ class ServiceController extends Controller
             'description' => 'nullable|string',
             'hourly_rate' => 'nullable|numeric|min:0',
             'fixed_price' => 'nullable|numeric|min:0',
-            'category' => 'required|string|max:50',
+            // 'category' => 'required|string|max:50',
             'tax_rate' => 'nullable|numeric|min:0|max:100',
             'estimated_hours' => 'nullable|numeric|min:0',
             'complexity_level' => 'required|in:baixa,media,alta',
-            'requirements' => 'nullable|array',
+            // 'requirements' => 'nullable|array',
+            'requirements' => 'nullable|string',
             'deliverables' => 'nullable|array',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'category' => 'required|exists:categories,id',
         ]);
         $validated['company_id'] = auth()->user()->company->id;
         // Validação customizada: deve ter pelo menos hourly_rate ou fixed_price
@@ -103,6 +114,7 @@ class ServiceController extends Controller
 
         $data = $request->all();
         $data['is_active'] = $request->has('is_active');
+        $data['category_id'] = $request->get('category');
 
         // Gerar código se não fornecido
         if (empty($data['code'])) {
@@ -142,7 +154,11 @@ class ServiceController extends Controller
     public function edit(Service $service)
     {
         // dd($service);
-        return view('services.edit', compact('service'));
+        $categories = Category::where('type', 'service')
+                        ->orWhere('type', 'both')
+                        ->orderBy('name')
+                        ->get();
+        return view('services.edit', compact('service','categories'));
     }
 
     /**
@@ -156,12 +172,13 @@ class ServiceController extends Controller
             'description' => 'nullable|string',
             'hourly_rate' => 'nullable|numeric|min:0',
             'fixed_price' => 'nullable|numeric|min:0',
-            'category' => 'required|string|max:50',
+            // 'category' => 'required|string|max:50',
+            'category' => 'required|exists:categories,id',
             'tax_rate' => 'nullable|numeric|min:0|max:100',
             'estimated_hours' => 'nullable|numeric|min:0',
             'complexity_level' => 'required|in:baixa,media,alta',
-            'requirements' => 'nullable|array',
-            'deliverables' => 'nullable|array',
+            'requirements' => 'nullable|string',
+            'deliverables' => 'nullable|string',
             'is_active' => 'boolean'
         ]);
         $validated['company_id'] = auth()->user()->company->id;
@@ -178,6 +195,7 @@ class ServiceController extends Controller
 
         $data = $request->all();
         $data['is_active'] = $request->has('is_active');
+        $data['category_id'] = $request->get('category');
 
         // Processar requirements e deliverables
         if ($request->filled('requirements_text')) {
@@ -188,8 +206,9 @@ class ServiceController extends Controller
             $data['deliverables'] = array_filter(explode("\n", $request->get('deliverables_text')));
         }
 
+        unset($data['category']);
         $service->update($data);
-
+        $data['category_id'] = $request->get('category');
         return redirect()->route('services.index')
             ->with('success', 'Serviço atualizado com sucesso!');
     }

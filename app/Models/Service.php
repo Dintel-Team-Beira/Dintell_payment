@@ -5,6 +5,7 @@
 namespace App\Models;
 
 use App\Scopes\CompanyScope;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,7 +27,8 @@ class Service extends Model
         'complexity_level',
         'requirements',
         'deliverables',
-        'company_id', // Adicionar para multi-tenancy
+        'company_id', // Adicionar para multi-tenancy,
+        'category_id'
     ];
 
     protected $casts = [
@@ -191,10 +193,10 @@ class Service extends Model
         ];
     }
 
-    protected static function booted()
-    {
-        static::addGlobalScope(new CompanyScope);
-    }
+    // protected static function booted()
+    // {
+    //     static::addGlobalScope(new CompanyScope);
+    // }
 
     /**
      * Serviço pertence a uma categoria.
@@ -203,4 +205,27 @@ class Service extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+
+      // Adicionando SCOPE de COMPANY
+        /**
+     * Boot method - adiciona global scope para multi-tenancy.
+     */
+    protected static function booted()
+    {
+        // Sempre filtra pela empresa do usuário logado
+        static::addGlobalScope('company', function (Builder $builder) {
+            if (auth()->check() && auth()->user()->company_id) {
+                $builder->where('company_id', auth()->user()->company_id);
+            }
+        });
+
+        // Ao criar, adiciona company_id automaticamente
+        static::creating(function ($service) {
+            if (auth()->check() && !$service->company_id) {
+                $service->company_id = auth()->user()->company_id;
+            }
+        });
+    }
+
 }

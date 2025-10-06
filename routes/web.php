@@ -330,7 +330,7 @@ Route::get('/', function () {
 -------------------------------------------------------
 */
 
-Route::middleware(['auth', 'subscription.check'])->prefix('dintell')->group(function () {
+Route::middleware(['tenant.resolve','auth', 'subscription.check'])->prefix('{tenant}')->group(function () {
     // Dashboard da Empresa
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('dashboard.analytics');
