@@ -133,13 +133,13 @@
                                 </label>
                                 <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('category') border-red-300 @enderror"
                                         id="category"
-                                        name="category"
+                                        name="category_id"
                                         required>
                                     <option value="">Selecione uma categoria</option>
-                                    @foreach(App\Models\Product::getCategories() as $key => $category)
-                                        <option value="{{ $key }}"
-                                                {{ old('category', $product->category ?? '') == $key ? 'selected' : '' }}>
-                                            {{ $category }}
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id}}"
+                                                {{ old('category', $category->id ?? '') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
                                         </option>
                                     @endforeach
                                 </select>

@@ -129,9 +129,9 @@
                         <label class="block mb-2 text-sm font-medium text-gray-700">Categoria:</label>
                         <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             <option value="">Todas</option>
-                            @foreach(\App\Models\Product::getCategories() as $key => $category)
-                                <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>
-                                    {{ $category }}
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -266,7 +266,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ \App\Models\Product::getCategories()[$product->category] ?? $product->category }}
+                                    {{ $product->category->name??'N/A' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">

@@ -5,6 +5,7 @@
 namespace App\Models;
 
 use App\Scopes\CompanyScope;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,6 +30,7 @@ class Product extends Model
         'weight',
         'dimensions',
         'company_id', // Adicionar para multi-tenancy
+        'category_id'
     ];
 
     // Relacionamento com empresa
@@ -158,10 +160,10 @@ class Product extends Model
         ];
     }
 
-    protected static function booted()
-    {
-        static::addGlobalScope(new CompanyScope);
-    }
+    // protected static function booted()
+    // {
+    //     static::addGlobalScope(new CompanyScope);
+    // }
 
     /**
      * Produto pertence a uma categoria.
@@ -170,4 +172,27 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+
+    // Adicionando SCOPE de COMPANY
+        /**
+     * Boot method - adiciona global scope para multi-tenancy.
+     */
+    protected static function booted()
+    {
+        // Sempre filtra pela empresa do usuário logado
+        static::addGlobalScope('company', function (Builder $builder) {
+            if (auth()->check() && auth()->user()->company_id) {
+                $builder->where('company_id', auth()->user()->company_id);
+            }
+        });
+
+        // Ao criar, adiciona company_id automaticamente
+        static::creating(function ($product) {
+            if (auth()->check() && !$product->company_id) {
+                $product->company_id = auth()->user()->company_id;
+            }
+        });
+    }
 }
+

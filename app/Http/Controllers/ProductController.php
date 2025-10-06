@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -27,8 +28,13 @@ class ProductController extends Controller
             });
         }
 
+        $categories = Category::where('type', 'product')
+                        ->orWhere('type', 'both')
+                        ->orderBy('name')
+                        ->get();
+
         if ($request->filled('category')) {
-            $query->where('category', $request->get('category'));
+            $query->where('category_id', $request->get('category'));
         }
 
         if ($request->filled('status')) {
@@ -56,7 +62,7 @@ class ProductController extends Controller
 
         $products = $query->where('company_id',auth()->user()->company_id)->orderBy('name')->paginate(20);
 
-        return view('products.index', compact('products'));
+        return view('products.index', compact('products', 'categories'));
     }
 
     /**
@@ -64,7 +70,11 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view('products.create');
+        $categories = Category::where('type', 'product')
+                        ->orWhere('type', 'both')
+                        ->orderBy('name')
+                        ->get();
+        return view('products.create', compact('categories'));
     }
 
     /**
@@ -80,13 +90,14 @@ class ProductController extends Controller
             'cost' => 'nullable|numeric|min:0',
             'stock_quantity' => 'nullable|integer|min:0',
             'min_stock_level' => 'nullable|integer|min:0',
-            'category' => 'required|string|max:50',
+            // 'category' => 'required|string|max:50',
             'unit' => 'required|string|max:20',
             'tax_rate' => 'nullable|numeric|min:0|max:100',
             'weight' => 'nullable|numeric|min:0',
             'dimensions' => 'nullable|string|max:100',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'category_id' => 'nullable|exists:categories,id'
         ]);
 
                 $validated['company_id'] = auth()->user()->company->id;
@@ -95,6 +106,7 @@ class ProductController extends Controller
         }
 
         $data = $request->except(['image']);
+        // $data['category'] = '';
         $data['is_active'] = $request->has('is_active');
 
         // Upload da imagem
@@ -133,7 +145,11 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        return view('products.edit', compact('product'));
+                $categories = Category::where('type', 'product')
+                        ->orWhere('type', 'both')
+                        ->orderBy('name')
+                        ->get();
+        return view('products.edit', compact('product', 'categories'));
     }
 
     /**
@@ -149,13 +165,14 @@ class ProductController extends Controller
             'cost' => 'nullable|numeric|min:0',
             'stock_quantity' => 'nullable|integer|min:0',
             'min_stock_level' => 'nullable|integer|min:0',
-            'category' => 'required|string|max:50',
+            // 'category' => 'required|string|max:50',
             'unit' => 'required|string|max:20',
             'tax_rate' => 'nullable|numeric|min:0|max:100',
             'weight' => 'nullable|numeric|min:0',
             'dimensions' => 'nullable|string|max:100',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+                        'category_id' => 'nullable|exists:categories,id'
         ]);
 
                 $validated['company_id'] = auth()->user()->company->id;
@@ -164,6 +181,7 @@ class ProductController extends Controller
         }
 
         $data = $request->except(['image']);
+        // $data['category'] = '';
         $data['is_active'] = $request->has('is_active');
 
         // Upload da nova imagem

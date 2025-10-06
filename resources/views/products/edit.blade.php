@@ -100,12 +100,12 @@
                                 <label for="category" class="block mb-2 text-sm font-medium text-gray-700">
                                     Categoria *
                                 </label>
-                                <select name="category" id="category" required
+                                <select name="category_id" id="category" required
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('category') border-red-300 @enderror">
                                     <option value="">Selecione uma categoria</option>
-                                    @foreach(\App\Models\Product::getCategories() as $key => $label)
-                                        <option value="{{ $key }}" {{ old('category', $product->category) == $key ? 'selected' : '' }}>
-                                            {{ $label }}
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id}}" {{ old('category_id', $product->category?->id) == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -153,12 +153,12 @@
                                 </label>
                                 <div class="relative">
                                     <span class="absolute text-gray-500 transform -translate-y-1/2 left-3 top-1/2">MT</span>
-                                    <input type="number" name="cost_price" id="cost_price" step="0.01" min="0"
-                                           class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('cost_price') border-red-300 @enderror"
-                                           value="{{ old('cost_price', $product->cost_price) }}"
+                                    <input type="number" name="price" id="price" step="0.01" min="0"
+                                           class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('price') border-red-300 @enderror"
+                                           value="{{ old('price', $product->price) }}"
                                            placeholder="0.00">
                                 </div>
-                                @error('cost_price')
+                                @error('price')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -169,12 +169,12 @@
                                 </label>
                                 <div class="relative">
                                     <span class="absolute text-gray-500 transform -translate-y-1/2 left-3 top-1/2">MT</span>
-                                    <input type="number" name="price" id="price" step="0.01" min="0" required
-                                           class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('price') border-red-300 @enderror"
-                                           value="{{ old('price', $product->price) }}"
+                                    <input type="number" name="cost_price" id="cost_price" step="0.01" min="0" required
+                                           class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('cost_price') border-red-300 @enderror"
+                                           value="{{ old('cost_price', $product->cost) }}"
                                            placeholder="0.00">
                                 </div>
-                                @error('price')
+                                @error('cost_price')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -250,7 +250,7 @@
                                 </label>
                                 <input type="number" name="min_stock" id="min_stock" min="0" step="0.01"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('min_stock') border-red-300 @enderror"
-                                       value="{{ old('min_stock', $product->min_stock) }}"
+                                       value="{{ old('min_stock', $product->min_stock_level) }}"
                                        placeholder="0">
                                 @error('min_stock')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
