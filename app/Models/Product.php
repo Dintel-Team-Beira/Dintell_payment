@@ -1,6 +1,7 @@
 <?php
 
 // Product.php
+
 namespace App\Models;
 
 use App\Scopes\CompanyScope;
@@ -30,20 +31,18 @@ class Product extends Model
         'company_id', // Adicionar para multi-tenancy
     ];
 
-
-       // Relacionamento com empresa
+    // Relacionamento com empresa
     public function company()
     {
         return $this->belongsTo(Company::class);
     }
-
 
     protected $casts = [
         'price' => 'decimal:2',
         'cost' => 'decimal:2',
         'tax_rate' => 'decimal:2',
         'is_active' => 'boolean',
-        'weight' => 'decimal:2'
+        'weight' => 'decimal:2',
     ];
 
     protected static function boot()
@@ -51,24 +50,24 @@ class Product extends Model
         parent::boot();
 
         static::creating(function ($product) {
-             $company = session('current_company');
-            if ($company && !$product->company_id) {
+            $company = session('current_company');
+            if ($company && ! $product->company_id) {
                 $product->company_id = $company->id;
             }
             if (empty($product->code)) {
-                $product->code = 'PROD' . str_pad(static::count() + 1, 6, '0', STR_PAD_LEFT);
+                $product->code = 'PROD'.str_pad(static::count() + 1, 6, '0', STR_PAD_LEFT);
             }
         });
     }
 
-
-       // Scope para filtrar por empresa atual
+    // Scope para filtrar por empresa atual
     public function scopeForCurrentCompany($query)
     {
         $company = session('current_company');
         if ($company) {
             return $query->where('company_id', $company->id);
         }
+
         return $query;
     }
 
@@ -102,7 +101,7 @@ class Product extends Model
     // Accessors
     public function getFormattedPriceAttribute()
     {
-        return number_format($this->price, 2, ',', '.') . ' MT';
+        return number_format($this->price, 2, ',', '.').' MT';
     }
 
     public function getStockStatusAttribute()
@@ -112,6 +111,7 @@ class Product extends Model
         } elseif ($this->stock_quantity <= $this->min_stock_level) {
             return 'low_stock';
         }
+
         return 'in_stock';
     }
 
@@ -120,6 +120,7 @@ class Product extends Model
         if ($this->cost > 0) {
             return (($this->price - $this->cost) / $this->cost) * 100;
         }
+
         return 0;
     }
 
@@ -141,7 +142,7 @@ class Product extends Model
             'consultoria' => 'Consultoria',
             'licencas' => 'Licenças',
             'manutencao' => 'Manutenção',
-            'outros' => 'Outros'
+            'outros' => 'Outros',
         ];
     }
 
@@ -153,11 +154,20 @@ class Product extends Model
             'horas' => 'Horas',
             'dias' => 'Dias',
             'mes' => 'Mês',
-            'ano' => 'Ano'
+            'ano' => 'Ano',
         ];
     }
-     protected static function booted()
+
+    protected static function booted()
     {
         static::addGlobalScope(new CompanyScope);
+    }
+
+    /**
+     * Produto pertence a uma categoria.
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\UsersController as AdminUsersController;
 use App\Http\Controllers\ApiLogController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CreditNoteController;
 use App\Http\Controllers\DashboardController;
@@ -366,6 +367,11 @@ Route::middleware(['auth', 'subscription.check'])->prefix('dintell')->group(func
         ->name('plans.toggle-status');
     Route::post('plans/{plan}/duplicate', [SubscriptionPlanController::class, 'duplicate'])
         ->name('plans.duplicate');
+
+    // Categorias de Protudos/Serviços
+     Route::resource('categories', CategoryController::class);
+    Route::post('categories/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])
+         ->name('categories.toggle-status');
 
     // Dashboard de Faturação
     Route::prefix('billing')->name('billing.')->group(function () {

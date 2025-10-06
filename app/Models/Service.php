@@ -1,6 +1,7 @@
 <?php
 
 // Service.php
+
 namespace App\Models;
 
 use App\Scopes\CompanyScope;
@@ -35,23 +36,23 @@ class Service extends Model
         'is_active' => 'boolean',
         'estimated_hours' => 'decimal:2',
         'requirements' => 'array',
-        'deliverables' => 'array'
+        'deliverables' => 'array',
     ];
 
-     // Relacionamento com empresa
+    // Relacionamento com empresa
     public function company()
     {
         return $this->belongsTo(Company::class);
     }
 
-
-        // Scope para filtrar por empresa atual
+    // Scope para filtrar por empresa atual
     public function scopeForCurrentCompany($query)
     {
         $company = session('current_company');
         if ($company) {
             return $query->where('company_id', $company->id);
         }
+
         return $query;
     }
 
@@ -60,12 +61,12 @@ class Service extends Model
         parent::boot();
 
         static::creating(function ($service) {
-               $company = session('current_company');
-            if ($company && !$service->company_id) {
+            $company = session('current_company');
+            if ($company && ! $service->company_id) {
                 $service->company_id = $company->id;
             }
             if (empty($service->code)) {
-                $service->code = 'SERV' . str_pad(static::count() + 1, 6, '0', STR_PAD_LEFT);
+                $service->code = 'SERV'.str_pad(static::count() + 1, 6, '0', STR_PAD_LEFT);
             }
         });
     }
@@ -105,12 +106,12 @@ class Service extends Model
     // Accessors
     public function getFormattedHourlyRateAttribute()
     {
-        return number_format($this->hourly_rate, 2, ',', '.') . ' MT/hora';
+        return number_format($this->hourly_rate, 2, ',', '.').' MT/hora';
     }
 
     public function getFormattedFixedPriceAttribute()
     {
-        return number_format($this->fixed_price, 2, ',', '.') . ' MT';
+        return number_format($this->fixed_price, 2, ',', '.').' MT';
     }
 
     public function getEstimatedCostAttribute()
@@ -118,6 +119,7 @@ class Service extends Model
         if ($this->fixed_price > 0) {
             return $this->fixed_price;
         }
+
         return $this->hourly_rate * $this->estimated_hours;
     }
 
@@ -126,7 +128,7 @@ class Service extends Model
         $badges = [
             'baixa' => 'success',
             'media' => 'warning',
-            'alta' => 'danger'
+            'alta' => 'danger',
         ];
 
         return $badges[$this->complexity_level] ?? 'secondary';
@@ -140,6 +142,7 @@ class Service extends Model
         }
 
         $hoursToUse = $hours ?? $this->estimated_hours;
+
         return $this->hourly_rate * $hoursToUse;
     }
 
@@ -155,7 +158,7 @@ class Service extends Model
             'integracao' => 'Integração',
             'migracao' => 'Migração de Dados',
             'seguranca' => 'Segurança',
-            'outros' => 'Outros'
+            'outros' => 'Outros',
         ];
     }
 
@@ -164,7 +167,7 @@ class Service extends Model
         return [
             'baixa' => 'Baixa',
             'media' => 'Média',
-            'alta' => 'Alta'
+            'alta' => 'Alta',
         ];
     }
 
@@ -174,7 +177,7 @@ class Service extends Model
             'Reunião inicial para levantamento de requisitos',
             'Acesso aos sistemas existentes (se aplicável)',
             'Aprovação do cliente em cada etapa',
-            'Ambiente de desenvolvimento/teste'
+            'Ambiente de desenvolvimento/teste',
         ];
     }
 
@@ -184,11 +187,20 @@ class Service extends Model
             'Documentação técnica',
             'Código fonte',
             'Manual do usuário',
-            'Suporte pós-entrega (30 dias)'
+            'Suporte pós-entrega (30 dias)',
         ];
     }
-     protected static function booted()
+
+    protected static function booted()
     {
         static::addGlobalScope(new CompanyScope);
+    }
+
+    /**
+     * Serviço pertence a uma categoria.
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
