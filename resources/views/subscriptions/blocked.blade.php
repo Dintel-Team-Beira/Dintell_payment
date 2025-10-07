@@ -14,7 +14,7 @@
             @php
                 // Definir cores baseadas no motivo
                 $colors = match($reason) {
-                    'suspended', 'subscription_suspended', 'inactive' => [
+                    'suspended', 'subscription_suspended', 'inactive', 'no_subscription' => [
                         'bg' => 'bg-red-50',
                         'border' => 'border-red-200',
                         'icon_bg' => 'bg-red-100',
@@ -23,6 +23,7 @@
                         'text' => 'text-red-700',
                         'button' => 'bg-red-600 hover:bg-red-700',
                     ],
+                    
                     'expired', 'trial_expired', 'cancelled' => [
                         'bg' => 'bg-orange-50',
                         'border' => 'border-orange-200',
@@ -145,7 +146,7 @@
 
                                 @if($plan)
                                 <div class="flex justify-between">
-                                    <dt class="text-gray-600">Plano Atual:</dt>
+                                    <dt class="text-gray-600">Plano Actual:</dt>
                                     <dd class="font-medium text-gray-900">
                                         {{ $plan->name }}
                                     </dd>

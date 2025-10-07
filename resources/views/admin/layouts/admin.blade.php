@@ -134,9 +134,9 @@
                                 <div class="border-t border-gray-100"></div>
                                 @endif
 
-                                <a href="{{ route('billing.dashboard') }}" class="block px-3 py-1 text-sm leading-6 text-gray-900 hover:bg-gray-50">
+                                {{-- <a href="{{ route('billing.dashboard') }}" class="block px-3 py-1 text-sm leading-6 text-gray-900 hover:bg-gray-50">
                                     Sistema Principal
-                                </a>
+                                </a> --}}
 
                                 <a href="#" class="block px-3 py-1 text-sm leading-6 text-gray-900 hover:bg-gray-50">
                                     Perfil

@@ -55,6 +55,14 @@ class CheckCompanySubscription
         // 1º PRIORIDADE: STATUS ADMINISTRATIVO
         // ===================================
         $subscription = $company->subscriptions()->latest()->first();
+        if (!$subscription) {
+            return $this->blockAccess(
+                'Sem Subscrição',
+                'Nenhuma subscrição encontrada para sua empresa. Entre em contato com o suporte.',
+                'no_subscription',
+                $company
+            );
+        }
         // Admin suspendeu manualmente
         if ($company->status === \App\Models\Company::STATUS_SUSPENDED) {
             if($subscription->isSuspended())

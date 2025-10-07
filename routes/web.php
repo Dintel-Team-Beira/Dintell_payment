@@ -300,25 +300,47 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::get('/', function () {
 
-    if (auth()->check()) {
+    // if (auth()->check()) {
+    //     $user = auth()->user();
+
+    //     // Se é super admin, redireciona para admin
+    //     if ($user->is_super_admin) {
+    //         return redirect()->route('admin.dashboard');
+    //     }
+
+    //     // Se é usuário de empresa, redireciona para dashboard da empresa com slug
+    //     if ($user->company_id) {
+    //         $company = \App\Models\Company::find($user->company_id);
+    //         if ($company && $company->slug) {
+    //             return redirect('dintell/dashboard');
+    //         }
+    //     }
+
+    //     return redirect()->route('login');
+    // }
+
+      if (auth()->check()) {
         $user = auth()->user();
 
         // Se é super admin, redireciona para admin
         if ($user->is_super_admin) {
-            return redirect()->route('admin.dashboard');
+             // O nome de rota 'admin.dashboard' JÁ EXISTE no seu arquivo e NÃO PRECISA de {tenant}
+             return redirect()->route('admin.dashboard'); 
         }
 
         // Se é usuário de empresa, redireciona para dashboard da empresa com slug
         if ($user->company_id) {
             $company = \App\Models\Company::find($user->company_id);
             if ($company && $company->slug) {
-                return redirect('dintell/dashboard');
+                // CORRIGIDO: Usa route() injetando o tenant
+                return redirect()->route('dashboard', ['tenant' => $company->slug]);
             }
         }
 
-        return redirect()->route('login');
+        // Caso não tenha company_id, redireciona para o login ou uma página de erro.
+        // Se o usuário está logado, o redirect()->route('login') é incorreto.
     }
-
+    // dd('home route');
     // Se não está logado, vai para login
     return redirect()->route('login');
 })->name('home');

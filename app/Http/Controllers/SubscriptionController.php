@@ -431,7 +431,7 @@ class SubscriptionController extends Controller
             'actionText' => $blockData['actionText'],
             'actionRoute' => $blockData['actionRoute'],
             'company' => $company,
-            'plan' => $company->plan,
+            'plan' => $company->subscriptions()->latest()->first()?->plan,
             'user' => $user,
         ]);
     }
@@ -458,6 +458,10 @@ class SubscriptionController extends Controller
             return 'pending';
         }
 
+        // Sem subscrição
+        if (!$company->subscriptions()->latest()->first()) {
+            return 'no_subscription';
+        }
         // Subscrição
         if ($company->subscriptions()->latest()->first()->status === CompanySubscription::STATUS_CANCELED) {
             return 'cancelled';
@@ -542,6 +546,12 @@ class SubscriptionController extends Controller
             'no_company' => [
                 'title' => 'Empresa Não Encontrada',
                 'message' => 'Você precisa estar associado a uma empresa para acessar o sistema.',
+                'actionText' => 'Contatar Suporte',
+                'actionRoute' => 'support.contact',
+            ],
+            'no_subscription' => [
+                'title' => 'Sem Subscrição',
+                'message' => 'Nenhuma subscrição encontrada para sua empresa. Entre em contato com o suporte para mais informações.',
                 'actionText' => 'Contatar Suporte',
                 'actionRoute' => 'support.contact',
             ],
