@@ -421,7 +421,7 @@
                 </div>
 
                 <!-- Limites do Plano -->
-                <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
+                {{-- <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center">
                             <div class="p-2 mr-3 bg-orange-100 rounded-lg">
@@ -487,7 +487,7 @@
                             <p class="mt-1 text-xs text-gray-500">Deixe vazio para usar preço do plano</p>
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
                 <!-- Ações -->
                 <div class="bg-white border border-gray-200 shadow-sm rounded-xl">
