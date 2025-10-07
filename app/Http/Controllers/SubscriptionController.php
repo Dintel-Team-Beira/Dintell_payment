@@ -53,7 +53,7 @@ class SubscriptionController extends Controller
 
 
     // Controller simplificado usando o método do modelo
-    public function show(Subscription $subscription)
+    public function show(string $tenant, Subscription $subscription)
     {
         $subscription->load(['user', 'plan', 'apiLogs' => function ($query) {
             $query->latest()->limit(50);
@@ -90,7 +90,7 @@ class SubscriptionController extends Controller
     }
 
     // Método adicional para API ou AJAX
-    public function getStats(Subscription $subscription)
+    public function getStats(string $tenant, Subscription $subscription)
     {
         return response()->json([
             'basic_stats' => [

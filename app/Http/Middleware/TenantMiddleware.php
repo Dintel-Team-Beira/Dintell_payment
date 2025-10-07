@@ -61,11 +61,13 @@ class TenantMiddleware
                     }
                 }
             }
+            
 
             return $next($request);
 
         } catch (\Exception $e) {
             Log::warning('Erro no TenantMiddleware: ' . $e->getMessage());
+           
             return $next($request);
         }
     }

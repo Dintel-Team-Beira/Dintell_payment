@@ -15,7 +15,7 @@
                     </span>
                     @if($service->category)
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {{ \App\Models\Service::getCategories()[$service->category] ?? $service->category }}
+                            {{  $service->category?->name ?? 'Sem categoria' }}
                         </span>
                     @endif
                 </div>
@@ -74,7 +74,7 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-700">Categoria</label>
                             <p class="p-3 text-sm text-gray-900 rounded-lg bg-gray-50">
-                                {{ \App\Models\Service::getCategories()[$service->category] ?? 'Não categorizado' }}
+                               {{  $service->category?->name ?? 'Sem categoria' }}
                             </p>
                         </div>
 

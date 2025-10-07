@@ -82,7 +82,7 @@ class SubscriptionPlanController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(SubscriptionPlan $plan)
+    public function show(string $tenant, SubscriptionPlan $plan)
     {
         $plan->load('subscriptions');
 
@@ -92,7 +92,7 @@ class SubscriptionPlanController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(SubscriptionPlan $plan)
+    public function edit(string $tenant, SubscriptionPlan $plan)
     {
         return view('plans.edit', compact('plan'));
     }
@@ -100,7 +100,7 @@ class SubscriptionPlanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SubscriptionPlan $plan)
+    public function update(Request $request,string $tenant, SubscriptionPlan $plan)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -148,7 +148,7 @@ class SubscriptionPlanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(SubscriptionPlan $plan)
+    public function destroy(string $tenant, SubscriptionPlan $plan)
     {
         // Check if plan has active subscriptions
         if ($plan->subscriptions()->exists()) {
@@ -165,7 +165,7 @@ class SubscriptionPlanController extends Controller
     /**
      * Toggle the active status of a plan.
      */
-    public function toggle(SubscriptionPlan $plan)
+    public function toggle(string $tenant, SubscriptionPlan $plan)
     {
         $plan->update([
             'is_active' => !$plan->is_active
@@ -180,7 +180,7 @@ class SubscriptionPlanController extends Controller
     /**
      * Duplicate a plan.
      */
-    public function duplicate(SubscriptionPlan $plan)
+    public function duplicate(string $tenant,SubscriptionPlan $plan)
     {
         $newPlan = $plan->replicate();
         $newPlan->name = $plan->name . ' (Cópia)';

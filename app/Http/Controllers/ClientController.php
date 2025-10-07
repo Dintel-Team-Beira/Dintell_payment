@@ -38,7 +38,7 @@ class ClientController extends Controller
         return view('clients.index', compact('clients'));
     }
 
-    public function show(Client $client)
+    public function show(string $tenant,Client $client)
     {
         $client->load(['subscriptions.plan', 'emailLogs']);
 
@@ -93,12 +93,12 @@ class ClientController extends Controller
                         ->with('success', 'Cliente criado com sucesso!');
     }
 
-    public function edit(Client $client)
+    public function edit(string $tenant, Client $client)
     {
         return view('clients.edit', compact('client'));
     }
 
-    public function update(Request $request, Client $client)
+    public function update(Request $request, string $tenant, Client $client)
     {
         // dd(auth()->user()->company->id);
         $validated = $request->validate([
@@ -120,7 +120,7 @@ class ClientController extends Controller
                         ->with('success', 'Cliente atualizado com sucesso!');
     }
 
-    public function destroy(Client $client)
+    public function destroy(string $tenant, Client $client)
     {
         // Verificar se tem subscrições ativas
         if ($client->activeSubscriptions()->count() > 0) {
@@ -133,7 +133,7 @@ class ClientController extends Controller
                         ->with('success', 'Cliente excluído com sucesso!');
     }
 
-    public function toggleStatus(Client $client)
+    public function toggleStatus(string $tenant, Client $client)
     {
         $newStatus = $client->status === 'active' ? 'inactive' : 'active';
         $client->update(['status' => $newStatus]);

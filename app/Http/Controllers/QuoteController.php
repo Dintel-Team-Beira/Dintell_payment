@@ -158,7 +158,7 @@ class QuoteController extends Controller
         }
     }
 
-    public function show(Quote $quote)
+    public function show(string $tenant, Quote $quote)
     {
         $quote->load(['client', 'items', 'invoice']);
 
@@ -170,7 +170,7 @@ class QuoteController extends Controller
         return view('quotes.show', compact('quote'));
     }
 
-    public function edit(Quote $quote)
+    public function edit(string $tenant,Quote $quote)
     {
         if ($quote->status === 'accepted' && $quote->converted_to_invoice_at) {
             return redirect()->route('quotes.show', $quote)
@@ -184,7 +184,7 @@ class QuoteController extends Controller
         return view('quotes.edit', compact('quote', 'clients', 'settings'));
     }
 
-    public function update(Request $request, Quote $quote)
+    public function update(Request $request,string $tenant, Quote $quote)
     {
         if ($quote->status === 'accepted' && $quote->converted_to_invoice_at) {
             return redirect()->route('quotes.show', $quote)
@@ -245,7 +245,7 @@ class QuoteController extends Controller
         }
     }
 
-    public function destroy(Quote $quote)
+    public function destroy(string $tenant, Quote $quote)
     {
         if ($quote->status === 'accepted' && $quote->converted_to_invoice_at) {
             return redirect()->route('quotes.index')
@@ -270,7 +270,7 @@ class QuoteController extends Controller
         }
     }
 
-    public function convertToInvoice(Quote $quote)
+    public function convertToInvoice(string $tenant, Quote $quote)
     {
         if (!$quote->canConvertToInvoice()) {
             return back()->with('error', 'Esta cotação não pode ser convertida em fatura.');
@@ -324,7 +324,7 @@ class QuoteController extends Controller
     // }
 
 
-    public function updateStatus(Request $request, Quote $quote)
+    public function updateStatus(Request $request, string $tenant, Quote $quote)
     {
         $request->validate([
             'status' => 'required|in:draft,sent,accepted,rejected,expired'
@@ -358,7 +358,7 @@ class QuoteController extends Controller
         return back()->with('success', $statusMessages[$newStatus] ?? 'Status atualizado!');
     }
 
-    public function duplicate(Quote $quote)
+    public function duplicate(string $tenant, Quote $quote)
     {
         try {
             DB::beginTransaction();
@@ -405,7 +405,7 @@ class QuoteController extends Controller
     /**
      * Download PDF da cotação
      */
-    public function downloadPdf(Quote $quote)
+    public function downloadPdf(string $tenant, Quote $quote)
     {
         try {
             $company = auth()->user()->company;
@@ -431,7 +431,7 @@ class QuoteController extends Controller
     /**
      * Preview do PDF (retorna base64 para modal)
      */
-    public function previewPdf(Quote $quote)
+    public function previewPdf(string $tenant, Quote $quote)
     {
         try {
             $pdf = $this->pdfService->generateQuotePdf($quote);
@@ -453,7 +453,7 @@ class QuoteController extends Controller
     /**
      * Stream PDF para visualização no navegador
      */
-    public function viewPdf(Quote $quote)
+    public function viewPdf(string $tenant, Quote $quote)
     {
         try {
             $pdf = $this->pdfService->generateQuotePdf($quote);
@@ -465,7 +465,7 @@ class QuoteController extends Controller
             abort(500, 'Erro ao gerar PDF: ' . $e->getMessage());
         }
     }
-    public function sendEmail(Request $request, Quote $quote)
+    public function sendEmail(Request $request, string $tenant, Quote $quote)
     {
         $request->validate([
             'email' => 'required|email',
@@ -489,7 +489,7 @@ class QuoteController extends Controller
     }
 
     // API Methods para AJAX
-    public function getActiveProducts(Request $request, $user_id)
+    public function getActiveProducts(Request $request,  $user_id)
     {
 
         try {
@@ -505,9 +505,9 @@ class QuoteController extends Controller
                 });
             }
 
-            if ($request->filled('category')) {
-                $query->where('category', $request->category);
-            }
+            // if ($request->filled('category')) {
+            //     $query->where('category', $request->category);
+            // }
 
             $products = $query->select([
                 'id',
@@ -515,7 +515,6 @@ class QuoteController extends Controller
                 'code',
                 'description',
                 'price',
-                'category',
                 'stock_quantity',
                 'tax_rate',
                 'image'
@@ -528,7 +527,7 @@ class QuoteController extends Controller
         }
     }
 
-    public function getActiveServices(Request $request, $user_id)
+    public function getActiveServices(Request $request,  $user_id)
     {
         try {
             $company_id = User::findOrFail($user_id)->company->id;
@@ -558,11 +557,11 @@ class QuoteController extends Controller
                 'description',
                 'hourly_rate',
                 'fixed_price',
-                'category',
+                // 'category',
                 'complexity_level',
                 'estimated_hours',
                 'tax_rate'
-            ])->orderBy('name')->get();
+            ])->with(['category'])->orderBy('name')->get();
 
             return response()->json($services);
         } catch (\Throwable $th) {
@@ -595,7 +594,7 @@ class QuoteController extends Controller
         ];
     }
 
-    private function createQuoteItem(Quote $quote, array $itemData)
+    private function createQuoteItem(string $tenant, Quote $quote, array $itemData)
     {
         $quoteItem = new QuoteItem([
             'type' => $itemData['type'],

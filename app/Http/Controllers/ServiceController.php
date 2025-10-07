@@ -143,7 +143,7 @@ class ServiceController extends Controller
     /**
      * Visualizar serviço
      */
-    public function show(Service $service)
+    public function show(string $tenant, Service $service)
     {
         return view('services.show', compact('service'));
     }
@@ -151,7 +151,7 @@ class ServiceController extends Controller
     /**
      * Formulário de edição
      */
-    public function edit(Service $service)
+    public function edit(string $tenant, Service $service)
     {
         // dd($service);
         $categories = Category::where('type', 'service')
@@ -216,7 +216,7 @@ class ServiceController extends Controller
     /**
      * Excluir serviço
      */
-    public function destroy(Service $service)
+    public function destroy(string $tenant,Service $service)
     {
         // Verificar se serviço está sendo usado em faturas/orçamentos
         if ($service->invoiceItems()->exists() || $service->quoteItems()->exists()) {
@@ -237,7 +237,7 @@ class ServiceController extends Controller
     /**
      * Duplicar serviço
      */
-    public function duplicate(Service $service)
+    public function duplicate(string $tenant, Service $service)
     {
         $newService = $service->replicate();
         $newService->name = $service->name . ' (Cópia)';
@@ -251,7 +251,7 @@ class ServiceController extends Controller
     /**
      * Alterar status do serviço
      */
-    public function toggleStatus(Request $request, Service $service): JsonResponse
+    public function toggleStatus(Request $request, string $tenant, Service $service): JsonResponse
     {
         $service->update(['is_active' => $request->get('is_active', true)]);
 

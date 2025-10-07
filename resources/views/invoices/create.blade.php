@@ -851,6 +851,7 @@
                         .then(response => response.json())
                         .then(data => {
                             products = data;
+                            
                             renderProducts();
                         })
                         .catch(error => {
@@ -864,6 +865,7 @@
                         .then(response => response.json())
                         .then(data => {
                             services = data;
+
                             renderServices();
                         })
                         .catch(error => {

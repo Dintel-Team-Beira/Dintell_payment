@@ -134,7 +134,7 @@ class CreditNoteController extends Controller
         }
     }
 
-    public function show(Invoice $creditNote)
+    public function show(string $tenant, Invoice $creditNote)
     {
         if (!$creditNote->isCreditNote()) {
             abort(404);
@@ -145,7 +145,7 @@ class CreditNoteController extends Controller
         return view('credit-notes.show', compact('creditNote'));
     }
 
-    public function downloadPdf(Invoice $creditNote)
+    public function downloadPdf(string $tenant, Invoice $creditNote)
     {
         if (!$creditNote->isCreditNote()) {
             abort(404);
@@ -169,7 +169,7 @@ class CreditNoteController extends Controller
         */
     }
 
-    public function sendByEmail(Request $request, Invoice $creditNote)
+    public function sendByEmail(Request $request, string $tenant, Invoice $creditNote)
     {
         $request->validate([
             'email' => 'required|email',
@@ -201,7 +201,7 @@ class CreditNoteController extends Controller
         }
     }
 
-    public function edit(Invoice $creditNote)
+    public function edit(string $tenant, Invoice $creditNote)
     {
         if (!$creditNote->isCreditNote()) {
             abort(404);
@@ -293,7 +293,7 @@ class CreditNoteController extends Controller
         }
     }
 
-    public function destroy(Invoice $creditNote)
+    public function destroy(string $tenant, Invoice $creditNote)
     {
         if (!$creditNote->isCreditNote()) {
             abort(404);
@@ -327,7 +327,7 @@ class CreditNoteController extends Controller
         }
     }
 
-    public function duplicate(Invoice $creditNote)
+    public function duplicate(string $tenant, Invoice $creditNote)
     {
         if (!$creditNote->isCreditNote()) {
             abort(404);

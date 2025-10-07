@@ -17,7 +17,7 @@ class TemplatePreviewController extends Controller
     /**
      * Listar templates por tipo
      */
-    public function list($type)
+    public function list(string $tenant,$type)
     {
         $companyId = auth()->user()->company_id;
 
@@ -33,7 +33,7 @@ class TemplatePreviewController extends Controller
     /**
      * 🆕 Visualizar template como HTML (otimizado)
      */
-    public function show($templateId)
+    public function show(string $tenant, $templateId)
     {
         $template = DocumentTemplate::findOrFail($templateId);
         $data = $this->getTemplateData($template);
@@ -44,7 +44,7 @@ class TemplatePreviewController extends Controller
     /**
      * 🆕 Download do template como PDF (otimizado)
      */
-    public function download($templateId)
+    public function download(string $tenant, $templateId)
     {
         $template = DocumentTemplate::findOrFail($templateId);
         $data = $this->getTemplateData($template);

@@ -9,6 +9,7 @@ use App\Models\InvoiceItem;
 use App\Models\Client;
 use App\Models\Quote;
 use App\Models\BillingSetting;
+use App\Models\Company;
 use App\Models\DocumentTemplate;
 use App\Models\Receipt;
 use App\Services\BillingCalculatorService;
@@ -328,7 +329,7 @@ class InvoiceController extends Controller
      * Display the specified resource.
      * ⭐ SEM TYPE HINT - aceita tanto Invoice quanto string/int
      */
-    public function show($invoice)
+    public function show(string $tenant, Invoice $invoice)
     {
         // Se for string/int, buscar o objeto
         if (!$invoice instanceof Invoice) {
@@ -348,7 +349,7 @@ class InvoiceController extends Controller
         return view('invoices.show', compact('invoice'));
     }
 
-    public function edit(Invoice $invoice)
+    public function edit(string $tenant,Invoice $invoice)
     {
         if ($invoice->status === 'paid') {
             return redirect()->route('invoices.show', $invoice)
@@ -423,7 +424,7 @@ class InvoiceController extends Controller
     //             ->with('error', 'Erro ao atualizar fatura: ' . $e->getMessage());
     //     }
     // }
-    public function update(Request $request, Invoice $invoice)
+    public function update(Request $request, string $tenant, Invoice $invoice)
     {
         if ($invoice->status === 'paid') {
             return redirect()->route('invoices.show', $invoice)
@@ -495,7 +496,7 @@ class InvoiceController extends Controller
                 ->with('error', 'Erro ao atualizar fatura: ' . $e->getMessage());
         }
     }
-    public function destroy(Invoice $invoice)
+    public function destroy(string $tenant,Invoice $invoice)
     {
         if ($invoice->status === 'paid') {
             return redirect()->route('invoices.index')
@@ -553,7 +554,7 @@ class InvoiceController extends Controller
 
     // Método markAsPaid simplificado no InvoiceController
 
-    public function markAsPaid(Request $request, Invoice $invoice)
+    public function markAsPaid(Request $request, string $tenant,Invoice $invoice)
     {
         $request->validate([
             'amount' => 'nullable|numeric|min:0.01|max:' . $invoice->total
@@ -632,7 +633,7 @@ class InvoiceController extends Controller
     }
 
     // Novo método para gerar recibo manual
-    public function generateReceipt(Request $request, Invoice $invoice)
+    public function generateReceipt(Request $request, string $tenant, Invoice $invoice)
     {
         $request->validate([
             'amount_paid' => 'required|numeric|min:0.01|max:' . $invoice->remaining_amount,
@@ -686,7 +687,7 @@ class InvoiceController extends Controller
     }
 
     // Método para listar recibos de uma fatura
-    public function receipts(Invoice $invoice)
+    public function receipts(string $tenant,Invoice $invoice)
     {
         $receipts = $invoice->receipts()
             ->with(['issuedBy'])
@@ -712,7 +713,7 @@ class InvoiceController extends Controller
 
         return view('invoices.receipts', compact('invoice', 'receipts'));
     }
-    public function updateStatus(Request $request, Invoice $invoice)
+    public function updateStatus(Request $request, string $tenant,Invoice $invoice)
     {
         $request->validate([
             'status' => 'required|in:draft,sent,paid,overdue,cancelled'
@@ -746,7 +747,7 @@ class InvoiceController extends Controller
         return back()->with('success', $statusMessages[$newStatus] ?? 'Status atualizado!');
     }
 
-    public function duplicate(Invoice $invoice)
+    public function duplicate(string $tenant,Invoice $invoice)
     {
         try {
             DB::beginTransaction();
@@ -815,7 +816,7 @@ class InvoiceController extends Controller
         }
     }
 
-    public function downloadPdf(Invoice $invoice)
+    public function downloadPdf(string $tenant, Invoice $invoice)
     {
         try {
             if ($this->pdfService) {
@@ -833,8 +834,9 @@ class InvoiceController extends Controller
     /**
      * Enviar fatura por email
      */
-    public function sendByEmail(Request $request, Invoice $invoice)
+    public function sendByEmail(Request $request, string $tenant, Invoice $invoice)
     {
+
         $request->validate([
             'email' => 'required|email',
             'subject' => 'required|string|max:255',
@@ -919,7 +921,7 @@ class InvoiceController extends Controller
     }
 
     // API Methods para AJAX
-    public function getClientQuotes(Client $client)
+    public function getClientQuotes(string $tenant, Client $client)
     {
         $quotes = $client->quotes()
             ->where('status', 'accepted')

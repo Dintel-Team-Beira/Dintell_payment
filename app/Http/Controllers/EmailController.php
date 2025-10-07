@@ -70,7 +70,7 @@ class EmailController extends Controller
     /**
      * Display the specified email log
      */
-    public function show(EmailLog $emailLog)
+    public function show(string $tenant, EmailLog $emailLog)
     {
         $emailLog->load(['subscription.plan', 'client']);
 
@@ -80,7 +80,7 @@ class EmailController extends Controller
     /**
      * Resend a failed email
      */
-    public function resend(EmailLog $emailLog)
+    public function resend(string $tenant, EmailLog $emailLog)
     {
         if ($emailLog->status !== 'failed') {
             return back()->withErrors(['error' => 'Apenas emails com falha podem ser reenviados.']);

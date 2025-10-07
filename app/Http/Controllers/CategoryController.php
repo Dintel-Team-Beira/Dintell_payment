@@ -113,7 +113,7 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show(string $tenant,Category $category)
     {
          $category->load(['parent', 'children', 'products', 'services']);
         
@@ -135,7 +135,7 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Category $category)
+    public function edit(string $tenant,Category $category)
     {
         $descendantIds = $category->getDescendantIds();
         $excludeIds = array_merge([$category->id], $descendantIds);
@@ -153,7 +153,7 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, string $tenant, Category $category)
     {
           $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 
@@ -194,7 +194,7 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(string $tenant, Category $category)
     {
          // Verificar se tem produtos ou serviços associados
         $hasProducts = $category->products()->exists();

@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -48,5 +50,7 @@ class AppServiceProvider extends ServiceProvider
             // Fallback (se a lógica de tenant falhar)
             return '/';
         });
+        
+        // Route::model('invoice', Invoice::class);
     }
 }

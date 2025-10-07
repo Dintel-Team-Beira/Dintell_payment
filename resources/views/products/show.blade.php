@@ -100,7 +100,7 @@
                             <label class="block text-sm font-medium text-gray-700">Categoria</label>
                             <p class="mt-1">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ \App\Models\Product::getCategories()[$product->category] ?? $product->category }}
+                                    {{ $product->category?->name??'Sem categoria' }}
                                 </span>
                             </p>
                         </div>
@@ -919,7 +919,7 @@ function printProduct() {
                     </div>
                     <div class="info-item">
                         <span class="label">Categoria:</span>
-                        <span class="value">{{ \App\Models\Product::getCategories()[$product->category] ?? $product->category }}</span>
+                        <span class="value">{{  $product->category?->name??'Sem categoria' }}</span>
                     </div>
                     <div class="info-item">
                         <span class="label">Unidade:</span>

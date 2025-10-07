@@ -133,7 +133,7 @@ class ProductController extends Controller
     /**
      * Visualizar produto
      */
-    public function show(Product $product)
+    public function show(string $tenant, Product $product)
     {
         // dd($product);
         // $product = $pr
@@ -143,7 +143,7 @@ class ProductController extends Controller
     /**
      * Formulário de edição
      */
-    public function edit(Product $product)
+    public function edit(string $tenant,Product $product)
     {
                 $categories = Category::where('type', 'product')
                         ->orWhere('type', 'both')
@@ -155,7 +155,7 @@ class ProductController extends Controller
     /**
      * Atualizar produto
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, string $tenant, Product $product)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -204,7 +204,7 @@ class ProductController extends Controller
     /**
      * Excluir produto
      */
-    public function destroy(Product $product)
+    public function destroy(string $tenant,Product $product)
     {
         // Verificar se produto está sendo usado em faturas/orçamentos
         if ($product->invoiceItems()->exists() || $product->quoteItems()->exists()) {
@@ -230,7 +230,7 @@ class ProductController extends Controller
     /**
      * Duplicar produto
      */
-    public function duplicate(Product $product)
+    public function duplicate(string $tenant, Product $product)
     {
         $newProduct = $product->replicate();
         $newProduct->name = $product->name . ' (Cópia)';
@@ -244,7 +244,7 @@ class ProductController extends Controller
     /**
      * Alterar status do produto
      */
-    public function toggleStatus(Request $request, Product $product): JsonResponse
+    public function toggleStatus(Request $request, string $tenant, Product $product): JsonResponse
     {
         $product->update(['is_active' => $request->get('is_active', true)]);
 

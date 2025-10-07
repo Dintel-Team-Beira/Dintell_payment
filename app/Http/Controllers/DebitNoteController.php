@@ -113,7 +113,7 @@ class DebitNoteController extends Controller
         }
     }
 
-    public function show(Invoice $debitNote)
+    public function show(string $tenant, Invoice $debitNote)
     {
         if (!$debitNote->isDebitNote()) {
             abort(404);
@@ -124,7 +124,7 @@ class DebitNoteController extends Controller
         return view('debit-notes.show', compact('debitNote'));
     }
 
-    public function downloadPdf(Invoice $debitNote)
+    public function downloadPdf(string $tenant,Invoice $debitNote)
     {
         if (!$debitNote->isDebitNote()) {
             abort(404);

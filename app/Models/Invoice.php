@@ -12,6 +12,11 @@ class Invoice extends Model
 {
     use HasFactory;
 
+    public function getRouteKeyName()
+{
+    return 'id'; // Garante que a fatura será buscada pelo ID numérico
+}
+
     protected $fillable = [
         'invoice_number',
         'client_id',
