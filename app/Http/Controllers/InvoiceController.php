@@ -33,7 +33,12 @@ class InvoiceController extends Controller
 
     public function index(Request $request)
     {
-        $query = Invoice::with(['client', 'items', 'quote']);
+        $company = auth()->user()->company;
+        if(!$company) {
+            return redirect()->route('company.required')
+                ->with('error', 'Você precisa estar associado a uma empresa.');
+        }
+        $query = Invoice::with(['client', 'items', 'quote'])->where('company_id',$company->id);
 
         // dd($request->all());
         // Filtros
@@ -87,8 +92,8 @@ class InvoiceController extends Controller
 
     public function create()
     {
-        $clients = Client::orderBy('name')->get();
-        $settings = BillingSetting::getSettings();
+        // $company = auth()->user()->company;
+
 
 
         // Verificar se é venda à dinheiro
@@ -96,6 +101,7 @@ class InvoiceController extends Controller
         $user = auth()->user();
 
         $company = $user->company;
+
         $excededUsage = false;
         if ($company->plan_id && $company->plan) {
             // $invoiceUsage = $company->getInvoiceUsage(); 
@@ -104,6 +110,8 @@ class InvoiceController extends Controller
                 $excededUsage = true;
             }
         }
+        $clients = Client::where('company_id', $company->id)->orderBy('name')->get();
+        $settings = BillingSetting::getSettings();
 
         return view('invoices.create', compact('clients', 'settings', 'isCashSale', 'excededUsage'));
     }
@@ -1042,43 +1050,44 @@ class InvoiceController extends Controller
 
     private function getInvoiceStats()
     {
+        $company = auth()->user()->company;
         $currentMonth = Carbon::now();
         $lastMonth = Carbon::now()->subMonth();
         $today = Carbon::today();
 
         $stats = [
             // Total de faturas
-            'total_invoices' => Invoice::count(),
+            'total_invoices' => Invoice::where('company_id', $company->id)->count(),
 
             // Faturas pendentes (status = 'draft' ou due_date ainda não passou)
-            'total_pending' => Invoice::whereIn('status', ['draft', 'sent'])
+            'total_pending' => Invoice::where('company_id', $company->id)->whereIn('status', ['draft', 'sent'])
                 ->where('due_date', '>=', $today)
                 ->sum('total'),
-            'pending_count' => Invoice::whereIn('status', ['draft', 'sent'])
+            'pending_count' => Invoice::where('company_id', $company->id)->whereIn('status', ['draft', 'sent'])
                 ->where('due_date', '>=', $today)
                 ->count(),
 
             // Faturas vencidas (due_date passou e não foram pagas)
-            'total_overdue' => Invoice::whereIn('status', ['draft', 'sent'])
+            'total_overdue' => Invoice::where('company_id', $company->id)->whereIn('status', ['draft', 'sent'])
                 ->where('due_date', '<', $today)
                 ->sum('total'),
-            'count_overdue' => Invoice::whereIn('status', ['draft', 'sent'])
+            'count_overdue' => Invoice::where('company_id', $company->id)->whereIn('status', ['draft', 'sent'])
                 ->where('due_date', '<', $today)
                 ->count(),
 
             // Faturas pagas este mês
-            'total_paid_this_month' => Invoice::where('status', 'paid')
+            'total_paid_this_month' => Invoice::where('company_id', $company->id)->where('status', 'paid')
                 ->whereMonth('updated_at', $currentMonth->month) // ou use paid_at se existir
                 ->whereYear('updated_at', $currentMonth->year)
                 ->sum('total'),
-            'paid_count_this_month' => Invoice::where('status', 'paid')
+            'paid_count_this_month' => Invoice::where('company_id', $company->id)->where('status', 'paid')
                 ->whereMonth('updated_at', $currentMonth->month)
                 ->whereYear('updated_at', $currentMonth->year)
                 ->count(),
         ];
 
         // Calcular média de dias para pagamento
-        $paidInvoices = Invoice::where('status', 'paid')
+        $paidInvoices = Invoice::where('company_id', $company->id)->where('status', 'paid')
             ->whereNotNull('updated_at') // ou paid_at se tiver essa coluna
             ->get();
 
@@ -1098,19 +1107,19 @@ class InvoiceController extends Controller
 
         // Calcular crescimento comparado ao mês anterior
         $lastMonthStats = [
-            'total_invoices' => Invoice::whereMonth('created_at', $lastMonth->month)
+            'total_invoices' => Invoice::where('company_id', $company->id)->whereMonth('created_at', $lastMonth->month)
                 ->whereYear('created_at', $lastMonth->year)
                 ->count(),
-            'total_amount' => Invoice::whereMonth('created_at', $lastMonth->month)
+            'total_amount' => Invoice::where('company_id', $company->id)->whereMonth('created_at', $lastMonth->month)
                 ->whereYear('created_at', $lastMonth->year)
                 ->sum('total')
         ];
 
         $currentMonthStats = [
-            'total_invoices' => Invoice::whereMonth('created_at', $currentMonth->month)
+            'total_invoices' => Invoice::where('company_id', $company->id)->whereMonth('created_at', $currentMonth->month)
                 ->whereYear('created_at', $currentMonth->year)
                 ->count(),
-            'total_amount' => Invoice::whereMonth('created_at', $currentMonth->month)
+            'total_amount' => Invoice::where('company_id', $company->id)->whereMonth('created_at', $currentMonth->month)
                 ->whereYear('created_at', $currentMonth->year)
                 ->sum('total')
         ];

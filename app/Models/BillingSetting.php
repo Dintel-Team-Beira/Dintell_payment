@@ -43,13 +43,15 @@ class BillingSetting extends Model
 
     public static function getSettings()
     {
+        $company = auth()->user()->company;
         return self::firstOrCreate(
-            ['id' => 1],
+            // ['id' => 1],
             [
-                'company_name' => 'Minha Empresa',
-                'company_address' => 'Endereço da Empresa',
-                'company_phone' => '123456789',
-                'company_email' => '',
+                'company_id'=>$company ? $company->id : null,
+                'company_name' => $company->name,
+                'company_address' => $company->address,
+                'company_phone' => $company->phone,
+                'company_email' => $company->email,
                 'invoice_prefix' => 'FAT',
                 'next_invoice_number' => 1,
                 'quote_prefix' => 'COT',

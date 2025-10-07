@@ -282,7 +282,8 @@
     </div>
 
     <!-- Lista de Facturas -->
-    <div class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl">
+    @if ($invoices)
+        <div class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <div>
                 <h3 class="text-lg font-semibold text-gray-900">Facturas</h3>
@@ -739,9 +740,14 @@
             </div>
         @endif
     </div>
+    @else
+        sas
+    @endif
+    
 
     <!-- Modal de Email -->
-    <div id="emailModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    @if (isset($invoice))
+        <div id="emailModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
         <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
 
@@ -801,6 +807,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Modal de Pagamento -->
     {{-- <div id="paymentModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
