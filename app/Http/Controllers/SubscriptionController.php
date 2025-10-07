@@ -414,9 +414,11 @@ class SubscriptionController extends Controller
                 'user' => $user,
             ]);
         }
-        if($company->status == \App\Models\Company::STATUS_ACTIVE && $company->subscription_status == \App\Models\Company::SUBSCRIPTION_ACTIVE)
+        // dd($company->subscription_status, $company->subscriptions()->latest()->first()->status);
+        if($company->status == \App\Models\Company::STATUS_ACTIVE && $company->subscriptions()->latest()->first()->status == CompanySubscription::STATUS_ACTIVE)
         {
-            return redirect(route('dashboard'));
+            // return redirect(route('dashboard'));
+            return redirect(route('dashboard', ['tenant' => $company->slug]));
         }
         // Pegar o motivo da URL (passado pela middleware)
         $reason = $request->get('reason', $this->detectBlockReason($company));

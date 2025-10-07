@@ -12,6 +12,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Services\SubscriptionService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
@@ -307,6 +308,11 @@ public function show(Company $company)
                 ]
             ]);
 
+            if($plan)
+            {
+                // Criar subscrição inicial
+                (new SubscriptionService())->createSubscription($company, $plan);
+            }
             // Log da ação
             $this->logAdminActivity("Criou empresa: {$company->name} (ID: {$company->id})");
 

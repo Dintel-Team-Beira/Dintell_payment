@@ -21,7 +21,7 @@
     </div>
 
     {{-- DEBUG INFO - Remova em produção --}}
-    <div class="p-4 border border-yellow-200 rounded-lg bg-yellow-50" id="debugPanel">
+    {{-- <div class="p-4 border border-yellow-200 rounded-lg bg-yellow-50" id="debugPanel">
         <div class="flex items-center justify-between mb-2">
             <h3 class="text-sm font-medium text-yellow-800">🔍 Debug Panel</h3>
             <button type="button" onclick="toggleDebug()" class="px-2 py-1 text-xs bg-yellow-200 rounded">Toggle</button>
@@ -39,7 +39,7 @@
             @endif
             <button onclick="window.debugCompanyForm()" class="px-2 py-1 mt-2 text-xs text-blue-800 bg-blue-200 rounded">Debug Console</button>
         </div>
-    </div>
+    </div> --}}
 
     <form action="{{ route('admin.companies.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8" id="companyForm">
         @csrf
@@ -251,7 +251,7 @@
             <!-- Sidebar -->
             <div class="space-y-6">
                 <!-- Plano e Status -->
-                <div class="sticky bg-white border border-gray-200 shadow-sm rounded-xl top-8" id="sidebarContainer">
+                <div class=" bg-white border border-gray-200 shadow-sm rounded-xl top-8" id="sidebarContainer">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center">
                             <div class="p-2 mr-3 bg-green-100 rounded-lg">

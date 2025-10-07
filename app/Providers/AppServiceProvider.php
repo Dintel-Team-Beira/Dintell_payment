@@ -2,11 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,30 +24,29 @@ class AppServiceProvider extends ServiceProvider
             Pdf::setOption(['dpi' => 96, 'defaultFont' => 'sans-serif']);
         }
 
+        // Redefine a lógica de redirecionamento para usuários autenticados (middleware 'guest')
+        RedirectIfAuthenticated::redirectUsing(function ($request) {
 
-         // Redefine a lógica de redirecionamento para usuários autenticados (middleware 'guest')
-    RedirectIfAuthenticated::redirectUsing(function ($request) {
-        
-        // 1. O usuário já está autenticado
-        $user = Auth::user();
+            // 1. O usuário já está autenticado
+            $user = Auth::user();
 
-        // 2. Lógica de redirecionamento
-        if ($user) {
-            
-            // Redirecionamento para Master Admin
-            if ($user->is_admin) { 
-                 return route('admin.dashboard'); // Não precisa de tenant
+            // 2. Lógica de redirecionamento
+            if ($user) {
+
+                // Redirecionamento para Master Admin
+                if ($user->is_admin) {
+                    return route('admin.dashboard'); // Não precisa de tenant
+                }
+
+                // Redirecionamento para Tenant User
+                if ($user->company && $user->company->slug) {
+                    // Monta a rota dinamicamente
+                    return route('dashboard', ['tenant' => $user->company->slug]);
+                }
             }
 
-            // Redirecionamento para Tenant User
-            if ($user->company && $user->company->slug) {
-                // Monta a rota dinamicamente
-                return route('dashboard', ['tenant' => $user->company->slug]);
-            }
-        }
-        
-        // Fallback (se a lógica de tenant falhar)
-        return '/'; 
-    });
+            // Fallback (se a lógica de tenant falhar)
+            return '/';
+        });
     }
 }
