@@ -22,6 +22,7 @@ class BillingController extends Controller
 
     public function dashboard(Request $request)
     {
+        $company = auth()->user()->company;
         $period = $request->get('period', 'monthly');
         $startDate = $this->getStartDate($period, $request->get('start_date'));
         $endDate = $this->getEndDate($period, $request->get('end_date'));
@@ -30,14 +31,14 @@ class BillingController extends Controller
         $stats = $this->getEnhancedStats($startDate, $endDate);
 
         // Faturas vencidas (máximo 10)
-        $overdueInvoices = Invoice::with('client')
+        $overdueInvoices = Invoice::where('company_id', $company->id)->with('client')
             ->where('status', 'overdue')
             ->orderBy('due_date', 'asc')
             ->limit(10)
             ->get();
 
         // Cotações recentes (máximo 10)
-        $recentQuotes = Quote::with('client')
+        $recentQuotes = Quote::where('company_id', $company->id)->with('client')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
@@ -71,39 +72,40 @@ class BillingController extends Controller
         $lastMonth = Carbon::now()->subMonth();
         $today = Carbon::today();
 
+        $company = auth()->user()->company;
         $stats = [
             // Total de faturas
-            'total_invoices' => Invoice::count(),
+            'total_invoices' => Invoice::where('company_id', $company->id)->count(),
 
             // Faturas pendentes (status = 'draft' ou due_date ainda não passou)
-            'total_pending' => Invoice::whereIn('status', ['draft', 'sent'])
+            'total_pending' => Invoice::where('company_id', $company->id)->whereIn('status', ['draft', 'sent'])
                 ->where('due_date', '>=', $today)
                 ->sum('total'),
-            'pending_count' => Invoice::whereIn('status', ['draft', 'sent'])
+            'pending_count' => Invoice::where('company_id', $company->id)->whereIn('status', ['draft', 'sent'])
                 ->where('due_date', '>=', $today)
                 ->count(),
 
             // Faturas vencidas (due_date passou e não foram pagas)
-            'total_overdue' => Invoice::whereIn('status', ['draft', 'sent'])
+            'total_overdue' => Invoice::where('company_id', $company->id)->whereIn('status', ['draft', 'sent'])
                 ->where('due_date', '<', $today)
                 ->sum('total'),
-            'count_overdue' => Invoice::whereIn('status', ['draft', 'sent'])
+            'count_overdue' => Invoice::where('company_id', $company->id)->whereIn('status', ['draft', 'sent'])
                 ->where('due_date', '<', $today)
                 ->count(),
 
             // Faturas pagas este mês
-            'total_paid_this_month' => Invoice::where('status', 'paid')
+            'total_paid_this_month' => Invoice::where('company_id', $company->id)->where('status', 'paid')
                 ->whereMonth('updated_at', $currentMonth->month) // ou use paid_at se existir
                 ->whereYear('updated_at', $currentMonth->year)
                 ->sum('total'),
-            'paid_count_this_month' => Invoice::where('status', 'paid')
+            'paid_count_this_month' => Invoice::where('company_id', $company->id)->where('status', 'paid')
                 ->whereMonth('updated_at', $currentMonth->month)
                 ->whereYear('updated_at', $currentMonth->year)
                 ->count(),
         ];
 
         // Calcular média de dias para pagamento
-        $paidInvoices = Invoice::where('status', 'paid')
+        $paidInvoices = Invoice::where('company_id', $company->id)->where('status', 'paid')
             ->whereNotNull('updated_at') // ou paid_at se tiver essa coluna
             ->get();
 
@@ -123,19 +125,19 @@ class BillingController extends Controller
 
         // Calcular crescimento comparado ao mês anterior
         $lastMonthStats = [
-            'total_invoices' => Invoice::whereMonth('created_at', $lastMonth->month)
+            'total_invoices' => Invoice::where('company_id', $company->id)->whereMonth('created_at', $lastMonth->month)
                                  ->whereYear('created_at', $lastMonth->year)
                                  ->count(),
-            'total_amount' => Invoice::whereMonth('created_at', $lastMonth->month)
+            'total_amount' => Invoice::where('company_id', $company->id)->whereMonth('created_at', $lastMonth->month)
                                  ->whereYear('created_at', $lastMonth->year)
                                  ->sum('total')
         ];
 
         $currentMonthStats = [
-            'total_invoices' => Invoice::whereMonth('created_at', $currentMonth->month)
+            'total_invoices' => Invoice::where('company_id', $company->id)->whereMonth('created_at', $currentMonth->month)
                                  ->whereYear('created_at', $currentMonth->year)
                                  ->count(),
-            'total_amount' => Invoice::whereMonth('created_at', $currentMonth->month)
+            'total_amount' => Invoice::where('company_id', $company->id)->whereMonth('created_at', $currentMonth->month)
                                  ->whereYear('created_at', $currentMonth->year)
                                  ->sum('total')
         ];
@@ -158,18 +160,19 @@ class BillingController extends Controller
 
     private function getEnhancedStats($startDate, $endDate)
     {
+        $company = auth()->user()->company;
         // Período anterior para comparação
         $periodDays = $startDate->diffInDays($endDate);
         $previousStartDate = $startDate->copy()->subDays($periodDays);
         $previousEndDate = $startDate->copy()->subDay();
 
         // Stats do período atual
-        $currentRevenue = Invoice::where('status', 'paid')
+        $currentRevenue = Invoice::where('company_id', $company->id)->where('status', 'paid')
             ->whereBetween('paid_at', [$startDate, $endDate])
             ->sum('total');
 
         // Stats do período anterior
-        $previousRevenue = Invoice::where('status', 'paid')
+        $previousRevenue = Invoice::where('company_id', $company->id)->where('status', 'paid')
             ->whereBetween('paid_at', [$previousStartDate, $previousEndDate])
             ->sum('total');
 
@@ -187,26 +190,26 @@ class BillingController extends Controller
             'revenue_growth' => $revenueGrowth,
 
             // Faturas
-            'total_invoices' => Invoice::count(),
-            'total_pending' => Invoice::whereIn('status', ['sent', 'overdue'])->sum('total'),
-            'count_pending' => Invoice::whereIn('status', ['sent', 'overdue'])->count(),
-            'total_overdue' => Invoice::where('status', 'overdue')->sum('total'),
-            'count_overdue' => Invoice::where('status', 'overdue')->count(),
+            'total_invoices' => Invoice::where('company_id', $company->id)->count(),
+            'total_pending' => Invoice::where('company_id', $company->id)->whereIn('status', ['sent', 'overdue'])->sum('total'),
+            'count_pending' => Invoice::where('company_id', $company->id)->whereIn('status', ['sent', 'overdue'])->count(),
+            'total_overdue' => Invoice::where('company_id', $company->id)->where('status', 'overdue')->sum('total'),
+            'count_overdue' => Invoice::where('company_id', $company->id)->where('status', 'overdue')->count(),
 
             // Pagamentos este mês
-            'total_paid_this_month' => Invoice::where('status', 'paid')
+            'total_paid_this_month' => Invoice::where('company_id', $company->id)->where('status', 'paid')
                 ->whereMonth('paid_at', Carbon::now()->month)
                 ->whereYear('paid_at', Carbon::now()->year)
                 ->sum('total'),
-            'paid_count_this_month' => Invoice::where('status', 'paid')
+            'paid_count_this_month' => Invoice::where('company_id', $company->id)->where('status', 'paid')
                 ->whereMonth('paid_at', Carbon::now()->month)
                 ->whereYear('paid_at', Carbon::now()->year)
                 ->count(),
 
             // Contadores por status
-            'paid_count' => Invoice::where('status', 'paid')->count(),
-            'sent_count' => Invoice::where('status', 'sent')->count(),
-            'draft_count' => Invoice::where('status', 'draft')->count(),
+            'paid_count' => Invoice::where('company_id', $company->id)->where('status', 'paid')->count(),
+            'sent_count' => Invoice::where('company_id', $company->id)->where('status', 'sent')->count(),
+            'draft_count' => Invoice::where('company_id', $company->id)->where('status', 'draft')->count(),
 
             // Cotações
             'quotes_count' => $quotesStats['total_count'],
@@ -216,8 +219,8 @@ class BillingController extends Controller
             'conversion_rate' => $quotesStats['conversion_rate'],
 
             // Clientes
-            'total_clients' => Client::count(),
-            'active_clients' => Client::whereHas('invoices', function($query) use ($startDate, $endDate) {
+            'total_clients' => Client::where('company_id', $company->id)->count(),
+            'active_clients' => Client::where('company_id', $company->id)->whereHas('invoices', function($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             })->count(),
         ];
@@ -225,27 +228,29 @@ class BillingController extends Controller
 
     private function getQuotesStats($startDate, $endDate)
     {
-        $totalQuotes = Quote::whereBetween('created_at', [$startDate, $endDate])->count();
-        $convertedQuotes = Quote::whereBetween('created_at', [$startDate, $endDate])
+        $company = auth()->user()->company;
+        $totalQuotes = Quote::where('company_id', $company->id)->whereBetween('created_at', [$startDate, $endDate])->count();
+        $convertedQuotes = Quote::where('company_id', $company->id)->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('converted_to_invoice_at')
             ->count();
 
         return [
-            'total_count' => Quote::whereIn('status', ['sent', 'accepted'])->count(),
-            'total_value' => Quote::whereIn('status', ['sent', 'accepted'])->sum('total'),
-            'pending_count' => Quote::where('status', 'sent')->count(),
-            'accepted_count' => Quote::where('status', 'accepted')->count(),
-            'rejected_count' => Quote::where('status', 'rejected')->count(),
-            'expired_count' => Quote::where('status', 'expired')->count(),
+            'total_count' => Quote::where('company_id', $company->id)->whereIn('status', ['sent', 'accepted'])->count(),
+            'total_value' => Quote::where('company_id', $company->id)->whereIn('status', ['sent', 'accepted'])->sum('total'),
+            'pending_count' => Quote::where('company_id', $company->id)->where('status', 'sent')->count(),
+            'accepted_count' => Quote::where('company_id', $company->id)->where('status', 'accepted')->count(),
+            'rejected_count' => Quote::where('company_id', $company->id)->where('status', 'rejected')->count(),
+            'expired_count' => Quote::where('company_id', $company->id)->where('status', 'expired')->count(),
             'converted_count' => $convertedQuotes,
             'conversion_rate' => $totalQuotes > 0 ? round(($convertedQuotes / $totalQuotes) * 100, 1) : 0,
-            'average_value' => Quote::avg('total') ?? 0,
+            'average_value' => Quote::where('company_id', $company->id)->avg('total') ?? 0,
         ];
     }
 
     private function getTopClients($startDate, $endDate, $limit = 5)
     {
-        return Client::select('clients.*')
+        $company = auth()->user()->company;
+        return Client::select('clients.*')->where('company_id', $company->id)
             ->withSum(['invoices as total_invoiced' => function($query) use ($startDate, $endDate) {
                 $query->where('status', 'paid')
                       ->whereBetween('paid_at', [$startDate, $endDate]);
@@ -261,6 +266,7 @@ class BillingController extends Controller
 
     private function getEnhancedChartData()
     {
+        $company = auth()->user()->company;
         $months = [];
         $revenue = [];
         $pending = [];
@@ -274,19 +280,19 @@ class BillingController extends Controller
             $months[] = $monthName;
 
             // Receita do mês
-            $monthRevenue = Invoice::where('status', 'paid')
+            $monthRevenue = Invoice::where('company_id', $company->id)->where('status', 'paid')
                 ->whereMonth('paid_at', $date->month)
                 ->whereYear('paid_at', $date->year)
                 ->sum('total');
 
             // Pendente do mês
-            $monthPending = Invoice::whereIn('status', ['sent', 'overdue'])
+            $monthPending = Invoice::where('company_id', $company->id)->whereIn('status', ['sent', 'overdue'])
                 ->whereMonth('created_at', $date->month)
                 ->whereYear('created_at', $date->year)
                 ->sum('total');
 
             // Cotações do mês
-            $monthQuotes = Quote::whereIn('status', ['sent', 'accepted'])
+            $monthQuotes = Quote::where('company_id', $company->id)->whereIn('status', ['sent', 'accepted'])
                 ->whereMonth('created_at', $date->month)
                 ->whereYear('created_at', $date->year)
                 ->sum('total');
@@ -359,14 +365,15 @@ class BillingController extends Controller
 
     private function getDetailedInvoiceStats($startDate, $endDate)
     {
-        $baseQuery = Invoice::whereBetween('created_at', [$startDate, $endDate]);
+        $company = auth()->user()->company;
+        $baseQuery = Invoice::where('company_id', $company->id)->whereBetween('created_at', [$startDate, $endDate]);
 
         return [
             'total_count' => $baseQuery->count(),
             'total_amount' => $baseQuery->sum('total'),
-            'paid_count' => Invoice::whereBetween('paid_at', [$startDate, $endDate])
+            'paid_count' => Invoice::where('company_id', $company->id)->whereBetween('paid_at', [$startDate, $endDate])
                 ->where('status', 'paid')->count(),
-            'paid_amount' => Invoice::whereBetween('paid_at', [$startDate, $endDate])
+            'paid_amount' => Invoice::where('company_id', $company->id)->whereBetween('paid_at', [$startDate, $endDate])
                 ->where('status', 'paid')->sum('total'),
             'pending_count' => $baseQuery->where('status', 'sent')->count(),
             'pending_amount' => $baseQuery->where('status', 'sent')->sum('total'),
@@ -387,7 +394,8 @@ class BillingController extends Controller
 
     private function getDetailedQuoteStats($startDate, $endDate)
     {
-        $baseQuery = Quote::whereBetween('created_at', [$startDate, $endDate]);
+        $company = auth()->user()->company;
+        $baseQuery = Quote::where('company_id', $company->id)->whereBetween('created_at', [$startDate, $endDate]);
         $totalQuotes = $baseQuery->count();
         $convertedQuotes = $baseQuery->whereNotNull('converted_to_invoice_at')->count();
 
@@ -414,7 +422,8 @@ class BillingController extends Controller
 
     private function getDetailedClientStats($startDate, $endDate)
     {
-        $topClientsByRevenue = Client::withSum(['invoices as revenue' => function($query) use ($startDate, $endDate) {
+        $company = auth()->user()->company;
+        $topClientsByRevenue = Client::where('company_id', $company->id)->withSum(['invoices as revenue' => function($query) use ($startDate, $endDate) {
                 $query->where('status', 'paid')
                       ->whereBetween('paid_at', [$startDate, $endDate]);
             }], 'total')
@@ -423,7 +432,7 @@ class BillingController extends Controller
             ->limit(10)
             ->get();
 
-        $topClientsByInvoices = Client::withCount(['invoices as invoice_count' => function($query) use ($startDate, $endDate) {
+        $topClientsByInvoices = Client::where('company_id', $company->id)->withCount(['invoices as invoice_count' => function($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }])
             ->having('invoice_count', '>', 0)
@@ -432,11 +441,11 @@ class BillingController extends Controller
             ->get();
 
         return [
-            'new_clients' => Client::whereBetween('created_at', [$startDate, $endDate])->count(),
-            'active_clients' => Client::whereHas('invoices', function($query) use ($startDate, $endDate) {
+            'new_clients' => Client::where('company_id', $company->id)->whereBetween('created_at', [$startDate, $endDate])->count(),
+            'active_clients' => Client::where('company_id', $company->id)->whereHas('invoices', function($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             })->count(),
-            'clients_with_overdue' => Client::whereHas('invoices', function($query) {
+            'clients_with_overdue' => Client::where('company_id', $company->id)->whereHas('invoices', function($query) {
                 $query->where('status', 'overdue');
             })->count(),
             'top_clients_by_revenue' => $topClientsByRevenue,
@@ -447,21 +456,23 @@ class BillingController extends Controller
 
     private function getPerformanceMetrics($startDate, $endDate)
     {
-        $totalInvoices = Invoice::whereBetween('created_at', [$startDate, $endDate])->count();
-        $paidInvoices = Invoice::where('status', 'paid')
+        $company = auth()->user()->company;
+        $totalInvoices = Invoice::where('company_id', $company->id)->whereBetween('created_at', [$startDate, $endDate])->count();
+        $paidInvoices = Invoice::where('company_id', $company->id)->where('status', 'paid')
             ->whereBetween('paid_at', [$startDate, $endDate])->count();
 
         return [
             'collection_rate' => $totalInvoices > 0 ? round(($paidInvoices / $totalInvoices) * 100, 2) : 0,
-            'average_invoice_value' => Invoice::whereBetween('created_at', [$startDate, $endDate])->avg('total') ?? 0,
-            'overdue_rate' => $totalInvoices > 0 ? round((Invoice::where('status', 'overdue')->count() / $totalInvoices) * 100, 2) : 0,
+            'average_invoice_value' => Invoice::where('company_id', $company->id)->whereBetween('created_at', [$startDate, $endDate])->avg('total') ?? 0,
+            'overdue_rate' => $totalInvoices > 0 ? round((Invoice::where('company_id', $company->id)->where('status', 'overdue')->count() / $totalInvoices) * 100, 2) : 0,
             'revenue_per_client' => $this->getRevenuePerClient($startDate, $endDate),
         ];
     }
 
     private function getAveragePaymentTime($startDate, $endDate)
     {
-        $avgDays = Invoice::where('status', 'paid')
+        $company = auth()->user()->company;
+        $avgDays = Invoice::where('company_id', $company->id)->where('status', 'paid')
             ->whereBetween('paid_at', [$startDate, $endDate])
             ->whereNotNull('due_date')
             ->selectRaw('AVG(DATEDIFF(paid_at, created_at)) as avg_days')
@@ -472,7 +483,8 @@ class BillingController extends Controller
 
     private function getAverageQuoteResponseTime($startDate, $endDate)
     {
-        $avgDays = Quote::whereIn('status', ['accepted', 'rejected'])
+        $company = auth()->user()->company;
+        $avgDays = Quote::where('company_id', $company->id)->whereIn('status', ['accepted', 'rejected'])
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('responded_at')
             ->selectRaw('AVG(DATEDIFF(responded_at, created_at)) as avg_days')
@@ -483,11 +495,12 @@ class BillingController extends Controller
 
     private function getRevenuePerClient($startDate, $endDate)
     {
-        $totalRevenue = Invoice::where('status', 'paid')
+                $company = auth()->user()->company;
+        $totalRevenue = Invoice::where('company_id', $company->id)->where('status', 'paid')
             ->whereBetween('paid_at', [$startDate, $endDate])
             ->sum('total');
 
-        $activeClients = Client::whereHas('invoices', function($query) use ($startDate, $endDate) {
+        $activeClients = Client::where('company_id', $company->id)->whereHas('invoices', function($query) use ($startDate, $endDate) {
             $query->whereBetween('created_at', [$startDate, $endDate]);
         })->count();
 

@@ -73,8 +73,8 @@
         }
 
         // Limite de faturas
-        $invoiceUsage = $company->getInvoiceUsage();
-        // $invoiceUsage = $company->getInvoiceUsageFeatured();
+        // $invoiceUsage = $company->getInvoiceUsage();
+        $invoiceUsage = $company->getInvoiceUsageFeatured();
         if ($invoiceUsage['max'] > 0) {
             $limits[] = [
                 'name' => 'Faturas este mês',

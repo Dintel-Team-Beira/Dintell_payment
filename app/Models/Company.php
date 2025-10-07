@@ -405,7 +405,7 @@ class Company extends Model
         }
 
         // Aviso de usuários (80% do limite)
-        $userUsage = $this->getUserUsage();
+        $userUsage = $this->getUserUsageFeatured();
         if ($userUsage['percentage'] >= 80 && !$userUsage['exceeded']) {
             $warnings[] = [
                 'type' => 'users',
@@ -416,7 +416,8 @@ class Company extends Model
         }
 
         // Aviso de faturas (90% do limite)
-        $invoiceUsage = $this->getInvoiceUsage();
+        // $invoiceUsage = $this->getInvoiceUsage();
+                $invoiceUsage = $this->getInvoiceUsageFeatured();
         if ($invoiceUsage['percentage'] >= 90 && !$invoiceUsage['exceeded']) {
             $warnings[] = [
                 'type' => 'invoices',

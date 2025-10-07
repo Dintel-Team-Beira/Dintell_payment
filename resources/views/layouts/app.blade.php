@@ -204,8 +204,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <span x-show="!collapsed || isMobile" class="flex-1">Faturas</span>
-                        @php
+                        <span x-show="!collapsed || isMobile" class="flex-1">Facturas</span>
+                        {{-- @php
                             $overdueCount = 3; // Exemplo
                         @endphp
                         @if ($overdueCount > 0)
@@ -213,14 +213,15 @@
                                 class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                 {{ $overdueCount }}
                             </span>
-                        @endif
+                        @endif --}}
 
                         <div x-show="collapsed && !isMobile"
                             class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);">
-                            Faturas @if ($overdueCount > 0)
+                            Facturas 
+                            {{-- @if ($overdueCount > 0)
                                 ({{ $overdueCount }})
-                            @endif
+                            @endif --}}
                         </div>
                     </a>
 
@@ -234,7 +235,7 @@
                                 d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                         </svg>
                         <span x-show="!collapsed || isMobile" class="flex-1">Cotações</span>
-                        @php
+                        {{-- @php
                             $pendingQuotes = 2; // Exemplo
                         @endphp
                         @if ($pendingQuotes > 0)
@@ -242,14 +243,15 @@
                                 class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                 {{ $pendingQuotes }}
                             </span>
-                        @endif
+                        @endif --}}
 
                         <div x-show="collapsed && !isMobile"
                             class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);">
-                            Cotações @if ($pendingQuotes > 0)
+                            Cotações 
+                            {{-- @if ($pendingQuotes > 0)
                                 ({{ $pendingQuotes }})
-                            @endif
+                            @endif --}}
                         </div>
                     </a>
 
@@ -280,12 +282,45 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
-                        <span x-show="!collapsed || isMobile">Armazem</span>
+                        <span x-show="!collapsed || isMobile">Produtos</span>
 
                         <div x-show="collapsed && !isMobile"
                             class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
                             style="top: 50%; transform: translateY(-50%);">
-                            Armazem
+                            Produtos
+                        </div>
+                    </a>
+                    <a href="{{ route('services.index') }}"
+                        class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('services.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
+                        :class="collapsed && !isMobile ? 'justify-center' : ''">
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span x-show="!collapsed || isMobile">Serviços</span>
+
+                        <div x-show="collapsed && !isMobile"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
+                            style="top: 50%; transform: translateY(-50%);">
+                            Serviços
+                        </div>
+                    </a>
+                    <a href="{{ route('categories.index') }}"
+                        class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('categories.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
+                        :class="collapsed && !isMobile ? 'justify-center' : ''">
+                        <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.583 8.445h.01M10.86 19.71l-6.573-6.63a.993.993 0 0 1 0-1.4l7.329-7.394A.98.98 0 0 1 12.31 4l5.734.007A1.968 1.968 0 0 1 20 5.983v5.5a.992.992 0 0 1-.316.727l-7.44 7.5a.974.974 0 0 1-1.384.001Z"/>
+                        </svg>
+                        <span x-show="!collapsed || isMobile">Categorias</span>
+
+                        <div x-show="collapsed && !isMobile"
+                            class="absolute z-50 invisible px-2 py-1 ml-2 text-xs font-medium text-white transition-all duration-200 bg-gray-900 rounded opacity-0 left-full group-hover:opacity-100 group-hover:visible whitespace-nowrap"
+                            style="top: 50%; transform: translateY(-50%);">
+                            Categorias
                         </div>
                     </a>
 
@@ -451,7 +486,8 @@
 
                                     <span class="flex font-medium text-gray-700"> <img
                                             src="{{ asset('facebook-verified.png') }}" alt=""
-                                            class="w-4 h-4 mr-1"> {{ auth()->user()->company->subscriptions()->latest()->first()->plan->name  }}
+                                            class="w-4 h-4 mr-1">
+                                        {{ auth()->user()->company->subscriptions()->latest()->first()->plan->name }}
                                     </span>
                                 </div>
                                 <div class="flex items-center justify-between">
@@ -462,11 +498,16 @@
                                         @endphp
                                         <span
                                             class="font-medium text-gray-500">{{ auth()->user()->company->users->count() }}
-                                            / <a>{{ Auth::user()->company->subscriptions()->latest()->first()->plan->max_users }}Max</a></span>
+                                            /
+                                            <a>{{ Auth::user()->company->subscriptions()->latest()->first()->plan->max_users }}Max</a></span>
                                         @if (auth()->user()->company)
                                             @php
                                                 $currentUsers = auth()->user()->company->users->count();
-                                                $maxUsers = max(auth()->user()->company->subscriptions()->latest()->first()->plan->max_users ?? 1, 1);
+                                                $maxUsers = max(
+                                                    auth()->user()->company->subscriptions()->latest()->first()->plan
+                                                        ->max_users ?? 1,
+                                                    1,
+                                                );
                                                 $percentage = min(100, ($currentUsers / $maxUsers) * 100);
                                             @endphp
 
@@ -500,7 +541,8 @@
                                             @php
                                                 $currentUsers = auth()->user()->company->invoices->count();
                                                 $maxUsers = max(
-                                                    auth()->user()->company->subscriptions()->latest()->first()->plan->max_invoices_per_month?? 1,
+                                                    auth()->user()->company->subscriptions()->latest()->first()->plan
+                                                        ->max_invoices_per_month ?? 1,
                                                     1,
                                                 );
                                                 $percentage = min(100, ($currentUsers / $maxUsers) * 100);
@@ -715,10 +757,10 @@
     :force-show="true"
 />
 -->
-   @if (request()->routeIs(['dashboard', 'billing.*', 'quotes.*','invoices.*','receipts.*','clients.*']))
-   {{-- Apenas exibido em páginas críticas: dashboard, faturação, fatura, cotação e recibo --}}
-    <x-subscription-popup-advanced :company="auth()->user()->company" :plan="auth()->user()->company->plan ?? null" />       
-   @endif
+    @if (request()->routeIs(['dashboard', 'billing.*', 'quotes.*', 'invoices.*', 'receipts.*', 'clients.*']))
+        {{-- Apenas exibido em páginas críticas: dashboard, faturação, fatura, cotação e recibo --}}
+        <x-subscription-popup-advanced :company="auth()->user()->company" :plan="auth()->user()->company->plan ?? null" />
+    @endif
 
     <x-loading />
     {{-- <x-subscription-popup /> --}}

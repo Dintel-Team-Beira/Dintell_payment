@@ -22,7 +22,8 @@ class ReceiptController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Receipt::with(['invoice', 'client', 'issuedBy']);
+        $company = auth()->user()->company;
+        $query = Receipt::where('company_id', $company->id)->with(['invoice', 'client', 'issuedBy']);
 
         // Filtros
         if ($request->filled('status')) {
@@ -63,8 +64,8 @@ class ReceiptController extends Controller
         $receipts = $query->orderBy($sortField, $sortDirection)
                           ->paginate($request->get('per_page', 15));
 
-        $clients = Client::orderBy('name')->get();
-        $stats = $this->receiptService->getReceiptStats();
+        $clients = Client::where('company_id', $company->id)->orderBy('name')->get();
+        $stats = $this->receiptService->getReceiptStats($company->id);
 
         return view('receipts.index', compact('receipts', 'clients', 'stats'));
     }

@@ -108,7 +108,6 @@ class CheckCompanySubscription
 
 
         // Subscrição cancelada
-        // dd($subscription->isCanceled());
         // if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_CANCELLED) {
         if ($subscription->isCanceled()) {
             return $this->blockAccess(
@@ -168,8 +167,9 @@ class CheckCompanySubscription
             
             // Limite de usuários excedido
             $userUsage = $company->getUserUsageFeatured();
-            // dd($userUsage);
+            
             if ($userUsage['exceeded']) {
+                
                 // Bloqueia criação de novos usuários, mas permite uso do sistema
                 // Você pode ajustar se quiser bloquear totalmente
                 session()->flash('warning', 'Você atingiu o limite de usuários do seu plano.');
@@ -180,12 +180,14 @@ class CheckCompanySubscription
             $invoiceUsage = $company->getInvoiceUsageFeatured();
             // dd($invoiceUsage);
             if ($invoiceUsage['exceeded']) {
+                
                 // Bloqueia criação de novas faturas
                 session()->flash('warning', 'Você atingiu o limite de faturas mensais do seu plano.');
             }
 
             $clientUsage = $company->getClientUsage();
             if ($clientUsage['exceeded']) {
+                
                 // Bloqueia criação de novos clientes
                 session()->flash('warning', 'Você atingiu o limite de clientes do seu plano.');
             }
@@ -196,9 +198,9 @@ class CheckCompanySubscription
         // ===================================
 
         // Pagamento pendente (avisa mas não bloqueia)
-        if ($company->subscription_status === \App\Models\Company::SUBSCRIPTION_STATUS_PENDING_PAYMENT) {
-            session()->flash('warning', 'Você tem um pagamento pendente. Regularize para evitar suspensão.');
-        }
+        // if ($subscription->status === ) {
+        //     session()->flash('warning', 'Você tem um pagamento pendente. Regularize para evitar suspensão.');
+        // }
 
         // Trial expirando em breve
         if ($company->subscription_type === \App\Models\Company::SUBSCRIPTION_TYPE_TRIAL) {

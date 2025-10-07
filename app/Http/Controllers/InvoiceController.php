@@ -38,7 +38,8 @@ class InvoiceController extends Controller
             return redirect()->route('company.required')
                 ->with('error', 'Você precisa estar associado a uma empresa.');
         }
-        $query = Invoice::with(['client', 'items', 'quote'])->where('company_id',$company->id);
+        
+        $query = Invoice::where('company_id', $company->id)->with(['client', 'items', 'quote'])->where('company_id',$company->id);
 
         // dd($request->all());
         // Filtros
@@ -82,7 +83,7 @@ class InvoiceController extends Controller
         }
 
         $invoices = $query->paginate($request->get('per_page', 15));
-        $clients = Client::orderBy('name')->get();
+        $clients = Client::where('company_id', $company->id)->orderBy('name')->get();
 
         // Estatísticas avançadas
         $stats = $this->getInvoiceStats();
