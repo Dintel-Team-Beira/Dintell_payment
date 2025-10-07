@@ -38,7 +38,8 @@ class InvoiceMail extends Mailable
     {
         // Gerar o PDF da fatura
         $pdf = Pdf::loadView('pdfs.invoice', [
-            'invoice' => $this->invoice
+            'invoice' => $this->invoice,
+            'company' => $this->invoice->company
         ]);
 
         $filename = 'fatura-' . $this->invoice->invoice_number . '.pdf';
@@ -47,6 +48,7 @@ class InvoiceMail extends Mailable
                     ->subject($this->emailSubject)
                     ->with([
                         'invoice' => $this->invoice,
+                        'company' => $this->invoice->company,
                         'customMessage' => $this->emailMessage
                     ])
                     ->attachData($pdf->output(), $filename, [

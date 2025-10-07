@@ -847,6 +847,7 @@ class InvoiceController extends Controller
             // Enviar email com PDF anexado
             Mail::to($request->email)->send(new InvoiceMail(
                 $invoice,
+                // $company = $invoice->company,
                 $request->subject,
                 $request->message
             ));
