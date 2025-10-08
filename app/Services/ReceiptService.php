@@ -199,7 +199,7 @@ class ReceiptService
             $template = DocumentTemplate::where('company_id', $receipt->company_id)
                 ->where('type', 'receipt')
                 ->where('is_selected', true)
-                ->first();
+                ->first() ?? DocumentTemplate::where('type', 'receipt')->where('is_default', true)->first();
                 
             return DocumentTemplateHelper::downloadPdfDocument($template, $data);
         }

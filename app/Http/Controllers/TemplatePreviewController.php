@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\DocumentTemplateHelper;
+use App\Models\Company;
 use App\Models\DocumentTemplate;
 use App\Models\Invoice;
 use App\Models\Quote;
@@ -26,7 +27,12 @@ class TemplatePreviewController extends Controller
             ->orderBy('is_default', 'desc')
             ->orderBy('name')
             ->get(['id', 'name', 'is_default', 'is_selected', 'created_at', 'updated_at']);
-
+        // retornar os defaults para todas empresas se não houver nenhum personalizado
+        if($templates->isEmpty()){
+            $templates = DocumentTemplate::where('type', $type)
+            ->where('is_default', true)
+            ->get(['id', 'name', 'is_default', 'is_selected', 'created_at', 'updated_at']);
+        }
         return response()->json($templates);
     }
 
@@ -35,8 +41,11 @@ class TemplatePreviewController extends Controller
      */
     public function show(string $tenant, $templateId)
     {
+        // dd($tenant);
+        $company = Company::where('slug', $tenant)->firstOrFail();
+        // dd($company);
         $template = DocumentTemplate::findOrFail($templateId);
-        $data = $this->getTemplateData($template);
+        $data = $this->getTemplateData($template, $company);
 
         return DocumentTemplateHelper::previewInBrowser($template, $data);
     }
@@ -46,10 +55,11 @@ class TemplatePreviewController extends Controller
      */
     public function download(string $tenant, $templateId)
     {
+        $company = Company::where('slug', $tenant)->firstOrFail();
         $template = DocumentTemplate::findOrFail($templateId);
-        $data = $this->getTemplateData($template);
+        $data = $this->getTemplateData($template, $company);
 
-        // 📄 USAR O HELPER PARA PDF com nome personalizado
+        //  USAR O HELPER PARA PDF com nome personalizado
         $options = [
             'filename' => $this->generateFileName($template, $data),
             'enable_cache' => true,
@@ -65,6 +75,7 @@ class TemplatePreviewController extends Controller
     /**
      * 🆕 Método unificado para buscar dados do template
      */
+    /*
     private function getTemplateData(DocumentTemplate $template): array
     {
         $company = $template->company;
@@ -121,7 +132,63 @@ class TemplatePreviewController extends Controller
 
         return $data;
     }
+    */
+private function getTemplateData(DocumentTemplate $template, Company $company): array
+    {
+        // $company = $comp;
+        $data = ['company' => $company];
+        // dd($company);
+        switch ($template->type) {
+            case 'invoice':
+                $invoice = Invoice::with(['client', 'items'])
+                    ->where('company_id', $company->id)
+                    ->first();
+                
+                if (!$invoice) {
+                    $invoice = $this->createSampleInvoice($company);
+                }
+                $data['invoice'] = $invoice;
+                break;
 
+            case 'quote':
+                $quote = Quote::with(['client', 'items'])
+                    ->where('company_id', $company->id)
+                    ->first();
+                
+                if (!$quote) {
+                    $quote = $this->createSampleQuote($company);
+                }
+                $data['quote'] = $quote;
+                break;
+
+            case 'credit_note':
+            case 'credit': // Manter compatibilidade
+                $creditNote = $this->getCreditNote($company->id);
+                if (!$creditNote) {
+                    $creditNote = $this->createSampleCreditNote($company);
+                }
+                $data['creditNote'] = $creditNote;
+                break;
+
+            case 'debit_note':
+            case 'debit': // Manter compatibilidade
+                $debitNote = $this->getDebitNote($company->id);
+                if (!$debitNote) {
+                    $debitNote = $this->createSampleDebitNote($company);
+                }
+                $data['debitNote'] = $debitNote;
+                break;
+            case 'receipt':
+                $receipt = $this->getReceipt($company->id);
+                $data['receipt'] = $receipt;
+                break;
+            default:
+                // Para tipos não mapeados, retornar apenas company
+                break;
+        }
+
+        return $data;
+    }
     /**
      * 🆕 Buscar Credit Note (flexível para diferentes models)
      */

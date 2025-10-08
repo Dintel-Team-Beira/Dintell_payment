@@ -155,7 +155,7 @@ class CreditNoteController extends Controller
         $settings = BillingSetting::getSettings();
         $company = auth()->user()->company;
         
-        $template = DocumentTemplate::where('company_id', $company->id)->where('type','credit')->where('is_selected',true)->first();
+        $template = DocumentTemplate::where('company_id', $company->id)->where('type','credit')->where('is_selected',true)->first()  ?? DocumentTemplate::where('type', 'credit')->where('is_default', true)->first();
         return DocumentTemplateHelper::downloadPdfDocument($template, compact('creditNote', 'settings', 'company'));
         
         

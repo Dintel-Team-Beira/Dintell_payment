@@ -116,7 +116,7 @@ class ReceiptController extends Controller
     /**
      * Download do PDF do recibo
      */
-    public function downloadPdf(Receipt $receipt)
+    public function downloadPdf(string $tenant, Receipt $receipt)
     {
         try {
             return $this->receiptService->generateReceiptPdf($receipt);

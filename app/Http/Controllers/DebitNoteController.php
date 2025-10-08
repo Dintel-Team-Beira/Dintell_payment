@@ -135,7 +135,7 @@ class DebitNoteController extends Controller
         $company = auth()->user()->company;
         $pdf = app('dompdf.wrapper');
 
-        $template = DocumentTemplate::where('company_id', $company->id)->where('type','debit')->where('is_selected',true)->first();
+        $template = DocumentTemplate::where('company_id', $company->id)->where('type','debit')->where('is_selected',true)->first() ?? DocumentTemplate::where('type', 'debit')->where('is_default', true)->first();
 
         return DocumentTemplateHelper::downloadPdfDocument($template, compact('debitNote', 'settings', 'company'));
         /*

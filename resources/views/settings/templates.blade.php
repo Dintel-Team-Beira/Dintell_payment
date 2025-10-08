@@ -253,7 +253,7 @@
     downloadBtn.addEventListener('click', function() {
         const selectedTemplateId = templateSelect.value;
         if (selectedTemplateId) {
-            window.open(`/dintell/template-preview/download/${selectedTemplateId}`, '_blank');
+            window.open(`../template-preview/download/${selectedTemplateId}`, '_blank');
         }
     });
 
@@ -284,7 +284,7 @@
 
     async function loadTemplatesList(type) {
         try {
-            const response = await fetch(`/dintell/template-preview/list/${type}`);
+            const response = await fetch(`../template-preview/list/${type}`);
             const templates = await response.json();
             console.log(templates);
             
@@ -373,7 +373,7 @@
 
     function loadTemplate(templateId) {
         showLoadingState();
-        const previewUrl = `/dintell/template-preview/preview/${templateId}`;
+        const previewUrl = `../template-preview/preview/${templateId}`;
         templatePreview.src = previewUrl;
         
         templatePreview.onload = function() {
@@ -462,7 +462,7 @@
         if (!currentSelectedTemplate) return;
 
         try {
-            const response = await fetch(`/dintell/template-preview/select/${currentSelectedTemplate.id}`, {
+            const response = await fetch(`../template-preview/select/${currentSelectedTemplate.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

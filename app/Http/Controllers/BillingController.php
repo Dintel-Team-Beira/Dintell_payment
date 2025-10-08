@@ -170,6 +170,7 @@ class BillingController extends Controller
         $currentRevenue = Invoice::where('company_id', $company->id)->where('status', 'paid')
             ->whereBetween('paid_at', [$startDate, $endDate])
             ->sum('total');
+            // dd($currentRevenue, [$startDate, $endDate]);
 
         // Stats do período anterior
         $previousRevenue = Invoice::where('company_id', $company->id)->where('status', 'paid')

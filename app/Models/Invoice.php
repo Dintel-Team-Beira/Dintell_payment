@@ -188,7 +188,7 @@ class Invoice extends Model
         $this->update([
             'paid_amount' => $this->paid_amount + $amount,
             'status' => ($this->paid_amount + $amount) >= $this->total ? 'paid' : 'sent',
-            'paid_at' => ($this->paid_amount + $amount) >= $this->total ? Carbon::now() : null
+            'paid_at' => Carbon::now(),// ($this->paid_amount + $amount) >= $this->total ? Carbon::now() : null
         ]);
     }
 

@@ -409,7 +409,7 @@ class QuoteController extends Controller
     {
         try {
             $company = auth()->user()->company;
-            $template = DocumentTemplate::where('company_id', $company->id)->where('type', 'quote')->where('is_selected', true)->first();
+            $template = DocumentTemplate::where('company_id', $company->id)->where('type', 'quote')->where('is_selected', true)->first() ?? DocumentTemplate::where('type', 'quote')->where('is_default', true)->first();
             $data = compact('quote', 'company');
             return DocumentTemplateHelper::downloadPdfDocument($template, $data, [
                 'margin_top' => '250mm',
@@ -493,8 +493,8 @@ class QuoteController extends Controller
     {
 
         try {
-            $company_id = User::findOrFail($user_id)->company->id;
-            $query = Product::where('is_active', true)->where('company_id', $company_id);
+            // $company_id = User::findOrFail($user_id)->company->id;
+            $query = Product::where('is_active', true)->where('company_id', $user_id);
 
             if ($request->filled('search')) {
                 $search = $request->search;
@@ -522,7 +522,7 @@ class QuoteController extends Controller
             return response()->json($products);
         } catch (\Throwable $th) {
             //throw $th;
-            return response()->json(['error' => 'Erro ao buscar produtos: ' . $th->getMessage() . 'user campany =>' . auth()->user()], 500);
+            return response()->json(['error' => 'Erro ao buscar produtos: ' . $th->getMessage() . ' user campany =>' . auth()->user()], 500);
             // dd($th->getMessage());
         }
     }
@@ -530,8 +530,8 @@ class QuoteController extends Controller
     public function getActiveServices(Request $request,  $user_id)
     {
         try {
-            $company_id = User::findOrFail($user_id)->company->id;
-            $query = Service::where('is_active', true)->where('company_id', $company_id);
+            // $company_id = User::findOrFail($user_id)->company->id;
+            $query = Service::where('is_active', true)->where('company_id', $user_id);
 
             if ($request->filled('search')) {
                 $search = $request->search;

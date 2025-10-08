@@ -103,6 +103,7 @@ class DocumentTemplateHelper
             return Cache::get($cacheKey);
         }
 
+        // dd($template->html_template);
         // Renderizar template
         $html = Blade::render($template->html_template, $data);
 

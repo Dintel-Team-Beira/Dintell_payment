@@ -115,7 +115,7 @@ class ServiceController extends Controller
         $data = $request->all();
         $data['is_active'] = $request->has('is_active');
         $data['category_id'] = $request->get('category');
-
+        unset($data['category']);
         // Gerar código se não fornecido
         if (empty($data['code'])) {
             $data['code'] = $this->generateCode($data['name']);

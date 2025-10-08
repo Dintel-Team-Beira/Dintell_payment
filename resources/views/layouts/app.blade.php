@@ -323,7 +323,7 @@
                             Categorias
                         </div>
                     </a>
-
+                    <div x-show="!collapsed || isMobile" class="my-4 border-t border-gray-200"></div>
                     <!-- Menu Dropdown de Ações Rápidas -->
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open"
@@ -409,10 +409,10 @@
                     </a>
 
 
-                    <div x-show="!collapsed || isMobile" class="my-4 border-t border-gray-200"></div>
+                    {{-- <div x-show="!collapsed || isMobile" class="my-4 border-t border-gray-200"></div> --}}
 
                     <!-- Logs da API -->
-                    <a href="{{ route('api-logs.index') }}"
+                    {{-- <a href="{{ route('api-logs.index') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('api-logs.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''">
                         <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
@@ -427,10 +427,10 @@
                             style="top: 50%; transform: translateY(-50%);">
                             Logs da API
                         </div>
-                    </a>
+                    </a> --}}
 
                     <!-- Logs de Email -->
-                    <a href="{{ route('email-logs.index') }}"
+                    {{-- <a href="{{ route('email-logs.index') }}"
                         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group relative {{ request()->routeIs('email-logs.*') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
                         :class="collapsed && !isMobile ? 'justify-center' : ''">
                         <svg class="flex-shrink-0 w-5 h-5 mr-3" fill="none" stroke="currentColor"
@@ -445,7 +445,7 @@
                             style="top: 50%; transform: translateY(-50%);">
                             Logs de Email
                         </div>
-                    </a>
+                    </a> --}}
 
 
 
