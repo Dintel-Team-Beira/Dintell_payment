@@ -395,7 +395,7 @@ public function convertToInvoice()
             'name' => $quoteItem->name ?? '',
             'type' => $quoteItem->type ?? 'product',
             'item_id' => $quoteItem->item_id ?? null,
-            'category' => $quoteItem->category ?? null,
+            // 'category' => $quoteItem->category ?? null,
             'unit' => $quoteItem->unit ?? null,
             'complexity_level' => $quoteItem->complexity_level ?? null,
             'estimated_hours' => $quoteItem->estimated_hours ?? null
@@ -451,7 +451,7 @@ private function getInvoiceItemData($quoteItem, $invoiceId)
         'total_price' => $total, // Ambos os nomes possíveis
         'type' => $quoteItem->type ?? 'product',
         'item_id' => $quoteItem->item_id ?? null,
-        'category' => $quoteItem->category ?? null,
+        // 'category' => $quoteItem->category ?? null,
         'unit' => $quoteItem->unit ?? null,
         'complexity_level' => $quoteItem->complexity_level ?? null,
         'estimated_hours' => $quoteItem->estimated_hours ?? null,

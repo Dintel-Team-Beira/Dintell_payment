@@ -162,17 +162,19 @@ class Receipt extends Model
 
         static::creating(function ($receipt) {
             // Definir company_id automaticamente
-            $company = session('current_company');
+            // $company = session('current_company');
+            $company = auth()->user()->company;
             if ($company && !$receipt->company_id) {
                 $receipt->company_id = $company->id;
             }
 
             // Gerar número do recibo se não existir
-            if (!$receipt->receipt_number) {
+            // if (!$receipt->receipt_number) {
                 $settings = BillingSetting::getSettings();
                 $receipt->receipt_number = $settings->getNextReceiptNumber();
-            }
+            // }
 
+            // dd($company, $receipt->receipt_number);
             // Definir usuário que registrou
             if (!$receipt->issued_by && auth()->check()) {
                 $receipt->issued_by = auth()->id();
@@ -203,7 +205,14 @@ class Receipt extends Model
 
         // Auto-definir company_id ao criar
         static::creating(function (Receipt $receipt) {
-            $company = Config::get('app.current_company');
+            // $company = Config::get('app.current_company');
+            $company = auth()->user()->company;
+            // dd($company);
+
+            // if (!$receipt->receipt_number) {
+                // $settings = BillingSetting::getSettings();
+                // $receipt->receipt_number = $settings->getNextReceiptNumber();
+            // }
 
             if ($company && !$receipt->company_id) {
                 $receipt->company_id = $company->id;

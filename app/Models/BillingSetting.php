@@ -45,9 +45,8 @@ class BillingSetting extends Model
     {
         $company = auth()->user()->company;
         return self::firstOrCreate(
-            // ['id' => 1],
+            ['company_id' => $company ? $company->id : null],
             [
-                'company_id'=>$company ? $company->id : null,
                 'company_name' => $company->name,
                 'company_address' => $company->address,
                 'company_phone' => $company->phone,
@@ -92,7 +91,8 @@ class BillingSetting extends Model
      */
     public function getNextReceiptNumber()
     {
-        $prefix = $this->receipt_prefix ?? 'REC';
+        $company = auth()->user()->company;
+        $prefix = $this->receipt_prefix ?? strtoupper(strtok($this->company_name, ' ')) . '-REC';//$this->company_name.'-'.'REC';
         $nextNumber = $this->receipt_next_number ?? 1;
         $length = $this->receipt_number_length ?? 6;
 

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('receipts', function (Blueprint $table) {
             $table->id();
-$table->string('receipt_number')->unique();
+                        $table->string('receipt_number')
+            // $table->string('receipt_number')->unique();
             $table->foreignId('invoice_id')->constrained()->onDelete('cascade');
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
@@ -41,6 +42,7 @@ $table->string('receipt_number')->unique();
             $table->index(['company_id', 'payment_date']);
             $table->index(['invoice_id', 'status']);
             $table->index(['client_id', 'payment_date']);
+            $table->unique(['company_id', 'receipt_number'],'unique_company_receipt_index');
         });
     }
 

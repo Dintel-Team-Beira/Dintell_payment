@@ -594,7 +594,7 @@ class QuoteController extends Controller
         ];
     }
 
-    private function createQuoteItem(string $tenant, Quote $quote, array $itemData)
+    private function createQuoteItem( Quote $quote, array $itemData)
     {
         $quoteItem = new QuoteItem([
             'type' => $itemData['type'],
@@ -611,13 +611,13 @@ class QuoteController extends Controller
         if ($itemData['type'] === 'product') {
             $product = Product::find($itemData['item_id']);
             if ($product) {
-                $quoteItem->category = $product->category;
+                // $quoteItem->category = $product->category;
                 $quoteItem->unit = $product->unit;
             }
         } elseif ($itemData['type'] === 'service') {
             $service = Service::find($itemData['item_id']);
             if ($service) {
-                $quoteItem->category = $service->category;
+                // $quoteItem->category = $service->category;
                 $quoteItem->complexity_level = $service->complexity_level;
                 $quoteItem->estimated_hours = $service->estimated_hours;
             }

@@ -567,6 +567,7 @@ class InvoiceController extends Controller
 
             // Atualizar a fatura
             $invoice->markAsPaid($amount);
+            // dd($invoice->id);
 
             $receipt = null;
 
@@ -577,7 +578,7 @@ class InvoiceController extends Controller
                         'invoice_id' => $invoice->id,
                         'client_id' => $invoice->client_id,
                         'amount_paid' => $amount,
-                          'company_id'=>$invoice->company_id,
+                        'company_id'=>$invoice->company_id,
                         'payment_method' => Receipt::PAYMENT_OTHER, // método genérico
                         'payment_date' => now(),
                         'notes' => "Recibo gerado automaticamente para fatura {$invoice->invoice_number}",

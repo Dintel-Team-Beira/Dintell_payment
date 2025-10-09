@@ -91,7 +91,7 @@
         </a>
 
         <!-- Enviar por Email -->
-        @if ($invoice->status === 'draft')
+        {{-- @if ($invoice->status === 'draft') --}}
             <button onclick="showEmailModal()"
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-purple-600 rounded-lg hover:bg-purple-700">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@
                 </svg>
                 Enviar por Email
             </button>
-        @endif
+        {{-- @endif --}}
 
         <!-- Editar -->
         @if ($invoice->status !== 'paid')

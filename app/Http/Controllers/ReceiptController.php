@@ -73,7 +73,7 @@ class ReceiptController extends Controller
     /**
      * Mostrar detalhes de um recibo
      */
-    public function show(Receipt $receipt)
+    public function show(string $tenant, Receipt $receipt)
     {
         $receipt->load(['invoice', 'client', 'company', 'issuedBy']);
         
