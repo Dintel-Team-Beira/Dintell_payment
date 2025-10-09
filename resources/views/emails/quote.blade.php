@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $quote->quote_number }}</title>
+    <title>{{ $receipt->receipt_number }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,7 +21,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .header {
-            background-color: #007bff;
+            background-color: #28a745;
             color: white;
             padding: 30px 20px;
             text-align: center;
@@ -37,16 +37,16 @@
         .greeting {
             margin-bottom: 20px;
         }
-        .invoice-info {
+        .receipt-info {
             background-color: #f8f9fa;
             padding: 20px;
             border-radius: 5px;
             margin: 25px 0;
-            border-left: 4px solid #007bff;
+            border-left: 4px solid #28a745;
         }
-        .invoice-info h3 {
+        .receipt-info h3 {
             margin-top: 0;
-            color: #007bff;
+            color: #28a745;
             font-size: 18px;
         }
         table {
@@ -72,19 +72,19 @@
             text-align: right;
         }
         .total-row {
-            background-color: #e3f2fd;
+            background-color: #d4edda;
             margin: 10px -20px -20px -20px;
             padding: 15px 20px;
         }
         .total-row th,
         .total-row td {
             font-size: 18px;
-            color: #007bff;
+            color: #28a745;
             padding: 0;
         }
         .message {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
+            background-color: #d1ecf1;
+            border-left: 4px solid #17a2b8;
             padding: 15px;
             margin: 20px 0;
             border-radius: 4px;
@@ -105,7 +105,7 @@
             margin: 20px 0;
         }
         .highlight {
-            color: #007bff;
+            color: #28a745;
             font-weight: 600;
         }
         .disclaimer {
@@ -116,17 +116,25 @@
             padding-top: 15px;
             border-top: 1px solid #e9ecef;
         }
+        .checkmark {
+            font-size: 48px;
+            color: #28a745;
+            text-align: center;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Nova Cotação Disponível</h1>
+            <h1>✓ Pagamento Recebido</h1>
         </div>
 
         <div class="content">
+            <div class="checkmark">✓</div>
+            
             <div class="greeting">
-                <p>Estimado(a) <strong>{{ $quote->client->name }}</strong>,</p>
+                <p>Estimado(a) <strong>{{ $receipt->client->name }}</strong>,</p>
             </div>
 
             @if($customMessage)
@@ -134,32 +142,31 @@
                     <p>{{ $customMessage }}</p>
                 </div>
             @else
-                <p>Esperamos que esta mensagem o(a) encontre bem.</p>
-                <p>É com satisfação que lhe enviamos a cotação solicitada, conforme os serviços e produtos discutidos. Todos os detalhes encontram-se no documento PDF anexo a este email.</p>
+                <p>Confirmamos o recebimento do seu pagamento. O recibo oficial encontra-se em anexo.</p>
             @endif
 
-            <div class="invoice-info">
-                <h3>Informações da Cotação</h3>
+            <div class="receipt-info">
+                <h3>Informações do Recibo</h3>
                 <table>
                     <tr>
-                        <th>Número da Cotação:</th>
-                        <td><strong>{{ $quote->quote_number }}</strong></td>
+                        <th>Número do Recibo:</th>
+                        <td><strong>{{ $receipt->receipt_number }}</strong></td>
                     </tr>
                     <tr>
                         <th>Data de Emissão:</th>
-                        <td>{{ $quote->quote_date->format('d/m/Y') }}</td>
+                        <td>{{ $receipt->receipt_date->format('d/m/Y') }}</td>
                     </tr>
                     <tr>
-                        <th>Válida até:</th>
-                        <td>{{ $quote->valid_until->format('d/m/Y') }}</td>
+                        <th>Forma de Pagamento:</th>
+                        <td>{{ $receipt->payment_method_label ?? 'N/A' }}</td>
                     </tr>
                 </table>
                 
                 <div class="total-row">
                     <table>
                         <tr>
-                            <th>Valor Total:</th>
-                            <td><strong>{{ number_format($quote->total, 2, ',', '.') }} MT</strong></td>
+                            <th>Valor Pago:</th>
+                            <td><strong>{{ number_format($receipt->amount, 2, ',', '.') }} MT</strong></td>
                         </tr>
                     </table>
                 </div>
@@ -167,18 +174,13 @@
 
             <div class="divider"></div>
 
-            <p>A cotação completa, com a descrição detalhada de todos os itens, encontra-se em anexo em formato PDF.</p>
-            
-            <p>Esta cotação é válida até à data indicada. Após este período, os valores e condições poderão sofrer alterações.</p>
+            <p>O recibo completo encontra-se em anexo em formato PDF.</p>
         </div>
 
         <div class="footer">
-            <p><strong>Precisa de esclarecimentos?</strong></p>
-            <p>Caso tenha alguma dúvida sobre esta cotação ou necessite de informações adicionais, não hesite em contactar-nos. Teremos todo o prazer em atendê-lo(a).</p>
+            <p>Agradecemos a sua preferência e pontualidade no pagamento.</p>
             
-            <p style="margin-top: 20px;">Agradecemos a sua preferência e confiança nos nossos serviços.</p>
-            
-            <p><strong>Atenciosamente,</strong><br>
+            <p style="margin-top: 20px;"><strong>Atenciosamente,</strong><br>
             <span class="highlight">A Equipa</span></p>
 
             <div class="disclaimer">

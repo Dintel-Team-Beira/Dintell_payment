@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\DocumentTemplateHelper;
 use App\Mail\InvoiceMail;
+use App\Mail\ReceiptMail;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Client;
@@ -584,6 +585,9 @@ class InvoiceController extends Controller
                         'notes' => "Recibo gerado automaticamente para fatura {$invoice->invoice_number}",
                         'issued_by' => auth()->user()->id,
                     ]);
+                    // Enviar email com recibo
+
+                    Mail::to($invoice->client->email)->send(new ReceiptMail($receipt, 'Recibo de Pagamento', null));
                 } catch (\Exception $e) {
                     // Log do erro mas não falhar a operação
                     \Log::warning('Erro ao gerar recibo automaticamente', [
