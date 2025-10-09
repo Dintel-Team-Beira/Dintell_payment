@@ -5,10 +5,10 @@ namespace App\Helpers;
 use App\Models\DocumentTemplate;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class DocumentTemplateHelper
 {
@@ -16,17 +16,15 @@ class DocumentTemplateHelper
      * Configurações otimizadas para performance
      */
     const DEFAULT_PAPER_SIZE = 'A4';
+
     const DEFAULT_ORIENTATION = 'portrait';
+
     const DEFAULT_FONT = 'DejaVu Sans';
+
     const CACHE_TTL = 300; // 5 minutos
 
     /**
      * Gerar e baixar PDF do template (versão otimizada)
-     *
-     * @param DocumentTemplate $template
-     * @param array $data
-     * @param array $options
-     * @return Response
      */
     public static function downloadPdfDocument(
         DocumentTemplate $template,
@@ -57,7 +55,7 @@ class DocumentTemplateHelper
             // Log de erro simplificado
             Log::error('PDF generation failed', [
                 'template_id' => $template->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;
@@ -68,7 +66,7 @@ class DocumentTemplateHelper
      * 🆕 Renderizar HTML para visualização no navegador
      */
     public static function renderHtmlForBrowser(
-        DocumentTemplate $template, 
+        DocumentTemplate $template,
         array $data
     ): string {
         return self::renderTemplate($template, $data, false);
@@ -80,9 +78,9 @@ class DocumentTemplateHelper
     public static function previewInBrowser(DocumentTemplate $template, array $data): Response
     {
         $html = self::renderTemplate($template, $data, false);
-        
+
         return response($html, 200, [
-            'Content-Type' => 'text/html; charset=UTF-8'
+            'Content-Type' => 'text/html; charset=UTF-8',
         ]);
     }
 
@@ -90,18 +88,23 @@ class DocumentTemplateHelper
      * 🆕 Método unificado para renderização com flag de controle
      */
     protected static function renderTemplate(
-        DocumentTemplate $template, 
-        array $data, 
+        DocumentTemplate $template,
+        array $data,
         bool $forPdf = false,
         array $options = []
     ): string {
         // Cache do HTML renderizado (opcional)
         $enableCache = $options['enable_cache'] ?? false;
-        $cacheKey = $enableCache ? 'template_html_' . $template->id . '_' . md5(serialize($data)) . '_' . ($forPdf ? 'pdf' : 'html') : null;
+        $cacheKey = $enableCache ? 'template_html_'.$template->id.'_'.md5(serialize($data)).'_'.($forPdf ? 'pdf' : 'html') : null;
 
         if ($enableCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
+
+         // 🔥 PASSAR FLAG PARA O TEMPLATE
+        $data['isPreview'] = !$forPdf; // true se for preview, false se for PDF/email
+        $data['isPdfContext'] = $forPdf; // true se for PDF/email
+
 
         // dd($template->html_template);
         // Renderizar template
@@ -126,24 +129,24 @@ class DocumentTemplateHelper
         return $html;
     }
 
-     /**
+    /**
      * 🆕 Converter caminhos para PDF (corrigido para imagens)
      */
     protected static function processPathsForPdf(string $html): string
     {
-        
+
         // 1. Processar {{ asset('...') }} primeiro
         $html = preg_replace_callback(
             '/\{\{\s*asset\([\'"]([^\'"]*)[\'"]\)\s*\}\}/',
-            function($matches) {
+            function ($matches) {
                 $assetPath = $matches[1];
                 $fullPath = public_path($assetPath);
-                
+
                 // Debug: verificar se arquivo existe
-                if (!file_exists($fullPath)) {
+                if (! file_exists($fullPath)) {
                     \Log::warning("Asset não encontrado: {$fullPath}");
                 }
-                
+
                 return $fullPath;
             },
             $html
@@ -152,101 +155,116 @@ class DocumentTemplateHelper
         // 2. Processar asset() dentro de atributos
         $html = preg_replace_callback(
             '/asset\([\'"]([^\'"]*)[\'"]\)/',
-            function($matches) {
+            function ($matches) {
                 $assetPath = $matches[1];
                 $fullPath = public_path($assetPath);
-                
+
                 // Debug: verificar se arquivo existe
-                if (!file_exists($fullPath)) {
+                if (! file_exists($fullPath)) {
                     \Log::warning("Asset não encontrado: {$fullPath}");
                 }
-                
+
                 return $fullPath;
             },
             $html
         );
 
-        // 3. Processar URLs relativos em src de imagens
-        $html = preg_replace_callback(
-            '/src=[\'"]([^\'"]*)[\'"]/i',
-            function($matches) {
-                $src = $matches[1];
-                
-                // Se já é um caminho absoluto ou data URL, não alterar
-                if (str_starts_with($src, '/') && str_starts_with($src, public_path())) {
-                    return $matches[0];
-                }
-                if (str_starts_with($src, 'data:')) {
-                    return $matches[0];
-                }
-                if (str_starts_with($src, 'http')) {
-                    return $matches[0];
-                }
-                
-                // Se contém asset(), processar
-                if (str_contains($src, 'asset(')) {
-                    return $matches[0]; // Já foi processado acima
-                }
-                
-                // Se é um caminho relativo, converter para absoluto
-                if (str_starts_with($src, 'storage/') || str_starts_with($src, '/storage/')) {
-                    $cleanPath = ltrim($src, '/');
-                    $fullPath = public_path($cleanPath);
-                    
-                    if (!file_exists($fullPath)) {
-                        \Log::warning("Imagem não encontrada: {$fullPath}");
-                    }
-                    
-                    return 'src="' . $fullPath . '"';
-                }
-                
-                return $matches[0];
-            },
-            $html
-        );
+                // 3. 🔥 PROCESSAR TODAS AS TAGS <img src="...">
+    $html = preg_replace_callback(
+        '/<img([^>]*?)src=[\'"]([^\'"]*)[\'"]([^>]*?)>/i',
+        function($matches) {
+            $beforeSrc = $matches[1]; // atributos antes do src
+            $src = trim($matches[2], '"\'');
+            $afterSrc = $matches[3]; // atributos depois do src
+            
 
-        // 4. OPÇÃO ALTERNATIVA: Converter imagens para base64 (mais confiável)
-        $html = preg_replace_callback(
-            '/src=[\'"]([^\'"]*)[\'"]/i',
-            function($matches) {
-                $src = trim($matches[1], '"\'');
+            // Pular se já é data URL
+            if (str_starts_with($src, 'data:')) {
+                return $matches[0];
+            }
+            
+            $filePath = null;
+            
+            // 🔥 CASO 1: URL COMPLETA LOCAL
+            if (str_starts_with($src, 'http://') || str_starts_with($src, 'https://')) {
+                // Lista de URLs locais possíveis
+                $localUrls = [
+                    rtrim(config('app.url'), '/'),
+                    'http://127.0.0.1:8000',
+                    'http://localhost:8000',
+                    'http://localhost',
+                    rtrim(url('/'), '/'),
+                ];
                 
-                // Pular se já é data URL
-                if (str_starts_with($src, 'data:')) {
-                    return $matches[0];
-                }
+                // Remover duplicatas
+                $localUrls = array_unique($localUrls);
                 
-                // Determinar caminho do arquivo
-                $filePath = null;
+                $isLocalUrl = false;
                 
-                if (str_starts_with($src, '/') && file_exists($src)) {
-                    // Já é caminho absoluto
-                    $filePath = $src;
-                } elseif (str_starts_with($src, 'storage/') || str_starts_with($src, '/storage/')) {
-                    // Caminho storage
-                    $cleanPath = ltrim($src, '/');
-                    $filePath = public_path($cleanPath);
-                } elseif (str_contains($src, public_path())) {
-                    // Já processado, é caminho completo
-                    $filePath = $src;
-                }
-                
-                // Converter para base64 se arquivo existe
-                if ($filePath && file_exists($filePath)) {
-                    try {
-                        $imageData = base64_encode(file_get_contents($filePath));
-                        $mimeType = mime_content_type($filePath);
-                        return 'src="data:' . $mimeType . ';base64,' . $imageData . '"';
-                    } catch (\Exception $e) {
-                        \Log::warning("Erro ao converter imagem para base64: {$filePath} - " . $e->getMessage());
+                foreach ($localUrls as $baseUrl) {
+                    if (str_starts_with($src, $baseUrl)) {
+                        $relativePath = str_replace($baseUrl . '/', '', $src);
+                        $filePath = public_path($relativePath);
+                        $isLocalUrl = true;
+                                
+                        break;
                     }
                 }
                 
-                return $matches[0];
-            },
-            $html
-        );
+                if (!$isLocalUrl) {
+                   
+                    return $matches[0];
+                }
+            }
+            // CASO 2: Já é caminho completo do sistema de arquivos
+            elseif (str_contains($src, public_path())) {
+                $filePath = $src;
+            }
+            // CASO 3: Caminho storage/
+            elseif (str_starts_with($src, 'storage/') || str_starts_with($src, '/storage/')) {
+                $cleanPath = ltrim($src, '/');
+                $filePath = public_path($cleanPath);
+            }
+            // CASO 4: Caminho relativo ao public
+            elseif (file_exists(public_path($src))) {
+                $filePath = public_path($src);
+            }
+            // CASO 5: Caminho com / inicial
+            elseif (str_starts_with($src, '/') && file_exists(public_path(ltrim($src, '/')))) {
+                $filePath = public_path(ltrim($src, '/'));
+            }
+            // CASO 6: Caminho absoluto direto que existe
+            elseif (file_exists($src)) {
+                $filePath = $src;
+            }
 
+            // Converter para base64 se arquivo existe
+            if ($filePath && file_exists($filePath)) {
+                try {
+                    $imageData = base64_encode(file_get_contents($filePath));
+                    $mimeType = mime_content_type($filePath);
+                    $fileSize = filesize($filePath);
+                                        // Retornar tag img completa com src em base64
+                    return '<img' . $beforeSrc . 'src="data:' . $mimeType . ';base64,' . $imageData . '"' . $afterSrc . '>';
+                    
+                } catch (\Exception $e) {
+                    \Log::error('❌ ERRO ao converter imagem para base64', [
+                        'file_path' => $filePath,
+                        'erro' => $e->getMessage()
+                    ]);
+                }
+            } else {
+                \Log::warning('⚠️ ARQUIVO NÃO ENCONTRADO', [
+                    'src_original' => $src,
+                    'file_path_tentado' => $filePath,
+                    'public_path_base' => public_path()
+                ]);
+            }
+
+            return $matches[0];
+        },
+        $html
+    );
 
         return $html;
     }
@@ -303,7 +321,7 @@ class DocumentTemplateHelper
      */
     protected static function getOptimizedOptions(array $customOptions = []): Options
     {
-        $options = new Options();
+        $options = new Options;
 
         // Configurações mínimas para máxima performance
         $performanceConfig = [
@@ -364,23 +382,24 @@ class DocumentTemplateHelper
      * 🆕 Gerar nome de arquivo dinâmico baseado nos dados
      */
     protected static function generateDynamicFileName(
-        DocumentTemplate $template, 
-        array $data, 
+        DocumentTemplate $template,
+        array $data,
         array $options = []
     ): string {
         // Se nome customizado foi fornecido nas opções
-        if (!empty($options['filename'])) {
+        if (! empty($options['filename'])) {
             $fileName = $options['filename'];
-            if (!str_ends_with($fileName, '.pdf')) {
+            if (! str_ends_with($fileName, '.pdf')) {
                 $fileName .= '.pdf';
             }
+
             return $fileName;
         }
 
         // Gerar nome baseado no tipo de documento e dados
         $fileName = self::buildFileNameFromData($template, $data);
-        
-        return $fileName . '.pdf';
+
+        return $fileName.'.pdf';
     }
 
     /**
@@ -390,7 +409,7 @@ class DocumentTemplateHelper
     {
         $date = date('Y-m-d');
         $timestamp = date('His');
-        
+
         // Mapear tipos de documento para prefixos
         $prefixMap = [
             'invoice' => 'Fatura',
@@ -415,6 +434,7 @@ class DocumentTemplateHelper
         $clientName = self::extractClientName($data);
         if ($clientName) {
             $safeName = self::sanitizeFileName($clientName);
+
             return "{$prefix}_{$safeName}_{$date}_{$timestamp}";
         }
 
@@ -429,23 +449,23 @@ class DocumentTemplateHelper
     {
         $numberFields = [
             'invoice_number',
-            'quote_number', 
+            'quote_number',
             'credit_note_number',
             'debit_note_number',
             'receipt_number',
             'contract_number',
             'proposal_number',
             'number',
-            'document_number'
+            'document_number',
         ];
 
         // Verificar no objeto principal (invoice, quote, etc.)
         foreach ($data as $key => $value) {
             if (is_object($value) || is_array($value)) {
-                $object = is_array($value) ? (object)$value : $value;
-                
+                $object = is_array($value) ? (object) $value : $value;
+
                 foreach ($numberFields as $field) {
-                    if (isset($object->$field) && !empty($object->$field)) {
+                    if (isset($object->$field) && ! empty($object->$field)) {
                         return self::sanitizeFileName($object->$field);
                     }
                 }
@@ -454,7 +474,7 @@ class DocumentTemplateHelper
 
         // Verificar diretamente no array de dados
         foreach ($numberFields as $field) {
-            if (isset($data[$field]) && !empty($data[$field])) {
+            if (isset($data[$field]) && ! empty($data[$field])) {
                 return self::sanitizeFileName($data[$field]);
             }
         }
@@ -470,18 +490,18 @@ class DocumentTemplateHelper
         // Verificar em objetos principais
         foreach ($data as $value) {
             if (is_object($value) || is_array($value)) {
-                $object = is_array($value) ? (object)$value : $value;
-                
+                $object = is_array($value) ? (object) $value : $value;
+
                 // Verificar se tem cliente relacionado
                 if (isset($object->client) && isset($object->client->name)) {
                     return $object->client->name;
                 }
-                
+
                 // Verificar campos diretos
                 if (isset($object->client_name)) {
                     return $object->client_name;
                 }
-                
+
                 if (isset($object->customer_name)) {
                     return $object->customer_name;
                 }
@@ -507,13 +527,13 @@ class DocumentTemplateHelper
     {
         // Remover/substituir caracteres especiais
         $name = preg_replace('/[^a-zA-Z0-9\-_\.]/', '_', $name);
-        
+
         // Remover múltiplos underscores
         $name = preg_replace('/_+/', '_', $name);
-        
+
         // Remover underscores do início e fim
         $name = trim($name, '_');
-        
+
         // Limitar tamanho
         return substr($name, 0, 50);
     }
@@ -524,7 +544,8 @@ class DocumentTemplateHelper
     protected static function generateSimpleFileName(DocumentTemplate $template): string
     {
         $safeName = preg_replace('/[^a-zA-Z0-9\-_]/', '_', $template->name);
-        return $safeName . '_' . date('Ymd') . '.pdf';
+
+        return $safeName.'_'.date('Ymd').'.pdf';
     }
 
     /**
@@ -537,7 +558,7 @@ class DocumentTemplateHelper
             'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
             'Content-Length' => strlen($pdfContent),
             'Cache-Control' => 'no-store',
-            'Pragma' => 'no-cache'
+            'Pragma' => 'no-cache',
         ]);
     }
 
@@ -550,7 +571,7 @@ class DocumentTemplateHelper
             'template_id' => $template->id,
             'file_name' => $fileName,
             'duration_ms' => $duration,
-            'user_id' => auth()->id()
+            'user_id' => auth()->id(),
         ]);
     }
 
@@ -563,7 +584,7 @@ class DocumentTemplateHelper
         $html = self::renderTemplate($template, $data, true);
 
         // PDF com configurações mínimas
-        $pdfOptions = new Options();
+        $pdfOptions = new Options;
         $pdfOptions->set('defaultFont', 'DejaVu Sans');
         $pdfOptions->set('isRemoteEnabled', false);
         $pdfOptions->set('dpi', 72);
@@ -592,7 +613,7 @@ class DocumentTemplateHelper
     /**
      * Limpar cache se necessário
      */
-    public static function clearCache(int $templateId = null): void
+    public static function clearCache(?int $templateId = null): void
     {
         if ($templateId) {
             Cache::forget("template_html_{$templateId}_*");
@@ -610,6 +631,23 @@ class DocumentTemplateHelper
         if (function_exists('gc_collect_cycles')) {
             gc_collect_cycles();
         }
+    }
+
+    /**
+     * 🆕 Gerar PDF output (sem download) para uso em emails
+     */
+    public static function generatePdfOutput(
+        DocumentTemplate $template,
+        array $data,
+        array $options = []
+    ): string {
+        // Renderizar HTML para PDF
+        $html = self::renderTemplate($template, $data, true, $options);
+
+        // Gerar PDF
+        $pdfOutput = self::generatePdfOptimized($html, $options);
+
+        return $pdfOutput;
     }
 }
 
@@ -632,7 +670,7 @@ trait OptimizedPdfDownload
 
         $defaultOptions = [
             'enable_cache' => true,
-            'enable_logging' => false
+            'enable_logging' => false,
         ];
 
         return DocumentTemplateHelper::downloadPdfDocument($template, $data, array_merge($defaultOptions, $options));
@@ -644,6 +682,7 @@ trait OptimizedPdfDownload
     protected function previewHtml(int $templateId, array $data): Response
     {
         $template = DocumentTemplate::findOrFail($templateId);
+
         return DocumentTemplateHelper::previewInBrowser($template, $data);
     }
 }

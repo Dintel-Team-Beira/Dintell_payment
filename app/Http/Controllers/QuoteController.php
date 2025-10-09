@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\DocumentTemplateHelper;
+use App\Mail\QuoteMail;
 use App\Models\Quote;
 use App\Models\QuoteItem;
 use App\Models\Client;
@@ -17,6 +18,7 @@ use App\Services\InvoicePdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class QuoteController extends Controller
 {
@@ -467,24 +469,25 @@ class QuoteController extends Controller
     }
     public function sendEmail(Request $request, string $tenant, Quote $quote)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'subject' => 'required|string|max:255',
-            'message' => 'nullable|string'
-        ]);
+        // $request->validate([
+        //     'email' => 'required|email',
+        //     'subject' => 'required|string|max:255',
+        //     'message' => 'nullable|string'
+        // ]);
 
+        // dd($request->all());
         try {
             // Implementar envio de email
-            // Mail::to($request->email)->send(new QuoteMail($quote, $request->subject, $request->message));
+            Mail::to($quote->client->email)->send(new QuoteMail($quote, 'Nova Cotação', $request->message));
 
-            $quote->update([
-                'status' => 'sent',
-                'sent_at' => now()
-            ]);
+            // $quote->update([
+            //     'status' => 'sent',
+            //     'sent_at' => now()
+            // ]);
 
-            return back()->with('success', 'Cotação enviada por email com sucesso!');
+            return response()->json(['success'=> 'Cotação enviada por email com sucesso!']);
         } catch (\Exception $e) {
-            return back()->with('error', 'Erro ao enviar email: ' . $e->getMessage());
+            return response()->json(['error'=> 'Erro ao enviar email: ' . $e->getMessage()]);
         }
     }
 

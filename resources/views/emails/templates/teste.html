@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $quote->quote_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: normal;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .greeting {
+            margin-bottom: 20px;
+        }
+        .invoice-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 25px 0;
+            border-left: 4px solid #007bff;
+        }
+        .invoice-info h3 {
+            margin-top: 0;
+            color: #007bff;
+            font-size: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        tr {
+            border-bottom: 1px solid #e9ecef;
+        }
+        tr:last-child {
+            border-bottom: none;
+        }
+        th {
+            padding: 10px 0;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            width: 45%;
+        }
+        td {
+            padding: 10px 0;
+            text-align: right;
+        }
+        .total-row {
+            background-color: #e3f2fd;
+            margin: 10px -20px -20px -20px;
+            padding: 15px 20px;
+        }
+        .total-row th,
+        .total-row td {
+            font-size: 18px;
+            color: #007bff;
+            padding: 0;
+        }
+        .message {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 25px 20px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .footer p {
+            margin: 8px 0;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 20px 0;
+        }
+        .highlight {
+            color: #007bff;
+            font-weight: 600;
+        }
+        .disclaimer {
+            font-style: italic;
+            color: #999;
+            font-size: 12px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Nova Cotação Disponível</h1>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                <p>Estimado(a) <strong>{{ $quote->client->name }}</strong>,</p>
+            </div>
+
+            @if($message)
+                <div class="message">
+                    <p>{{ $message }}</p>
+                </div>
+            @else
+                <p>Esperamos que esta mensagem o(a) encontre bem.</p>
+                <p>É com satisfação que lhe enviamos a cotação solicitada, conforme os serviços e produtos discutidos. Todos os detalhes encontram-se no documento PDF anexo a este email.</p>
+            @endif
+
+            <div class="invoice-info">
+                <h3>Informações da Cotação</h3>
+                <table>
+                    <tr>
+                        <th>Número da Cotação:</th>
+                        <td><strong>{{ $quote->quote_number }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Data de Emissão:</th>
+                        <td>{{ $quote->quote_date->format('d/m/Y') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Válida até:</th>
+                        <td>{{ $invoice->valid_until->format('d/m/Y') }}</td>
+                    </tr>
+                </table>
+                
+                <div class="total-row">
+                    <table>
+                        <tr>
+                            <th>Valor Total:</th>
+                            <td><strong>{{ number_format($quote->total, 2, ',', '.') }} MT</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <p>A cotação completa, com a descrição detalhada de todos os itens, encontra-se em anexo em formato PDF.</p>
+            
+            <p>Esta cotação é válida até à data indicada. Após este período, os valores e condições poderão sofrer alterações.</p>
+        </div>
+
+        <div class="footer">
+            <p><strong>Precisa de esclarecimentos?</strong></p>
+            <p>Caso tenha alguma dúvida sobre esta cotação ou necessite de informações adicionais, não hesite em contactar-nos. Teremos todo o prazer em atendê-lo(a).</p>
+            
+            <p style="margin-top: 20px;">Agradecemos a sua preferência e confiança nos nossos serviços.</p>
+            
+            <p><strong>Atenciosamente,</strong><br>
+            <span class="highlight">A Equipa</span></p>
+
+            <div class="disclaimer">
+                <p>Este é um email automático. Por favor, não responda directamente a esta mensagem. Para qualquer questão, utilize os nossos canais oficiais de contacto.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

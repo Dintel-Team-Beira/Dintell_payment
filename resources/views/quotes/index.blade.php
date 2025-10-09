@@ -659,7 +659,7 @@ function changePerPage(perPage) {
 // Função para enviar cotação por email
 function sendQuoteEmail(quoteId) {
     if (confirm('Deseja enviar esta cotação por email para o cliente?')) {
-        fetch(`/quotes/${quoteId}/send-email`, {
+        fetch(`./quotes/${quoteId}/send-email`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -672,7 +672,8 @@ function sendQuoteEmail(quoteId) {
                 showNotification('Cotação enviada com sucesso!', 'success');
                 setTimeout(() => location.reload(), 1500);
             } else {
-                showNotification('Erro ao enviar cotação: ' + data.message, 'error');
+                 console.error('Error:', data.error);
+                showNotification('Erro ao enviar cotação: ' + data.error, 'error');
             }
         })
         .catch(error => {
