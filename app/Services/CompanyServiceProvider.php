@@ -3,7 +3,7 @@
 // 1. Service Provider atualizado
 // app/Providers/CompanyServiceProvider.php
 
-namespace App\Providers;
+namespace App\Services;
 
 use App\Helpers\CompanyHelper;
 use Illuminate\Support\Facades\Blade;
