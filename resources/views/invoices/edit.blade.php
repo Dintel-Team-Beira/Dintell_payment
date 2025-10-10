@@ -615,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Carregar dados
     function loadProducts() {
-        fetch('/api/products/active')
+        fetch('/api/products/active/{{ auth()->user()->company_id }}')
             .then(response => response.json())
             .then(data => {
                 products = data;
@@ -628,7 +628,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadServices() {
-        fetch('/api/services/active')
+        fetch('/api/services/active/{{ auth()->user()->company_id }}')
             .then(response => response.json())
             .then(data => {
                 services = data;

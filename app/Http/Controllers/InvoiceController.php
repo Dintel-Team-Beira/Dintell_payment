@@ -431,16 +431,24 @@ class InvoiceController extends Controller
             return redirect()->route('invoices.show', $invoice)
                 ->with('error', 'Faturas pagas não podem ser editadas.');
         }
-
+        // dd($request->all());
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'invoice_date' => 'required|date',
             'payment_terms_days' => 'required|numeric|min:0|max:365',
-            'items' => 'required|array|min:1',
-            'items.*.description' => 'required|string|max:255',
-            'items.*.quantity' => 'required|numeric|min:0.01',
-            'items.*.unit_price' => 'required|numeric|min:0',
+            'items' => 'nullable|array|min:1',
+            'items.*.description' => 'nullable|string|max:255',
+            'items.*.quantity' => 'nullable|numeric|min:0.01',
+            'items.*.unit_price' => 'nullable|numeric|min:0',
             'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
+            'existing_items' => 'nullable|array',  // ADICIONAR
+    'existing_items.*.id' => 'nullable|exists:invoice_items,id',
+    'existing_items.*.description' => 'nullable|string|max:255',
+    'existing_items.*.quantity' => 'nullable|numeric|min:0.01',
+    'existing_items.*.unit_price' => 'nullable|numeric|min:0',
+    'existing_items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
+    'delete_items' => 'nullable|array',  // ADICIONAR
+    'delete_items.*' => 'exists:invoice_items,id',
             'notes' => 'nullable|string',
             'terms_conditions' => 'nullable|string'
         ]);
@@ -448,8 +456,13 @@ class InvoiceController extends Controller
         try {
             DB::beginTransaction();
 
+             // Juntar items novos e existentes para calcular totais
+            $allItems = array_merge(
+                $validated['existing_items'] ?? [],
+                $validated['items'] ?? []
+            );
             // Calcular novos totais
-            $totals = $this->calculateInvoiceTotals($validated['items']);
+            $totals = $this->calculateInvoiceTotals($allItems);
 
             // Garantir que payment_terms_days é inteiro
             $paymentTerms = (int)$validated['payment_terms_days'];
@@ -470,13 +483,37 @@ class InvoiceController extends Controller
 
             $invoice->save();
 
-            // Remover itens existentes
-            $invoice->items()->delete();
-
-            // Criar novos itens
-            foreach ($validated['items'] as $itemData) {
-                $this->createInvoiceItem($invoice, $itemData);
+             // Deletar itens marcados para remoção
+            if (!empty($validated['delete_items'])) {
+                InvoiceItem::whereIn('id', $validated['delete_items'])
+                    ->where('invoice_id', $invoice->id)
+                    ->delete();
             }
+
+                // Atualizar itens existentes
+            if (!empty($validated['existing_items'])) {
+                foreach ($validated['existing_items'] as $itemData) {
+                    if (isset($itemData['id'])) {
+                        $item = InvoiceItem::find($itemData['id']);
+                        if ($item && $item->invoice_id === $invoice->id) {
+                            $item->update([
+                                'description' => $itemData['description'],
+                                'quantity' => $itemData['quantity'],
+                                'unit_price' => $itemData['unit_price'],
+                                'tax_rate' => $itemData['tax_rate'],
+                                'total_price' => $itemData['quantity'] * $itemData['unit_price'] * (1 + $itemData['tax_rate']/100)
+                            ]);
+                        }
+                    }
+                }
+            }
+              // Criar novos itens
+            if (!empty($validated['items'])) {
+                foreach ($validated['items'] as $itemData) {
+                    $this->createInvoiceItem($invoice, $itemData);
+                }
+            }
+
 
             DB::commit();
 

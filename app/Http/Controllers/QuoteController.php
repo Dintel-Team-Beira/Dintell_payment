@@ -471,23 +471,23 @@ class QuoteController extends Controller
     {
         // $request->validate([
         //     'email' => 'required|email',
-        //     'subject' => 'required|string|max:255',
+        //     'email_subject' => 'required|string|max:255',
         //     'message' => 'nullable|string'
         // ]);
 
         // dd($request->all());
         try {
             // Implementar envio de email
-            Mail::to($quote->client->email)->send(new QuoteMail($quote, 'Nova Cotação', $request->message));
+            Mail::to($quote->client->email)->send(new QuoteMail($quote, $request->email_subject??'Nova Cotação', $request->message));
 
             // $quote->update([
             //     'status' => 'sent',
             //     'sent_at' => now()
             // ]);
 
-            return response()->json(['success'=> 'Cotação enviada por email com sucesso!']);
+            return back()->with(['success'=> 'Cotação enviada poqr email com sucesso!']);
         } catch (\Exception $e) {
-            return response()->json(['error'=> 'Erro ao enviar email: ' . $e->getMessage()]);
+            return back()->with(['error'=> 'Erro ao enviar email: ' . $e->getMessage()]);
         }
     }
 
