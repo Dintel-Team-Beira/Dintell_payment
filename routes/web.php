@@ -3,7 +3,7 @@
 use App\Http\Controllers\Admin\AdminHelpController;
 use App\Http\Controllers\Admin\AdminMonitoringController;
 use App\Http\Controllers\Admin\AdminSupportController;
-use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\CompaniesController as AdminCompaniesController;
 use App\Http\Controllers\admin\CompanySubscription;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -325,7 +325,7 @@ Route::get('/', function () {
         // Se é super admin, redireciona para admin
         if ($user->is_super_admin) {
              // O nome de rota 'admin.dashboard' JÁ EXISTE no seu arquivo e NÃO PRECISA de {tenant}
-             return redirect()->route('admin.dashboard'); 
+             return redirect()->route('admin.dashboard');
         }
 
         // Se é usuário de empresa, redireciona para dashboard da empresa com slug
